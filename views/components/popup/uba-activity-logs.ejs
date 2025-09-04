@@ -1,0 +1,66 @@
+<div>
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+        <h4 class="fw-bold mb-1">
+            <img src="/dashboard/uba/assets/icons/<%= act.action %>" alt="Icon" class="profile_image" height="30">
+            <span class=""><%= act.action %></span>
+        </h4>
+        <div class="mb-2">
+            by
+            <span class="badge bg-primary rounded-pill">
+                <i class="fa fa-user"></i>
+                <%= act.username %>
+            </span>
+        </div>
+    </div>
+    <div class="small mb-2">
+        <details id="siem-log-<%= act._id %>" class="mt-1">
+            <summary class="clickable">
+                <%- locals.format.truncateText(act.siem_log, 200) %> <strong>Click to See More</strong>
+            </summary>
+            <div class="mt-1 p-3 rounded bg-light text-dark">
+                <pre><%- act.siem_log %></pre>
+            </div>
+        </details>
+    </div>
+</div>
+<table class="table small table-hover text-secondary w-100">
+
+    <thead class="thead text-nowrap">
+        <tr>
+            <th scope="col">Timestamp</th>
+            <th scope="col">Log ID</th>
+            <th scope="col">Description</th>
+            <th scope="col" class="text-center">Agent ID</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <% logs.forEach(log=> { %>
+
+            <tr class="clickable"
+                onclick="loadDynamicPopup('Wazuh Log Preview', '/dashboard/wazuh/logs/data/raw?idfs=id&operators=equal_to&types=string&values=' + '<%= log.id %>')">
+                <td class="text-nowrap">
+                    <% if (!log.timestamp) { %>
+                        Click to view
+                    <% } else { %>
+                        <% let timestamp = new Date(log.timestamp) %>
+                        <%= timestamp.toLocaleTimeString() || "Unknown" %> <br>
+                        <%= timestamp.toLocaleDateString() || "Unknown" %>
+                    <% } %>
+                </td>
+                <td class="">
+                    <%= log.id || "Unknown" %>
+                </td>
+                <td class="">
+                    <%= locals.format.truncateText(log.rule?.description || "Click to view", 100) %>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-primary rounded-pill">
+                        <%= log.agent?.id || "Click to view" %>
+                    </span>
+                </td>
+            </tr>
+
+        <% }) %>
+    </tbody>
+</table>

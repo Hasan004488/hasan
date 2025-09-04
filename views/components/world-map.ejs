@@ -1,0 +1,142 @@
+<link rel="stylesheet" href="/styles/jsvectormap.min.css" />
+<script src="/scripts/jsvectormap.js"></script>
+<script src="/scripts/world.js"></script>
+<div class="row my-2">
+
+  <div class="me-3 col-md-4">
+
+    <div class="d-flex justify-content-between">
+      <div class="fs-5 fw-bold">
+        <img src="/images/icons/globe.png" alt="" height="30">
+        <span>Connectivity Map</span>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <div class="small py-2">
+        Total Connectivity:
+        <strong class="text-primary">
+          <%= Math.max(0, data.markers.length - 1) %>
+        </strong><br />
+        Connectivity From:
+        <strong>
+          <%= format.hourTime(range.from) %> - <%= format.hourTime(range.to) %>
+        </strong>
+      </div>
+    </div>
+
+    <div class="small bg-primary p-2 rounded-top text-light">
+      <i class="fa fa-bullseye"></i>
+      <span class="fw-bold">
+        <%= data?.target || "Server Location not found" %>
+      </span>
+    </div>
+
+    <div class="overflow-auto" style="height: 350px">
+
+      <table class="table small table-hover text-secondary">
+        <thead class="thead bg-white sticky-top" style="top: -2px">
+          <tr>
+            <th scope="col">Location</th>
+            <th scope="col">Address</th>
+            <th scope="col">Frequency</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% data.info.forEach(info=> { %>
+
+          <tr class="clickable" onclick="loadIPInfo('<%=info.ip%>')">
+            <td class="">
+              <%= info.location || "Not found" %>
+            </td>
+            <td class="">
+              <%= info.ip || "Not found" %>
+            </td>
+            <td class="text-center">
+              <%= info.frequency || "0" %>
+            </td>
+          </tr>
+
+          <% }) %>
+        </tbody>
+      </table>
+
+      <% if (data.markers.length < 2) { %>
+      <div class="alert alert-warning py-2">
+        No connectivity found in this time range!
+      </div>
+      <% } %>
+
+    </div>
+  </div>
+
+  <div id="world-map" class="w-auto col rounded-3 border p-0 shadow-lg bg-white" style="height: 500px"></div>
+
+</div>
+
+<script>
+  window.markers = JSON.parse('<%- JSON.stringify(data.markers) %>');
+  window.lines = JSON.parse('<%- JSON.stringify(data.lines) %>');
+
+  window.map = new jsVectorMap({
+
+    map: 'world',
+    selector: '#world-map',
+    labels: {
+      markers: {
+        render: function(marker) {
+          return "";
+        },
+        offsets: function(index) {
+          return markers[index].offsets || [0, 0]
+        }
+      },
+      regions: {
+        // The render's region receives region `code`
+        render(code) {
+          return ``
+        }
+      }
+    },
+    zoomOnScroll: false,
+    markers: markers,
+    lines: lines,
+    markerStyle: {
+      initial: {
+        fill: '#ff7f3f'
+      },
+      hover: {
+        stroke: "ff7f3f",
+        fillOpacity: 0.5,
+        strokeWidth: 2.5,
+        fill: '#ff5566'
+      }
+    },
+    lineStyle: {
+      stroke: /* "#f0f0f0" */ "#ff7f3f",
+      strokeWidth: 2,
+      /* fill: '#ff7f3f',
+      fillOpacity: 1, */
+      strokeDasharray: [5, 5],
+      animation: true
+    },
+    markerLabelStyle: {
+      initial: {
+        fontFamily: 'Sans-serif',
+        fontSize: 16,
+        fontWeight: 500,
+        fill: '#21293d',
+      },
+    },
+    regionStyle: {
+      initial: {
+        fill: '#5e6580',
+        fillOpacity: 0.3
+      },
+      hover: {
+        fillOpacity: 0.5
+      }
+    }
+  });
+</script>

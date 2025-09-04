@@ -1,0 +1,278 @@
+<script src="/scripts/chart.js"></script>
+
+<div class="col-12">
+  <div class="p-4 bg-white rounded-bottom shadow">
+
+    <div class="d-flex justify-content-between">
+      <div>
+        <div class="fs-5 fw-bold">FIM Changes by Agents <span class="badge bg-primary rounded-pill">Today</span></div>
+        <small>File changes tracked from various wazuh agents or servers.</small>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <div class="fs-4 fw-bold">
+          <span class="text-primary" id="monitor-current-view">0</span> -
+          <span id="monitor-total-view">0</span>
+        </div>
+        <div>
+          <button class="btn btn-outline-secondary" onclick="changeData(-1)">
+            <i class="fa fa-angle-left"></i>
+          </button>
+          <button class="btn btn-outline-secondary" onclick="changeData(1)">
+            <i class="fa fa-angle-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="">
+      <% if (data.fca_range.length < 1) { %>
+      <div class="alert alert-warning py-2 mt-2">
+        <i class="fa fa-circle-info me-2"></i>
+        No Records Available!
+      </div>
+      <% } %>
+      <div id="fim_agents" class="clickable block py-3" style="min-height: 30vh;">
+        <canvas id="fim_agents_monitor"></canvas>
+      </div>
+    </div>
+
+    <div class="alert alert-secondary py-2">
+      <i class="fa fa-circle-info me-2"></i>
+      <span>Click on any bar to see change history!</span>
+    </div>
+
+    <div id="changes" class="d-none transition">
+      <div class="data col-12 p-3">
+        <div class="spinner-grow text-primary text-center" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="col-12">
+
+  <div class="p-4 bg-white rounded-bottom shadow">
+
+    <div class="d-flex justify-content-between">
+
+      <div class="btn-group toggle-block">
+        <button class="btn btn-tab px-5" onclick="changeMonitor('weekly')">
+          <i class="fa fa-globe area_blocked"></i>
+          Weekly Monitor
+        </button>
+        <button class="btn btn-tab-off px-5" onclick="changeMonitor('monthly')">
+          <i class="fa fa-globe area_blocked"></i>
+          Monthly Monitor
+        </button>
+      </div>
+
+    </div>
+
+    <div class="gap-3 mb-2">
+
+      <div class="flex-fill my-3">
+        <div class="fs-5 fw-bold">FIM Changes by Days</div>
+        <div>
+          <small>File changes tracked from various wazuh agents by days.</small>
+        </div>
+        <div id="fim-monitor-container" style="min-height: 30vh;">
+          <canvas id="changes_monitor"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <script>
+
+      const fcd_labels = [];
+      const fcd_changes = [];
+      const fca_labels = "<%=data.fca_range%>".split(",");
+      const fca_changes = "<%=data.fca_changes%>".split(",");
+
+      const max_agents = 15;
+      let monitor_view = 0;
+      let total_view = Math.ceil(fca_labels.length / max_agents);
+
+      $("#monitor-current-view").text(monitor_view + 1);
+      $("#monitor-total-view").text(total_view);
+
+      // map numbers into viewable format
+
+      let data_set_extra = {
+        tension: 0.5,
+        pointRadius: 4,
+        pointHoverRadius: 15,
+        borderWidth: 3,
+        hoverBorderWidth: 2
+      }
+
+      let options = {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+        },
+        maintainAspectRatio: false
+      }
+
+      const changes_ctx = document.getElementById("changes_monitor").getContext("2d");
+      const changes_monitor = new Chart(changes_ctx, {
+        type: "line",
+        data: {
+          labels: fcd_labels,
+          datasets: [{
+            label: " Changes",
+            data: fcd_changes,
+            borderColor: '#ff7f3f',
+            backgroundColor: '#ff7f3f30',
+            fill: true,
+            ...data_set_extra
+          }],
+        },
+        options: {
+          interaction: {
+            intersect: false
+          },
+          ...options
+        }
+      });
+
+      const fim_agents_ctx = document.getElementById("fim_agents_monitor").getContext("2d");
+      const fim_agents_monitor = new Chart(fim_agents_ctx, {
+        type: "bar",
+        data: {
+          labels: chunkArray(fca_labels, monitor_view, max_agents)[0],
+          datasets: [{
+            label: " Changes",
+            data: chunkArray(fca_changes, monitor_view, max_agents)[0],
+            borderColor: '#ff7f3f',
+            backgroundColor: '#ff7f3f',
+            borderWidth: 2,
+            borderRadius: 20
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+          },
+          maintainAspectRatio: false,
+          barPercentage: 0.5,
+          onClick: (event) => {
+
+            const activeElements = fim_agents_monitor.getElementsAtEventForMode(event, 'nearest', {
+              intersect: true
+            }, true);
+
+            if (activeElements.length > 0) {
+
+              let index = activeElements[0].index;
+              loadChanges(fca_labels[(monitor_view * max_agents) + index], 1);
+
+            }
+          }
+        }
+      });
+
+      function loadChanges(agent_id, page = 1) {
+
+        // get data from the contents
+        // render the theme table with data
+        const changes = $("#changes");
+        const container = $("#changes .data");
+        const url = `/content/agent/changes?agent=${agent_id}&page=${page}`;
+
+        changes.removeClass("d-none");
+        changes.addClass("loading-state");
+
+        $.get(url, (data) => {
+
+            container.html(data);
+            window.location.href = "#changes";
+            changes.removeClass("loading-state");
+
+          })
+          .fail((xhr, status, err) => {
+
+            console.log(err);
+
+          })
+
+      }
+
+      function changeData(value) {
+
+        let current_view = monitor_view + value;
+
+        if (current_view >= 0 && current_view < total_view) {
+
+          monitor_view = current_view;
+
+          $("#monitor-current-view").text(current_view + 1);
+          $("#monitor-total-view").text(total_view);
+
+          let start = monitor_view * max_agents;
+          let new_labels = chunkArray(fca_labels, start, max_agents)[0];
+          let new_changes = chunkArray(fca_changes, start, max_agents)[0];
+
+          fim_agents_monitor.data.labels = new_labels;
+          fim_agents_monitor.data.datasets[0].data = new_changes;
+          fim_agents_monitor.update();
+
+        }
+
+      }
+
+      function chunkArray(array, startIndex, chunkSize) {
+
+        const result = [];
+
+        for (let i = startIndex; i < array.length; i += chunkSize) {
+
+          const chunk = array.slice(i, i + chunkSize);
+
+          while (chunk.length < chunkSize) {
+            chunk.push(""); // Pad the last chunk with null values
+          }
+
+          result.push(chunk);
+
+        }
+
+        return result;
+
+      }
+
+      function changeMonitor(timing) {
+
+        loadDynamicData({
+          container: "#fim-monitor-container",
+          url: "/dashboard/fim/monitor/data?timing=" + timing,
+        }, (monitor) => {
+          
+          changes_monitor.data.labels = monitor.fcd_range;
+          changes_monitor.data.datasets[0].data = monitor.fcd_changes;
+          changes_monitor.update();
+
+        }, 60000); // 1 minute
+
+      }
+
+      // calling section
+      $("#fim-tab-<%=timing%>").removeClass("btn-tab-off");
+      $("#fim-tab-<%=timing%>").addClass("btn-tab");
+
+      changeMonitor("<%=timing%>");
+
+
+    </script>
+
+  </div>
+
+</div>

@@ -1,0 +1,92 @@
+<% 
+let search_query = typeof query != "undefined" ? true : false;
+%>
+<style>
+    .permission-switches > div:hover {
+        background-color: var(--bs-white);
+        color: var(--bs-dark);
+    }
+    .form-check-input {
+        cursor: pointer;
+    }
+    .btn-tab-off {
+      background: white !important;
+    }
+    .role-btn {
+      min-width: 250px;
+      text-align: left;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .role-btn.btn-tab-off > .fa-arrow-right {
+      display: none;
+    }
+    .role-btn.btn-tab > .fa-arrow-right {
+      display: inline;
+    }
+</style>
+
+<% 
+function hyphenize(str) {
+    let separate = str.split(" ");
+    let hyphenized = separate.join("-");
+    return hyphenized;
+}
+%>
+
+<div class="col-12">
+
+  <div class="d-md-flex">
+    <div class="">
+      <div class="toggle-block max-longer d-flex flex-column gap-2 px-2" style="overflow-y: auto; overflow-x: hidden;">
+
+        <% roles.forEach((role, idx)=> { %>
+          <div class="d-flex gap-2 align-items-center w-100 small">
+            <button class="role-btn btn-tab<%= idx === 0 ? " active" : "-off" %> py-2 px-3" onclick="loadRole('<%= role.name %>')">
+              <% if (role.editable) { %>
+                <i class="fa fa-unlock text-success"></i>
+              <% } else { %>
+                <i class="fa fa-lock"></i>
+              <% } %>
+              <%= role?.name %>
+              <i class="fa fa-arrow-right ms-auto fs-5"></i>
+            </button>
+         </div>
+        <% }) %>
+
+      </div>
+    </div>
+    <div class="p-4 bg-white rounded shadow w-100">
+
+      <h1 class="fs-5 fw-bold">Selected role: <strong id="selected-role-name" class="text-primary"><%= selected_role.name %></strong></h1>
+      <div class="mb-3 small">
+        Select a role to edit the permissions and other information.
+      </div>
+
+      <div id="update-role-data" class="w-100">
+        <%- include("components/update-roles", { role: selected_role }) %>
+      </div>
+
+    </div>
+  </div>
+  
+</div>
+
+<script>
+
+  function loadRole(role) {
+
+    fetchDynamicData({
+        container: '#update-role-data', 
+        url: "/dashboard/users/manage/roles/" + role
+    }, (response) => {
+
+      $("#selected-role-name").html(role);
+      $('#update-role-data').html(response);
+
+    })
+
+  }
+
+</script>

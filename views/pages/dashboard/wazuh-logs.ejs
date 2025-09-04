@@ -1,0 +1,262 @@
+<div class="col-12">
+  <div class="p-4 bg-white rounded shadow">
+
+    <div class="d-flex justify-content-between">
+      <h4 class="fw-bold">
+        Security logs found in Wazuh
+      </h4>
+      <div class="d-flex gap-2">
+        <span id="download-results" class="d-none">
+          <% if(access("report", locals.permissions)) { %>
+          <button type="button" onclick="downloadReport('#search-form')" class="btn rounded-pill btn-success">
+            <i class="fa fa-download"></i>
+            Download Results
+          </button>
+          <% } %>
+        </span>
+        <button type="button" class="btn rounded-pill btn-danger" onclick="loadData(true, true); hideDataCount(false); toggle('#reload-icon', '#reload-icon2')">
+          <i id="reload-icon" class="fa fa-refresh rotate-360"></i>
+          <i id="reload-icon2" class="fa fa-refresh rotate-360 d-none"></i>
+          Reload
+        </button>
+        <button class="btn rounded-pill btn-primary icon1" onclick="toggleSection('#search-container'); toggleSection('#download-results', 'no'); toggle('#search-icon', '#search-close-icon')">
+          <i id="search-icon" class="fa fa-search"></i>
+          <i id="search-close-icon" class="d-none fa fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="search-container" class="d-none my-4 col-md-10 mx-auto">
+      <form id="search-form" action="/dashboard/wazuh/logs/search#wLogs" method="GET" class="py-3 px-4 m-2 bg-white rounded shadow-lg">
+
+        <div class="row">
+
+          <div class="col-12">
+            <div class="d-flex gap-3">
+              <div class="col-md-4 my-0">
+                <%- include("../../components/form/select-box.ejs", {
+                    id: "input-range",
+                    label: "Enter Date Range",
+                    name: "range",
+                    selected: "select",
+                    event: "onchange=changeRange()",
+                    options: [
+                      {
+                        value: "select",
+                        option: "Select Range"
+                      },
+                      {
+                        value: "daily",
+                        option: "Today"
+                      },
+                      {
+                        value: "week",
+                        option: "Last Week"
+                      },
+                      {
+                        value: "month",
+                        option: "Last Month"
+                      },
+                      {
+                        value: "quarter",
+                        option: "Last Quarter"
+                      }
+                    ]
+                  }) %>
+              </div>
+              <div class="d-flex w-100 gap-4">
+                <div class="form-group w-100">
+                  <label class="mb-2 fw-bold text-primary">Starting Date</label>
+                  <input type="date" id="input-from" class="form-control rounded-pill" name="timestamp_from" value="" max="<%= locals.format.htmlToday() %>" onchange="validateRange()" />
+                </div>
+                <div class="form-group w-100">
+                  <label class="mb-2 fw-bold text-primary">Ending Date</label>
+                  <input type="date" id="input-to" class="form-control rounded-pill" name="timestamp_to" value="<%= locals.format.htmlToday() %>" max="<%= locals.format.htmlToday() %>" onchange="validateRange()" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+
+            <div class="my-1 mb-2 fw-bold text-primary">
+              Create search filters
+            </div>
+            <%- include('../../components/logs-filter', {
+                  filters: false, identifiers, len: 0, editable: true
+              }) %>
+
+          </div>
+
+        </div>
+
+        <div class="d-flex gap-3 justify-content-end mt-2">
+          <button type="button" onclick="toggleSection('#search-container'); toggleSection('#download-results', 'no')" class="btn rounded-pill btn-light px-3">
+            <i class="fa fa-close mx-1"></i>
+            Close Search
+          </button>
+          <button type="submit" onclick="hideDataCount(); toggleSection('#download-results', 'yes')" class="btn rounded-pill btn-primary px-5">
+            <i class="fa fa-search mx-1"></i>
+            Search Logs
+          </button>
+        </div>
+
+        <div class="d-none">
+          <input type="text" name="search" value="1">
+          <input type="text" name="limit" value="30">
+        </div>
+
+      </form>
+    </div>
+
+    <div id="search-data-count" class="py-2">
+      <span>Total available data:
+        <strong id="data-total" class="text-primary">0</strong>
+        <span id="data-total-info">
+          <i class="fa fa-circle-info text-muted cursor-help ms-1 small"></i>
+        </span>
+    </div>
+
+    <%- include("../../components/body/data-table.ejs") %>
+
+  </div>
+</div>
+
+
+<script>
+  // load dynamic data
+  loadData(true);
+
+  // search form
+  const wlog_search_form = document.getElementById("search-form");
+
+  // from logs-filter component
+  addFilter();
+
+  wlog_search_form.addEventListener("submit", e => {
+
+    e.preventDefault();
+    const formData = new URLSearchParams(new FormData(wlog_search_form));
+    const url_params = formData.toString();
+    loadData(true, false, url_params);
+
+  });
+
+  function hideDataCount(hidden = true) {
+
+    if (hidden) {
+
+      $("#search-data-count").addClass("d-none");
+
+    } else {
+
+      $("#search-data-count").removeClass("d-none");
+
+    }
+
+
+  }
+
+  function makeSchedule(form_id) {
+
+    const form = document.querySelector(form_id);
+
+    form.target = "_blank";
+    form.action = "/dashboard/reports/schedule/create";
+    form.submit();
+
+  }
+
+  function downloadReport(form_id) {
+
+    const form = document.querySelector(form_id);
+
+    form.target = "_parent";
+    form.action = "/dashboard/wazuh/report/logs";
+    form['limit'].value = page;
+    form.submit();
+
+  }
+
+  function changeRange() {
+
+    const input_range = document.getElementById("input-range");
+    const input_from = document.getElementById("input-from");
+    const input_to = document.getElementById("input-to");
+
+    input_to.value = htmlToday();
+
+    if (input_range.value === "week") {
+
+      input_from.value = htmlToday(-7);
+
+    } else if (input_range.value === "month") {
+
+      input_from.value = htmlToday(-30);
+
+    } else if (input_range.value === "quarter") {
+
+      input_from.value = htmlToday(-90);
+
+    } else {
+
+      input_from.value = htmlToday();
+
+    }
+
+  }
+
+  function validateRange() {
+
+    const input_from = document.getElementById("input-from");
+    const input_to = document.getElementById("input-to");
+
+    const from_date = new Date(input_from.value);
+    const to_date = new Date(input_to.value);
+
+    if (from_date > to_date) {
+
+      input_from.value = "";
+      toast("Invalid Range", "You've selected an invalid range", 1);
+
+    }
+
+  }
+
+  function fetchWazuhData(selector, id, collection, exclude) {
+
+    let container = $(selector);
+
+    container.html(TEMPLATE.loader);
+
+    $.ajax({
+
+      url: `/dashboard/wazuh/content/log?id=${id}&collection=${collection}&exclude=${exclude}`,
+      type: 'GET',
+
+      success: (data) => {
+
+        container.html(renderJSONInfo(data));
+
+      },
+
+      statusCode: {
+
+        404: function() {
+
+          container.html(EMSG.notFound("data"));
+
+        },
+
+        500: function() {
+
+          container.html(EMSG.server);
+
+        }
+
+      }
+
+    });
+
+  }
+</script>

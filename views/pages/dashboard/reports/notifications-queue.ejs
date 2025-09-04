@@ -1,0 +1,30 @@
+<div class="col-12">
+  <div class="p-4 bg-white rounded shadow">
+
+    <div class="d-flex align-items-center justify-content-between">
+      <h4 class="fw-bold">
+        Notification Queue
+      </h4>
+      <div class="d-flex gap-2">
+        <%- include('components/search-control-buttons') %>
+      </div>
+    </div>
+
+    <%- include("components/body/search-data.ejs", {
+      options: [
+        { name: "Source", property: "source" },
+        { name: "Message ID", property: "message_id" },
+        { name: "Status", property: "status" },
+        { name: "Receiver", property: "receiver" },
+      ],
+      total_text: "Total email reports:"
+    }) %>
+
+    <%- include("components/body/data-table.ejs") %>
+
+  </div>
+</div>
+
+<script>
+  loadData(true, true);
+</script>

@@ -1,0 +1,55 @@
+<div class="px-2 mt-3">
+    <div class="fs-5 fw-bold pb-2">
+        Wazuh logs affected by this IP address <span class="text-primary"><%= ip %></span>
+    </div>
+    <div class="overflow-auto form-control rounded mb-3" style="max-height: 70vh;">
+      <table class="table small table-hover text-secondary">
+        <thead class="thead sticky-top bg-white" style="top: -6px;">
+            <tr>
+                <th scope="col">Timestamp</th>
+                <th scope="col">Log ID</th>
+                <th scope="col">Agent ID</th>
+                <th scope="col">Local IP</th>
+                <th scope="col">Public IP</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% data.forEach(info=> { %>
+
+              <% let log_id = info.id %>
+
+              <tr class="">
+                  <td class="">
+                    <% let timestamp = new Date(info.timestamp) %>
+                    <%= timestamp.toLocaleString() || "Unknown" %>
+                  </td>
+                  <td class="">
+                    <small title="Click to view log preview" class="clickable" onclick="loadDynamicPopup('Wazuh Log Preview', '/dashboard/wazuh/logs/data/raw?idfs=id&operators=equal_to&types=string&values=' + '<%= log_id %>')">
+                      <img src="/images/icons/view-log.png" alt="" height="20">
+                    </small>
+                    <span class="clickable copy-icon" onclick="navigator.clipboard.writeText('<%= log_id %>').then(() => toast('Text Copied!', 'Log ID copied to clipboard', 1));" title="Copy Log ID">
+                      <img src="/images/icons/copy.png" alt="" height="20">
+                    </span>
+                    <strong><%= log_id || "unknown" %></strong>
+                  </td>
+                  <td class="">
+                    <%= info.agent.id || "Unknown" %>
+                  </td>
+                  <td class="">
+                    <%= info.source || "Unknown" %>
+                  </td>
+                  <td class="">
+                    <%= ip || "Unknown" %>
+                  </td>
+              </tr>
+
+            <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% if (len > 100) { %>
+      <div class="fw-bold pb-2">
+        Showing first 100 logs...
+      </div>
+    <% } %>
+</div>

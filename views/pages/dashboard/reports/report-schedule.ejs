@@ -1,0 +1,47 @@
+
+
+<div class="col-12">
+    <div class="p-4 bg-light rounded shadow">
+
+        <div class="d-flex justify-content-between">
+            <div class="btn-group toggle-block">
+              <button class="btn btn-tab px-5" onclick="changeURL('/dashboard/reports/schedule/data/active')">
+                <i class="fa fa-circle text-success"></i>
+                Active
+              </button>
+              <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/reports/schedule/data/inactive')">
+                <i class="fa fa-circle text-danger"></i>
+                Inactive
+              </button>
+              <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/reports/schedule/data/all')">
+                <i class="fa fa-list"></i>
+                All
+              </button>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn rounded-pill btn-primary" href="/dashboard/reports/schedule/create">
+                    <i class="fa fa-add"></i>
+                    New Schedule
+                </a>
+                <%- include('components/search-control-buttons') %>
+            </div>
+        </div>
+
+        <%- include("components/body/search-data.ejs", {
+            options: [
+              { name: "Title", property: "title" },
+              { name: "Schedule ID", property: "sid" }
+            ],
+            total_text: "Total Report Schedules:"
+        }) %>
+  
+        <%- include("components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<script>
+    
+    loadData(true);
+
+</script>

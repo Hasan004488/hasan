@@ -1,0 +1,76 @@
+
+<div class="col-md-8 mx-auto d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="text-center">
+        <div id="loading-status">
+            <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <h1 id="status-title" class="text-secondary">Hold Tight!</h1>
+        <p id="status-info" class="text-secondary">Eitix is preparing your dashboard</p>
+        <div id="loading-help" class="d-none my-4">
+            <a href="/configure" class="btn btn-outline-dark my-2">Configure EITIx Again</a>
+            <div>EITIx is taking too long to configure...</div>
+            <div>You may start the Monitor to check logs.</div>
+        </div>
+        <div id="failure-help" class="d-none my-3">
+            <div class="rounded bg-dark text-danger">
+              <p id="error_reason" class="p-4"></p>
+            </div>
+            <a href="/configure" class="btn btn-outline-dark mb-3">Configure EITIx Again</a>
+            <div class="text-start">
+                <div class="my-2 fw-bold">
+                    Also try the following:
+                </div>
+                <ul>
+                    <li>Start the "Monitor EITIx" to check live logs</li>
+                    <li>Apply patches to solve critical issues</li>
+                </ul>
+            </div>
+        </div>
+        <div id="next" class="d-none">
+            <a href="/" class="btn btn-secondary rounded-pill px-5">
+                <i class="fa fa-arrow-left"></i>
+                Go to dashboard</a>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    /* show contact button if eitix is taking too much time */
+    let showHelp = setTimeout(() => {
+        $("#loading-help").removeClass("d-none");
+    }, 60000); // 1 minute
+
+    /* check every second if all dbs are created */
+    let checkReady = setInterval(() => {
+
+        $.get("/configured", (data, status) => {
+
+            if (data.status === 'success') {
+
+                clearInterval(showHelp);
+                clearInterval(checkReady);
+                $("#loading-help").addClass("d-none");
+                $("#loading-status").html(`<i class="fa fa-check text-primary fs-1"></i>`);
+                $("#status-title").html(`Done!`);
+                $("#status-info").html(`Eitix is ready to run!`);
+                $("#next").removeClass("d-none");
+
+            } else if (data.status === 'failed') {
+
+              clearInterval(showHelp);
+              clearInterval(checkReady);
+              $("#failure-help").removeClass("d-none");
+              $("#loading-status").html(`<i class="fa fa-close text-primary fs-1"></i>`);
+              $("#status-title").html(`Configure Failed!`);
+              $("#status-info").html(`Eitix is unable to run due to an error!`);
+              $("#error_reason").html(data.reason);
+
+            }
+            
+        })
+    }, 1000);
+
+</script>

@@ -1,0 +1,368 @@
+{
+  "malware": {
+    "Impact": 10,
+    "Title": "Malware Activity",
+    "MITRE_ATTACK_Technique": {
+      "T1204.001": "Malicious Link",
+      "T1204.002": "Malicious File",
+      "T1587.001": "Develop Capabilities: Malware"
+    },
+    "Risk_Description": "A malware is found, quarantined or, executed in the system. Investigate and secure the system before it is too late.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Inform your security department or external security provider to work on this incident",
+      "If malware is executed, quarantine the infected system from network",
+      "Collect and store the malware file for investigation"
+    ]
+  },
+  "ransomware": {
+    "Impact": 10,
+    "Title": "Ransomware Activity",
+    "MITRE_ATTACK_Technique": {
+      "T1204.001": "Malicious Link",
+      "T1204.002": "Malicious File",
+      "T1486": "Data Encrypted for Impact",
+      "T1587.001": "Develop Capabilities: Malware"
+    },
+    "Risk_Description": "A ransomware is found, quarantined or, executed in the system. If not investigated, and it is really a ransomware then your full company system may stop working. So, quickly investigate and secure the system before it is too late.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Inform your security department or external security provider to work on this incident",
+      "If ransomware is executed, quarantine the infected system from network",
+      "Collect and store the malware file for investigation"
+    ]
+  },
+  "command_and_control": {
+    "Impact": 8,
+    "Title": "Command & Control Activity",
+    "MITRE_ATTACK_Technique": {
+      "T1041": "Exfiltration Over C2 Channel"
+    },
+    "Risk_Description": "Through the command & control server, threat actors can execute malicious commands, exfiltrate your sensitive data, deploy additional malware in the already infected system, and propagate attacks across networks.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Identify infected devices and verify if the network communication was really done by any malicious/unknown process",
+      "If really malicious, then isolate the infected system from network",
+      "Collect and store the malware file and network communication logs for investigation"
+    ]
+  },
+  "network_attack": {
+    "Impact": 7,
+    "Title": "Attack in Network",
+    "MITRE_ATTACK_Technique": {
+      "T1040": "Network Sniffing",
+      "T1498": "Network Denial of Service"
+    },
+    "Risk_Description": "A hostile activity is targeting the network infrastructure and trying to disrupt services.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Network based attacks are usually intended to steal data, intercept traffic or cause disruption. Monitoring traffic flow, using intrusion detection systems and blocking suspicious IPs can mitigate such attempts."
+  },
+  "malicious": {
+    "Impact": 9,
+    "Title": "Malicious Activity",
+    "MITRE_ATTACK_Technique": {
+      "T1204": "User Execution"
+    },
+    "Risk_Description": "Detected behavior is intentionally harmful and indicates an active attempt to compromise assets.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Malicious activity is often performed by adversaries to gain control or spread infection. Immediate isolation, forensic investigation and applying threat intelligence driven response is recommended."
+  },
+  "network_anomaly": {
+    "Impact": 7,
+    "Title": "Network Anomaly Activity",
+    "MITRE_ATTACK_Technique": {
+      "T1046": "Network Service Scanning"
+    },
+    "Risk_Description": "Unusual network patterns are observed which deviate from the normal traffic behavior.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Network anomalies may not always mean compromise but can indicate reconnaissance or data movement. Review logs, inspect flows, and enforce strict segmentation to reduce exposure."
+  },
+  "anomaly": {
+    "Impact": 6,
+    "Title": "Anomaly Activity",
+    "MITRE_ATTACK_Technique": {
+      "T1588": "Obtain Capabilities",
+      "T1078": "Valid Accounts"
+    },
+    "Risk_Description": "Something is not right. Or, something is doing wrong.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Anomaly activity is detected because it does not happen usually. So, although it may not be directly something suspicious. But this type of activities sometimes done by threat actors."
+  },
+  "vulnerability": {
+    "Impact": 7,
+    "Title": "Vulnerability Found",
+    "MITRE_ATTACK_Technique": {
+      "T1588.006": "Obtain Capabilities: Vulnerabilities",
+      "T1595.002": "Active Scanning: Vulnerability Scanning"
+    },
+    "Risk_Description": "Vulnerability or any type of mis-configuration may open the door to threat actors. So, vulnerabilities should be fixed on priority basis.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Identify the vulnerability.",
+      "If multiple vulnerabilities found then prioritize each one to fix as per the risk.",
+      "Mitigate the vulnerability by following the vendor guideline or, update the affected solution to a patched version."
+    ]
+  },
+  "limit_disk": {
+    "Impact": 4,
+    "Title": "Disk or Memory Usage Seems Full",
+    "MITRE_ATTACK_Technique": {
+      "T1496": "Resource Hijacking"
+    },
+    "Risk_Description": "The machine may shut down or become unusable if the system remains this state.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Identify the process that is making the disk or memory full",
+      "Limit that process so that it can not again make the system full.",
+      "But if it is required to continue that process then increase the system specification."
+    ]
+  },
+  "authentication": {
+    "Impact": 6,
+    "Title": "Authentication Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1078": "Valid Accounts",
+      "T1586": "Compromise Accounts",
+      "T1110.001": "Brute Force: Password Guessing"
+    },
+    "Risk_Description": "Authentication process is done by legit users. But threat actors also authenticate to compromised systems or, services. Which will look like a legitimate authentication operation.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "If there is any authentication operation being done outside of office hour or, from unusual geo-location then it can be a security risk. Also, check if there are too many unusual authentication operations. If anything suspicious, take appropriate action to remove any access by a suspicious authentication."
+  },
+  "network": {
+    "Impact": 5,
+    "Title": "Network Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1590": "Gather Victim Network Information",
+      "T1046": "Network Service Discovery",
+      "T1011": "Exfiltration Over Other Network Medium"
+    },
+    "Risk_Description": "Network related operations can be suspicious. Threat actors often injects malicious payloads into legitimate traffic or, tunnels suspicious network protocols inside a ligitimate/permitted protocol.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Monitor network related logs.",
+      "If found anything suspicious, then analyze network packets.",
+      "Check the reputation of the connected domains or, IP addresses in threat intel feeds such as VirusTotal."
+    ]
+  },
+  "integrity": {
+    "Impact": 4,
+    "Title": "Integrity Possibly Changed",
+    "MITRE_ATTACK_Technique": {
+      "T1112": "Modify Registry",
+      "T1601": "Modify System Image",
+      "T1647": "Plist File Modification"
+    },
+    "Risk_Description": "Threat actors may modify file, registry etc. as per their needs. Even ransomware will modify (encrypt) files. So, it can be risky if there are too many integrity changes.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Check if the system integrity are being changed by any legitimate process such as data backup program etc. If not, then find out the suspicious process that is changing the system integrity."
+  },
+  "data_del": {
+    "Impact": 6,
+    "Title": "Data Delete Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1070": "Indicator Removal",
+      "T1531": "Account Access Removal"
+    },
+    "Risk_Description": "Threat actors may delete data for malicious purpose such as demanding ransom for giving data back etc. Or, they may delete malicious files after using that to remove their trace.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Correlate other security logs.",
+      "Monitor for sensitive or, important data deletion logs.",
+      "If these operations are not done by permission, take the appropriate action to detect who did this and take remediation action."
+    ]
+  },
+  "data_add": {
+    "Impact": 4,
+    "Title": "Possible Data Creation/Adding Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1204": "User Execution"
+    },
+    "Risk_Description": "Creation of new data may not be directly something malicious. But SOC analysts should monitor if the data creation is related to malware file creation or, something like this.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Correlate other security logs.",
+      "Monitor for suspicious or, unusual data creation logs.",
+      "If these operations are not done by permission, take the appropriate action to detect who did this and take remediation action."
+    ]
+  },
+  "security_tool": {
+    "Impact": 8,
+    "Title": "Security Tool Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1562": "Impair Defenses"
+    },
+    "Risk_Description": "Security tools related events may reveal suspicious activities. These events/logs often reveal anomalous activities happening in the system or, network.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Identify if any threat is detected or not.",
+      "If any threat is found by security tool, then take action on the affected system as soon as possible."
+    ]
+  },
+  "rdp": {
+    "Impact": 5,
+    "Title": "Remote Desktop (RDP)",
+    "MITRE_ATTACK_Technique": {
+      "T1021.001": "Remote Desktop Protocol",
+      "T1219": "Remote Access Software",
+      "T1563.002": "RDP Hijacking"
+    },
+    "Risk_Description": "Exposed RDP servers can be exploited by attackers to gain unauthorized access to systems and networks. This can lead to data breaches, ransomware attacks, and other malicious activities.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Quickly assess the severity of the alert and gather more information about the RDP activity. If necessary, temporarily disable or restrict RDP access to the affected system or network to prevent further exploitation. Strengthen RDP security by enabling strong authentication methods (e.g., two-factor authentication), using a firewall to restrict RDP access, and regularly patching systems to address vulnerabilities."
+  },
+  "phishing": {
+    "Impact": 8,
+    "Title": "Phishing Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1566": "Phishing",
+      "T1598": "Phishing for Information"
+    },
+    "Risk_Description": "Threat actors may send phishing messages/emails (or in websites) to steal sensitive information that can be used during attack. Phishing for information is an attempt to trick targets into divulging information, frequently credentials or other actionable information.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Identify if any user clicked any phishing link or, executed any file attached in phishing mail/website or, entered password in phishing site. If yes, then immediately change the account credentials and investigate further to mitigate all the risk."
+  },
+  "email": {
+    "Impact": 6,
+    "Title": "Email Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1114": "Email Collection",
+      "T1586.002": "Compromise Accounts: Email Accounts",
+      "T1566": "Phishing"
+    },
+    "Risk_Description": "Email is often used for phishing. Threat actors mostly send malicious link or, attachment via email.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "If any email security configuration is modified, then find out if it was done intentionally or, can be done by a threat actor.",
+      "If any malicious link or attachment is detected in an email, check if anyone clicked on the link or, opened the attahment."
+    ]
+  },
+  "ssh_failed_login": {
+    "Impact": 7,
+    "Title": "SSH Failed Login Attempt",
+    "MITRE_ATTACK_Technique": {
+      "T1110": "Brute Force",
+      "T1078": "Valid Accounts"
+    },
+    "Risk_Description": "Multiple failed login attempts were detected over SSH which may suggest brute force or credential stuffing activity.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Failed SSH logins should be monitored closely. Enforce strong passwords, enable key-based authentication, and block or limit repeated failed attempts using intrusion prevention mechanisms."
+  },
+  "ssh": {
+    "Impact": 5,
+    "Title": "SSH Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1021.004": "Remote Services: SSH",
+      "T1563.001": "Remote Service Session Hijacking: SSH Hijacking"
+    },
+    "Risk_Description": "SSH is often a legitimate activity. Until it is using by a threat actor to connect to your company network.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Verify if any SSH connectivity is unknown to your company.",
+      "If then, identify if any threat actor has accessed your network or not."
+    ]
+  },
+  "failed_login": {
+    "Impact": 5,
+    "Title": "Failed Login",
+    "MITRE_ATTACK_Technique": {
+      "T1078": "Valid Accounts"
+    },
+    "Risk_Description": "Several failed login attempts were detected on the system which may indicate misuse or unauthorized access attempts.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Failed logins should be investigated to confirm whether they are user mistakes or malicious activity. Apply account lockout policies, enable MFA, and monitor login patterns to reduce risk."
+  },
+  "exfiltration": {
+    "Impact": 7,
+    "Title": "Data Exfiltration Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1048": "Exfiltration Over Alternative Protocol"
+    },
+    "Risk_Description": "Data exfiltration is where threat actors send your sensitive information/files to external recipient.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Verify if any data/file being transmitted to remote entity by any suspicious program.",
+      "If then, kill the suspicious program, isolate the infected machine.",
+      "Keep the malicious program as an evidence for further investigation by security analysts."
+    ]
+  },
+  "ddos": {
+    "Impact": 4,
+    "Title": "Possible DDoS Attack",
+    "MITRE_ATTACK_Technique": {
+      "T1498": "Network Denial of Service",
+      "T0814": "Denial of Service",
+      "T1464": "Network Denial of Service",
+      "T1499": "Endpoint Denial of Service"
+    },
+    "Risk_Description": "DDoS attack is a malicious attempt to disrupt the normal traffic of a targeted server, service or network by a flood of Internet traffic",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Identify the suspicious amounts of traffic and the origin/source IP address or IP range.",
+      "Configure the affected system, service or, network as per the vendor documentation so that, DDoS attack can be mitigated."
+    ]
+  },
+  "man_in_the_middle": {
+    "Impact": 6,
+    "Title": "Man in The Middle",
+    "MITRE_ATTACK_Technique": {
+      "T1557": "Adversary-in-the-Middle",
+      "T1638": "Adversary-in-the-Middle",
+      "T0830": "Adversary-in-the-Middle"
+    },
+    "Risk_Description": "In man in the middle attack, a threat actor or malware sniffs network communication by sitting between sender and receiver.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Identify if the man-in-the-middle attack and relevant processes.",
+      "Isolate the infected system.",
+      "Revoke passwords, certificates and other types of credential of affected product or, service."
+    ]
+  },
+  "sql_attack": {
+    "Impact": 9,
+    "Title": "SQL Attack",
+    "MITRE_ATTACK_Technique": {
+      "T1190": "Exploit Public-Facing Application"
+    },
+    "Risk_Description": "An SQL injection attack exploits vulnerabilities in a database query by injecting malicious SQL code, potentially allowing unauthorized access, data theft, or database manipulation.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Immediately block the malicious IP addresses or user accounts involved in the attack.",
+      "Apply security patches to the application, database, and server software to close known vulnerabilities.",
+      "Revoke passwords, certificates and other types of credential of affected product or, service."
+    ]
+  },
+  "xss_attack": {
+    "Impact": 9,
+    "Title": "XSS Attack",
+    "MITRE_ATTACK_Technique": {
+      "T1189": "Drive-by Compromise"
+    },
+    "Risk_Description": "XSS attack injects malicious scripts into trusted websites or applications, potentially allowing attackers to steal sensitive data, hijack user sessions, or manipulate site content.",
+    "Remediation_Guide_Type": "List",
+    "Remediation_Guide": [
+      "Determine the source and scope of the attack by analyzing logs and user activity, and block the offending IP addresses or accounts.",
+      "Alert impacted users to reset their sessions, credentials, or other sensitive information if data or account integrity may have been compromised."
+    ]
+  },
+  "hacking_operation": {
+    "Impact": 6,
+    "Title": "Hacking Operation",
+    "MITRE_ATTACK_Technique": {
+      "T1190": "Exploit Public-Facing Application"
+    },
+    "Risk_Description": "Indicators show a coordinated hacking operation targeting systems or services with the intent of gaining control or causing disruption.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "Hacking operations are complex and may involve multiple stages of attack. Apply immediate containment, patch exposed systems, review external exposure, and escalate to incident response teams for detailed investigation"
+  },
+  "error": {
+    "Impact": 4,
+    "Title": "Error Event",
+    "MITRE_ATTACK_Technique": {
+      "T1489": "Service Stop"
+    },
+    "Risk_Description": "An unexpected error was logged which may indicate misconfiguration, faulty service, or potential abuse by adversaries.",
+    "Remediation_Guide_Type": "Text",
+    "Remediation_Guide": "System errors should be reviewed to identify whether they stem from normal issues or malicious manipulation. Apply proper configuration management, patching, and error monitoring to prevent recurrence."
+  }
+}

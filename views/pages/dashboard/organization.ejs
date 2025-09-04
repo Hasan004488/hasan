@@ -1,0 +1,115 @@
+<style>
+    .profile-image-wrapper {
+        width: 250px;
+        height: 250px;
+        overflow: hidden;
+        margin: auto;
+        text-align: center;
+    }
+
+    .profile-image-wrapper img {
+        width: 80%;
+    }
+</style>
+
+<div class="col-md-6 mt-5">
+    <div class="col-md bg-white rounded shadow p-5">
+        <div class="py-3 mb-2 text-center">
+            <img src="/images/organization.png" alt="Organization image" style="height: 60px">
+            <div class="fs-4 pt-4 fw-bold">
+                <span>Organization Information</span>
+            </div>
+        </div>
+        <div class="pb-3">
+            <form action="/dashboard/settings/organization/update" method="POST"
+                onsubmit="return confirmChoice(event, 'Are you ready to update information?')" enctype="multipart/form-data">
+                <%- include("../../components/form/input-box.ejs", {
+                  label: "Choose Image",
+                  name: "image",
+                  type: "file",
+                  extra: "accept=image/*"
+                }) %>
+                <%- include("../../components/form/input-box.ejs", {
+                    label: "Name",
+                    name: "name",
+                    placeholder: "Enter organization name",
+                    value: data.name,
+                    char_limit: [1, 70],
+                    required: true
+                  }) %>
+                <%- include("../../components/form/input-box.ejs", {
+                    label: "Address",
+                    name: "address",
+                    placeholder: "Enter organization address",
+                    value: data.address,
+                    char_limit: [1, 150],
+                    required: true
+                  }) %>
+                <div class="d-flex gap-3">
+                  <%- include("../../components/form/input-box.ejs", {
+                    label: "Phone Number",
+                    name: "phone",
+                    placeholder: "Enter organization phone number",
+                    value: data.phone,
+                    char_limit: [1, 25],
+                    required: true
+                  }) %>
+                <%- include("../../components/form/input-box.ejs", {
+                    label: "Email",
+                    name: "email",
+                    placeholder: "Enter organization email",
+                    value: data.email,
+                    char_limit: [1, 25],
+                    required: true
+                  }) %>
+                </div>
+                <div class="d-flex gap-3">
+                  <%- include("../../components/form/input-box.ejs", {
+                    label: "Working Hour Starts",
+                    name: "working_hour_starts",
+                    type: "time",
+                    value: data.working_hour_starts || "09:00",
+                    required: true
+                  }) %>
+                  <%- include("../../components/form/input-box.ejs", {
+                    label: "Working Hour Ends",
+                    name: "working_hour_ends",
+                    type: "time",
+                    value: data.working_hour_ends || "15:00",
+                    required: true
+                  }) %>
+                </div>
+                <%- include("../../components/form/input-box.ejs", {
+                    label: "Fax Number",
+                    name: "fax",
+                    placeholder: "Enter organization fax number",
+                    value: data.fax,
+                    char_limit: [1, 100]
+                  }) %>
+                <div class="d-flex gap-3">
+                  <%- include("../../components/form/input-box.ejs", {
+                    label: "Contact Person Name",
+                    name: "contact_name",
+                    placeholder: "Enter organization contact person name",
+                    value: data.contact_name,
+                    char_limit: [1, 100]
+                  }) %>
+                <%- include("../../components/form/input-box.ejs", {
+                    label: "Contact Person Phone",
+                    name: "contact_phone",
+                    placeholder: "Enter organization contact person phone",
+                    value: data.contact_phone,
+                    char_limit: [1, 100]
+                    
+                  }) %>
+                </div>
+                <div class="text-center my-3">
+                    <button type="submit" class="btn rounded-pill btn-primary px-4">
+                      <i class="fa fa-arrow-up"></i>
+                        Update Information
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

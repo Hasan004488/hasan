@@ -1,0 +1,35 @@
+<style>
+  .height-limit {
+    max-height: 25vh;
+    overflow: auto;
+  }
+</style>
+
+<div class="col-md-8 mx-auto bg-white rounded shadow p-4">
+
+  <h4 class="fw-bold mb-1">
+    EITIx MQ
+  </h4>
+  <div class="mb-2">
+    This page shows the current status of the message queue used by EITIx. Here you can see the amount of messages in the queue, and the last 10 messages.
+  </div>
+
+  <div id="eitix-queue"></div>
+
+  <div class="py-2"></div>
+
+</div>
+
+<script>
+
+  loadDynamicData({
+    container: "",
+    url: "/dashboard/settings/queue/status",
+    type: "GET"
+  }, (data) => {
+
+    $("#eitix-queue").html(data);
+
+  }, 1000);
+
+</script>

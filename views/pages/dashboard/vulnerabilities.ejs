@@ -1,0 +1,38 @@
+
+  <div class="col-12">
+    <div class="p-4 bg-white rounded shadow position-relative">
+
+      <div class="d-flex justify-content-between">
+        <div class="btn-group toggle-block">
+          <button class="btn btn-tab px-5" onclick="changeURL('/dashboard/vulnerabilities/tab/daily/data')">
+            <i class="fa fa-clock area_blocked"></i>
+            Daily CVE
+          </button>
+          <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/vulnerabilities/tab/archive/data')">
+            <i class="fa fa-box area_blocked"></i>
+            Archive CVE
+          </button>
+        </div>
+        <div class="d-flex gap-2">
+          <%- include('components/search-control-buttons') %>
+        </div>
+      </div>
+
+      <%- include("../../components/body/search-data.ejs", {
+        options: [
+          { name: "CVE ID", property: "id" },
+          { name: "Agent ID", property: "agent" }
+        ],
+        total_text: "Total CVEs found in your system:"
+      }) %>
+
+      <%- include("../../components/body/data-table.ejs") %>
+
+    </div>
+  </div>
+
+  <script>
+
+    loadData(true, true);
+
+  </script>

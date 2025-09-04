@@ -1,0 +1,42 @@
+<% data.forEach((template) => { %>
+  <tr class="py-3 slide-in-up">
+    <td>
+      <span><%= template.sid || "Unknown" %></span>
+    </td>
+    <td>
+      <div class="d-flex align-items-center gap-1">
+        <span><%= locals.format.truncateText(template.title, 30) || "No Information" %></span>
+        <% if (template.type === "playbook") { %>
+          <span class="badge rounded-pill bg-primary">Rule: <%= template.rule %></span>
+        <% } %>
+      </div>
+    </td>
+    <td><%= template.reporter_name || "Default" %></td>
+    <td><%= template.date?.toLocaleString() || "Deployment" %></td>
+    <td>
+      <div class="d-flex justify-content-center">
+        <a href="/dashboard/templates/edit/update?id=<%= template._id %>&type=<%= template.type %>"
+          class="btn rounded-pill btn-sm btn-success" title="Edit this template">
+            <i class="fa fa-pen"></i>
+            Edit
+        </a>
+        <% if (template.protected != true) { %>
+          <button type="button" class="btn btn-sm ms-2 rounded-pill btn-danger" data-toggle="tooltip" title="Delete this template" onclick="updateData('Are sure to delete this template?', '/dashboard/templates/delete', '<%= template._id %>')">
+            <i class="fa fa-trash"></i>
+          </button>
+        <% } else { %>
+          <button type="button" class="btn btn-sm rounded-pill btn-danger area_disabled ms-2" disabled title="You can't delete this template">
+            <i class="fa fa-trash"></i>
+          </button>
+        <% } %>
+      </div>
+    </td>
+  </tr>
+  <tr id="dropdata-<%= data._id %>" class="d-none">
+    <td colspan="<%= 7 %>" class="p-3">
+      <div class="bg-white rounded p-3">
+        <div class="data"></div>
+      </div>
+    </td>
+  </tr>
+<% }) %>

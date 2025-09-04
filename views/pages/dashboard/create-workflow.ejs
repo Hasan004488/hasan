@@ -1,0 +1,371 @@
+<link rel="stylesheet" href="/styles/progress-steps.css">
+
+<!-- Circles which indicates the steps of the form: -->
+<div id="step-indicator" class="d-flex gap-2 justify-content-center align-items-center mt-4 mb-2">
+  <span class="step">1</span>
+  <span class="step">2</span>
+  <span class="step">3</span>
+</div>
+
+<form class="col-md-10 col-lg-8 user-selection-form-wrapper" id="create-workflow" 
+  action="/dashboard/workflow/create" method="POST">
+
+  <!-- Basic Information -->
+  <div class="tab p-4 bg-white rounded shadow mb-3 scale-in-center">
+
+    <h2 class="fs-5 fw-bold">
+      Basic Information
+    </h2>
+    <div id="basic-info-body">
+      <div class="d-md-flex gap-3">
+        <div class="col-md-8">
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Workflow Title",
+            name: "title",
+            value: data.title || "",
+            placeholder: "Add a title",
+            required: true
+          }) %>
+        </div>
+        <div class="col">
+          <%- include("../../components/form/select-box.ejs", {
+            label: "Total Escalation Phases",
+            id: "escalation-phases",
+            name: "phases",
+            selected: data.phases || "1",
+            disabled: data.title ? true : false,
+            event: "onchange=updatePhases(this)",
+            required:true,
+            options: [
+              {
+                value: "1",
+                option: "One Phase"
+              },
+              {
+                value: "2",
+                option: "Two Phases"
+              },
+              {
+                value: "3",
+                option: "Three Phases"
+              },
+              {
+                value: "4",
+                option: "Four Phases"
+              },
+              {
+                value: "5",
+                option: "Five Phases"
+              },
+              {
+                value: "6",
+                option: "Six Phases"
+              },
+              {
+                value: "7",
+                option: "Seven Phases"
+              },
+              {
+                value: "8",
+                option: "Eight Phases"
+              },
+              {
+                value: "9",
+                option: "Nine Phases"
+              },
+              {
+                value: "10",
+                option: "Ten Phases"
+              }
+            ]
+          }) %>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="escalation-tabs">
+    <!-- escalation tabs will be dynamically rendered here by renderETab() -->
+  </div>
+  
+  <!-- Confirm Selection -->
+  <div class="tab p-4 py-5 bg-white rounded shadow mb-3 text-center scale-in-center rounded-pill">
+
+    <div class="display-3">
+      <i class="fa-regular fa-circle-question"></i>
+    </div>
+    <h5 class="fs-5 fw-bold">
+      Confirm Submission
+    </h5>
+
+    <div class="">
+      <% if (data.title) { %>
+        Please press submit if you want to update workflow.
+      <% } else { %>
+        Please press submit if you want to create new workflow.
+      <% } %>
+    </div>
+      
+  </div>
+
+  <div class="text-end mt-4">
+    <button class="btn btn-secondary rounded-pill px-4 me-2" type="button" id="prevBtn" onclick="nextPrev(-1)">
+      <i class="fa fa-arrow-left"></i>
+      Previous
+    </button>
+    <button class="btn btn-success rounded-pill px-4" type="button" id="nextBtn" onclick="toggleSection('#progress-next-loading-icon'); nextPrev(1)">
+      Next
+      <i class="fa fa-arrow-right"></i>
+    </button>
+  </div>
+
+  <!-- hidden fields -->
+  <div class="d-none">
+    <% if (data.title) { %>
+      <input name="id" type="text" value="<%= data._id %>">
+      <input name="updating" type="text" value="true">
+    <% } %>
+  </div>
+
+</form>
+
+<%- include('./user-selection') %>
+
+<script>
+  window.eitix_progress_form_target = "#create-workflow";
+</script>
+
+<script src="/scripts/progress-steps.js"></script>
+
+<script>
+
+  let mode = "<%= data.title ? 'update' : 'create' %>";
+
+  // load users
+  let preloaded_users = [];
+  let pre_interval = [];
+  let pre_interval_h = [];
+  let pre_interval_m = [];
+  try {
+
+    // no_f = this may stop working, use textarea instead
+    let users_data = JSON.parse("<%= JSON.stringify(data.users) %>".replace(/&#34;/g, '"'));
+    if (Array.isArray(users_data)) {
+      
+      preloaded_users = users_data.map(ustr => {
+        let user = ustr?.split("-");
+        return {sid: user[1], type: user[0]}
+      }) || [];
+      
+    }
+
+    let interval_data = JSON.parse("<%= JSON.stringify(data.interval) %>".replace(/&#34;/g, '"'));
+    let interval_h_data = JSON.parse("<%= JSON.stringify(data?.interval_h) %>".replace(/&#34;/g, '"'));
+    let interval_m_data = JSON.parse("<%= JSON.stringify(data?.interval_m) %>".replace(/&#34;/g, '"'));
+
+    pre_interval = interval_data;
+    pre_interval_h = interval_h_data;
+    pre_interval_m = interval_m_data;
+
+  } catch (error) {
+
+  // ignore json parsing error
+
+  }
+
+  loadUsers(preloaded_users);
+  updatePhases(document.querySelector("#escalation-phases"), pre_interval, pre_interval_h, pre_interval_m);
+
+  // custom validator
+  customValidator = (callback) => {
+
+    // This function deals with validation of the form fields
+    let x, y, i, valid = true;
+    let form = document.querySelector(window.eitix_progress_form_target);
+    x = document.getElementsByClassName("tab");
+    y = x[currentTab].getElementsByTagName("input");
+    
+    if (mode === 'create' && currentTab === 0) {
+
+      let title = form["title"].value;
+      
+      fetchDynamicData({
+        url: `/content/check/value?col=wf&field=title&val=${title}`
+      }, (response) => {
+
+        if (response?.unique) {
+
+          return callback(true);
+
+        } else {
+
+          toast("Workflow already exists", "Please set another unique title", 1);
+          return callback(false);
+
+        }
+
+      })
+      
+    } else {
+      
+      let total = 0;
+      let atleast_one_user = false;
+      let all_tabs = document.getElementsByClassName("tab");
+      let isPhaseSelection = all_tabs[currentTab].querySelector(".phase-title");
+
+      if (isPhaseSelection) {
+
+        let currentPhase = isPhaseSelection.dataset?.phase;
+
+        // all_users coming from user-selection.js
+        all_users.forEach(user => {
+          if (user.type === currentPhase) {
+            atleast_one_user = true;
+            return;
+          }
+        })
+
+        if (!atleast_one_user) {
+          toast("No users selected!", "Please select at least one user", 1);
+          return callback(false);
+        }
+
+      }
+
+      let interval = form["interval"];
+      if (interval?.length) {
+        for (let i = 0; i < interval.length; i++) {
+
+          if (interval[i].value > 10) {
+
+            toast("Invalid interval days!", "Please make sure interval value stays between 1 and 10 (inclusive)", 1);
+            return callback(false);
+            break;
+
+          }
+
+          total += parseInt(interval[i].value);
+
+        }
+      } else {
+
+        if (interval?.value > 10) {
+
+          toast("Invalid interval days!", "Please make sure interval value stays between 1 and 10 (inclusive)", 1);
+          return callback(false);
+
+        }
+      }
+      
+      if (total > 30) {
+        toast("Lifecycle exceeds 30 days!", "Please adjust the interval days (keep it less then 30)", 1);
+        return callback(false);
+      }
+      
+      return callback(true);
+
+    }
+
+  }
+
+  // update the phase selector while creating 
+  function updatePhases(element, interval_array, interval_h_array, interval_m_array) {
+
+    // create the required number of tabs
+    let max_phase = parseInt(element.value) - 1;
+    let raw_tab_html = "";
+    let raw_step_html = "";
+
+    // remove all the selected users
+    removeAllSelectedUser();
+
+    for (let i = 0; i <= max_phase; i++) {
+      
+      raw_tab_html += renderETab(i + 1, interval_array, interval_h_array, interval_m_array);
+      
+    }
+
+    for (let i = 0; i <= max_phase + 2 + max_phase; i++) {
+      
+      raw_step_html += `
+        <div class="step scale-in-center">${i + 1}</div>
+      `;
+      
+    }
+
+    $("#escalation-tabs").html(raw_tab_html);
+    $("#step-indicator").html(raw_step_html);
+
+    fixStepIndicator(currentTab);
+
+  }
+
+  function renderETab(serial, interval_array = [], interval_h_array = [], interval_m_array = []) {
+    let interval_selector = "";
+    if (serial > 1) {
+      interval_selector = `
+        <div class="tab">
+          <div class="py-5 px-3 text-center shadow bg-white rounded-pill scale-in-center">
+            <div class="mb-3"><i class="fa-solid fa-3x fa-calendar-days"></i></div>
+            <span>
+              <strong>Escalation Phase ${serial}</strong>
+               will occur after 
+            </span>
+            <input type="number" name="interval" min="0" max="10" value="${interval_array[serial - 2] || 0}" class="clean-input text-center fs-4 fw-bold text-primary width-1 border-bottom border-3 border-primary">
+            <span>Day(s)</span>
+
+            <input type="number" name="interval_h" min="0" max="23" value="${interval_h_array[serial - 2] || 0}" class="clean-input text-center fs-4 fw-bold text-primary width-1 border-bottom border-3 border-primary">
+            <span>Hour(s)</span>
+
+            <input type="number" name="interval_m" min="0" max="59" value="${interval_m_array[serial - 2] || 0}" class="clean-input text-center fs-4 fw-bold text-primary width-1 border-bottom border-3 border-primary">
+            <span>Minute(s)</span>
+          </div>
+        </div>
+      `;
+    }
+    return `
+      ${interval_selector}
+      <div class="tab p-4 bg-white rounded shadow scale-in-center">
+        <div class="small mb-1">User Selection For</div>
+        <h5 class="fw-bold d-flex justify-content-between gap-3 mb-3">
+          <div class="phase-title" data-phase="phase${serial}">
+            <i class="fa fa-flag me-1"></i>
+            Escalation Phase ${serial}
+          </div>
+          <div>
+              <button class="btn btn-sm btn-primary rounded-pill" type="button"
+                  onclick="bringPopover('#user-selection'); updateUserTarget('phase${serial}')"
+              >
+                  <i class="fa fa-user-plus"></i>
+                  Add User
+              </button>
+          </div>
+        </h5>
+
+        <div class="py-1 px-3 d-flex justify-content-between border-2 border-bottom mb-3 fw-bold small">
+            <div class="col-4">
+                Selected User
+            </div>
+            <div class="col-4 text-center">
+                Forward Status
+            </div>
+            <div class="col-2 text-center">
+                Action
+            </div>
+        </div>
+
+        <div id="phase${serial}-users" class="user-container d-flex flex-column gap-3">
+          <div class="d-flex justify-content-center py-4 text-muted">
+            <div class="text-center">
+              <div class="mb-3"><i class="fa fa-user-plus fa-3x"></i></div>
+              <h5>Please Add Users Here...</h5>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    `;
+  }
+
+</script>

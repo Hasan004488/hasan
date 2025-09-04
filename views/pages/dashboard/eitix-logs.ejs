@@ -1,0 +1,108 @@
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow mb-2">
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="btn-group pb-2">
+                    <a href="/dashboard/eitix/logs?type=system" class="btn btn-tab-off px-4" id="logs-tab-system">
+                        <i class="fa fa-clock-rotate-left"></i>
+                        System Logs
+                    </a>
+                    <a href="/dashboard/eitix/logs?type=error" class="btn btn-tab-off px-4" id="logs-tab-error">
+                        <i class="fa fa-bug"></i>
+                        System Error Logs
+                    </a>
+                    <a href="/dashboard/eitix/logs?type=activity" class="btn btn-tab-off px-4" id="logs-tab-activity">
+                        <i class="fa fa-user"></i>
+                        User Activity Logs
+                    </a>
+                </div>
+                <div id="logs-status" class="my-1"></div>
+                <div id="logs-wrapper" class="p-2 overflow-auto bg-dark rounded" style="height: 75vh">
+                    <div id="logs-container" class="text-light">
+                        <div class="spinner-grow text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $("#logs-tab-<%=active%>").removeClass("btn-tab-off");
+    $("#logs-tab-<%=active%>").addClass("btn-tab");
+
+    const logs_container = $("#logs-container");
+    const api_logs_container = $("#api-logs-container");
+    const lines = 100;
+    const type = `<%=active%>`;
+
+    function getLogs() {
+
+        $.ajax({
+            url: `/content/eitix/logs?type=${type}`,
+            type: 'GET',
+            success: (data) => {
+
+                logs_container.html("");
+
+                let len = data.length;
+
+                data.forEach((line, idx) => {
+
+                    let date_str = line?.date.split(", ");
+                    
+                    logs_container.append(`
+                        <div class="d-flex gap-2 odd-dark-gray py-1">
+                            <div class="" style="width: 200px;">
+                                ${date_str[0]}
+                                <strong class="text-primary">${date_str[1]}</strong>
+                            </div>
+                            <div class="col">
+                                <div class="">${writeLog(line.log)}</div>
+                                ${line.error && line.error != "Not Found" ? `<div class="m-1"><strong>Details: </strong><span>${line.error}</span></div>` : ""}
+                                ${line.json && line.json != "{}" ? `<div class="m-1"><strong>More: </strong><span>${line?.json}</span></div>` : ""}
+                            </div>
+                        </div>
+                    `);
+
+                });
+
+
+            },
+            statusCode: {
+                500: function() {
+
+                    $("#logs-status").html(EMSG.server);
+                    
+                }
+            }
+            
+        });
+
+    }
+
+    getLogs();
+    
+    setInterval(() => {
+        getLogs();
+    }, 10000); // 10 seconds
+
+    function writeLog(log) {
+
+        const userMatch = log.match(/User\(([^)]+)\)/);
+        if (userMatch) {
+            const userText = userMatch[1];
+            const logParts = log.split(userMatch[0]);
+            return `<span class="badge bg-secondary">${userText}</span>${logParts[1]}`;
+        } else {
+            return log;
+        }
+
+    }
+
+</script>

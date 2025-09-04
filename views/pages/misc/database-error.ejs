@@ -1,0 +1,21 @@
+<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+  <div class="text-center">
+      <img src="/images/database-error.png" alt="error page" class="py-3" height="200px">
+      <h1 class="text-secondary">Database Error Encountered</h1>
+      <div class="row justify-content-md-center">
+          <p class="text-secondary col-sm-10">
+            We are having trouble connecting to your database!<br/>
+            Error Message:
+            <span class="text-danger"><%= error_message %></span>
+          </p>
+      </div>
+      <button class="btn btn-secondary px-5 rounded-pill me-2" onclick="window.history.back()">
+        <i class="fa fa-arrow-left"></i>
+        Go back
+      </button>
+      <a href="/" class="btn btn-primary px-5 rounded-pill">
+          <i class="fa fa-home"></i>
+          Dashboard
+      </a>
+  </div>
+</div> 

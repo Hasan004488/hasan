@@ -1,0 +1,28 @@
+<% data.forEach((item) => { %>
+  <%
+    let logs_count = item.count || 0;
+  %>
+  <tr class="py-3 slide-in-up clickable" onclick="toggleSecondaryPopup('Attack Preview', null, '/dashboard/ai/data/attack?date=<%= date %>&name=<%= item.name %>'); loadPopupData('<%= item.name %>', false)">
+    <td>
+      <%= item.Title || "None" %>
+    </td>
+    <td class="text-center">
+      <%= locals.format.number(logs_count) || "None" %>
+    </td>
+    <td>
+      <%= locals.format.truncateText(item.Risk_Description, 150) || "None" %>
+    </td>
+    <td>
+      <% mitre_attacks = Object.values(item.MITRE_ATTACK_Technique) || [] %>
+      <% mitre_attacks.forEach(attack => { %>
+        <span class="badge bg-secondary"><%= attack || "None" %></span> <br>
+      <% }) %>
+    </td>
+    <td class="text-center">
+      <span class="fw-bold text-danger">
+        <i class="fa fa-skull"></i>
+        <span><%= item.Impact || "None" %></span>
+      </span>
+    </td>
+  </tr>
+<% }) %>

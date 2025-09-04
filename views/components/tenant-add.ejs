@@ -1,0 +1,101 @@
+
+<% 
+const { 
+    tenant_id, name, tenant_owner, location, email, phone, 
+    wazuh_host, wazuh_user, wazuh_pass
+} = data;
+%>
+
+<div class="col-md bg-white rounded shadow p-5">
+
+    <div class="fs-4 fw-bold mb-3">
+      <button class="btn rounded-pill" onclick="toggleTenantAdd()"><i class="fa fa-arrow-left"></i></button>
+      Add New Wazuh Tenant
+    </div>
+    <div class="small">
+      Add tenant basic information and wazuh authentication credentials to setup a tenant.
+    </div>
+
+    <form id="tenant-form" class="my-3" action="/dashboard/settings/tenant/add" method="POST" onsubmit="return addTenant('#tenant-form')">
+
+      <div class="rounded border gap-3 p-3 mb-3 text-secondary">
+
+        <h5 class="mb-3 fw-bold">Tenant Information</h5>
+
+        <div class="d-flex gap-3">
+          <%- include("./form/input-box.ejs", {
+            label: `Tenant ID`,
+            name: "tenant_id",
+            value: tenant_id,
+            char_limit: [1, 11],
+            required: true
+          }) %>
+          <%- include("./form/input-box.ejs", {
+            label: "Tenant Name",
+            name: "name",
+            value: name || "",
+            required: true
+          }) %>
+        </div>
+
+        <div class="d-flex gap-3">
+          <%- include("./form/input-box.ejs", {
+            label: "Tenant Owner",
+            name: "tenant_owner",
+            value: tenant_owner || "",
+            required: true
+          }) %>
+          <%- include("./form/input-box.ejs", {
+            label: "Tenant Location",
+            name: "location",
+            value: location || ""
+          }) %>
+        </div>
+
+        <div class="d-flex gap-3">
+          <%- include("./form/input-box.ejs", {
+            label: "Email",
+            name: "email",
+            value: email
+          }) %>
+          <%- include("./form/input-box.ejs", {
+            label: "Phone",
+            name: "phone",
+            value: phone
+          }) %>
+        </div>
+
+        <% if (!tenant_id) { %>
+
+          <div class="d-none flex-column gap-2 mb-4">
+            <div class="form-group w-100">
+              <label class="fw-bold text-primary">Private Tenant Key <span class="text-danger">(One Time Key)</span></label>
+            </div>
+            <div class="d-flex gap-3">
+              <input type="text" class="col form-control rounded-pill" name="key" id="tenant-key" value="" placeholder="Tenant Key will be shown here..." readonly>
+            </div>
+          </div>
+
+          <div>
+            <button class="btn rounded-pill btn-primary my-2 px-3" type="submit">
+              <i class="fa fa-add me-1"></i>
+              Add New Tenant
+            </button>
+          </div>
+
+        <% } else { %>
+
+          <div>
+            <button class="btn rounded-pill btn-primary my-2 px-3" type="submit">
+              <i class="fa fa-rotate me-1"></i>
+              Update Tenant
+            </button>
+          </div>
+
+        <% } %>
+
+      </div>
+
+    </form>
+
+  </div>

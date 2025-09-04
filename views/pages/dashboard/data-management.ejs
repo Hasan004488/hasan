@@ -1,0 +1,234 @@
+
+
+<div class="col-12">
+  <div class="col-md-8 mt-5 mx-auto">
+
+    <div class="bg-white rounded shadow p-5">
+  
+      <div class="fs-4 fw-bold">EITIx Data Overview</div>
+      <div class="small mb-3">
+          Overview of your data on EITIx. EITIx uses MongoDB (NoSQL) as it's core database for storing logs and user data.
+      </div>
+      <div class="row gap-3">
+          <div class="col-md text-center p-2 rounded border border-secondary-light">
+              <div class="fs-3 fw-bold text-primary">
+                  <% let total_cols = data.stats?.collections || 0 %>  
+                  <span><%= data.stats?.indexes - total_cols %> Keys</span>
+                  <i class="fa fa-key"></i>
+              </div>
+              <small>Applied</small>
+          </div>
+          <div class="col-md text-center p-2 rounded border border-secondary-light">
+              <div class="fs-3 fw-bold text-primary">
+                  ~ <%= parseFloat(data.stats.avgObjSize / (1024)).toPrecision(2) %> KB</div>
+              <small>Average Content</small>
+          </div>
+          <div class="col-md text-center p-2 rounded border border-secondary-light">
+              <div class="fs-3 fw-bold text-primary">
+                  ~ <%= parseFloat(data.stats.dataSize / (1024 * 1024 * 1024)).toPrecision(3) %> GB</div>
+              <small>Total Storage</small>
+          </div>
+      </div>
+  
+    </div>
+      
+  </div>
+</div>
+
+<div class="col-12">
+  <div class="col-md-8 mx-auto">
+
+    <div class="col-md bg-white rounded shadow p-5">
+  
+      <div class="fs-4 fw-bold">EITIx Backup Plan</div>
+      <div class="small">
+          Periodically backup your EITIx data or manually backup EITIx
+      </div>
+      <div class="alert alert-warning my-2 small">
+        <i class="fa fa-circle-info"></i>
+        Only important information will be backed up, avoiding huge datasets like wazuh logs.
+      </div>
+  
+      <form class="my-3" action="/dashboard/settings/backup/update" method="POST" onsubmit="return confirmChoice(event, 'Are you sure to update?')">
+  
+        <div class="mb-2 fw-bold fs-5">
+          <i class="fa fa-clock"></i>
+          <span>Scheduled Backup</span>
+        </div>
+  
+        <div class="d-flex gap-3">
+  
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Backup Frequency (in days)",
+            name: "frequency",
+            value: data.eitix.backup_frequency || 0,
+            required: true,
+            char_limit: [1, 99]
+          }) %>
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Backup Location",
+            name: "location",
+            value: "[EITIx] ./backups",
+            extra: "readonly=false"
+          }) %>
+  
+        </div>
+  
+        
+        <div class="mb-3">
+  
+          <button class="btn rounded-pill btn-primary me-2 px-4">
+            <i class="fa fa-rotate"></i>
+            Update Backup Plan
+          </button>
+  
+          <a href="/dashboard/settings/backup" 
+            class="btn rounded-pill btn-success"
+            onclick="initiateBackup()">
+            <i class="fa fa-arrow-down"></i>
+            Create a backup point
+          </a>
+  
+        </div>
+  
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="col-12">
+  <div class="col-md-8 mx-auto">
+
+    <div class="col-md bg-white rounded shadow p-5">
+  
+      <div class="fs-4 fw-bold">EITIx Restore Options</div>
+      <div class="small">
+          Restore EITIx data from the backup files. You can also manually add backup folders into backup location in the server.
+      </div>
+  
+      <div id="restore-form" class="my-3 d-flex gap-3">
+  
+        <form class="col form-control py-2 d-flex flex-column gap-2" action="/dashboard/settings/restore" method="POST"
+        onsubmit="return confirmChoice(event, 'Are you sure to restore EITIx?')" style="height: 350px;">
+          <div class="mb-2 fw-bold d-flex align-items-center justify-content-between">
+            <div class="text-secondary">Select a backup</div>
+            <button type="button" class="btn rounded-pill ms-2 btn-sm btn-primary" 
+            onclick="loadBackupList('#backup-list')">
+            <i class="fa fa-rotate"></i>
+              Refresh list
+            </button>
+          </div>
+          <div id="backup-list" class="border-top border-bottom p-1 overflow-auto d-flex flex-column gap-2"
+              style="max-height: 30vh;">
+              <div class="spinner-grow text-primary text-center" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+          </div>
+          <button type="submit" class="btn rounded-pill btn-primary mt-auto">
+            <i class="fa fa-undo"></i>
+            Restore Backup
+          </button>
+        </form>
+  
+        <form class="col form-control py-2 d-flex flex-column gap-2" action="/dashboard/settings/restore/external" method="POST"
+        enctype="multipart/form-data"
+        onsubmit="return confirmChoice(event, 'Are you sure to restore EITIx from external file?')" >
+          <div class="fw-bold text-secondary">Upload a backup point to restore</div>
+          <div class="d-flex justify-content-center my-4">
+            <i class="fa fa-upload fa-3x text-success"></i>
+          </div>
+          <input type="file" name="backup_file" class="form-control rounded-pill form-control-sm mb-3" accept=".tar.gz" required>
+          <small class="text-danger">Only <strong>.tar.gz</strong> files are accepted.</small>
+          <div class="small text-secondary">Upload a backup file to restore. Please upload a valid gz file.</div>
+          <button type="submit" class="btn rounded-pill btn-success mt-auto" onclick="toggle('#restore-ex-icon', '#restore-ex-loading-icon')">
+            <i id="restore-ex-icon" class="fa fa-undo"></i>
+            <i id="restore-ex-loading-icon" class="d-none fa fa-spinner fa-spin ms-1"></i>          
+            Restore from Backup File
+          </button>
+        </form>
+  
+      </div>
+  
+    </div>
+  
+  </div>
+</div>
+
+<div class="col-12">
+  <div class="col-md-8 mx-auto">
+
+    <div class="col-md bg-white rounded shadow p-5">
+   
+      <div class="fs-4 fw-bold">EITIx Housekeeping</div>
+      <div class="small">
+          Periodically clean your old EITIx data. Measured in days.
+      </div>
+  
+      <form class="my-3" action="/dashboard/settings/data/retention/update" method="POST" onsubmit="return confirmChoice(event, 'Are you sure to update?')">
+  
+        <div class="d-flex gap-3">
+  
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Global Data Retention",
+            name: "retention",
+            type:"number",
+            value: data.eitix.retention || 30,
+            num_limit: [1, 90],
+            required: true
+          }) %>
+  
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Wazuh data storage",
+            name: "wlog_ret",
+            value: data.eitix.wlog_ret,
+            num_limit: [0, 90],
+            required: true
+          }) %>
+  
+          <%- include("../../components/form/input-box.ejs", {
+              label: "System logs storage",
+              name: "syslog_ret",
+              type:"number",
+              value: data.eitix.syslog_ret || 30,
+              num_limit: [1, 90],
+              required: true
+          }) %>
+          
+        </div>
+  
+        <button type="submit" class="btn rounded-pill btn-primary my-2">
+          <i class="fa fa-rotate"></i>
+          Update Housekeeping Preferences
+        </button>
+  
+      </form>
+  
+    </div>
+  
+  </div>
+</div>
+
+<script>
+
+  loadBackupList('#backup-list');
+
+  function initiateBackup() {
+
+    toast("Backup initiated successfully", "EITIx will notify you when the backup is done", 1);
+    
+  }
+
+  function loadBackupList(selector) {
+
+    fetchDynamicData({
+        container: "#restore-form",
+        url: "/dashboard/settings/backup/list"
+    }, (data) => {
+
+        $(selector).html(data);
+
+    })
+      
+  }
+
+</script>

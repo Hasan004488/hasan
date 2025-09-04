@@ -1,0 +1,143 @@
+<style>
+  .report-btn {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #dee2e6;
+    color: var(--bs-secondary);
+  }
+</style>
+
+<div class="col-12">
+  <div class="d-md-flex gap-3">
+
+    <div id="report-list" class="fade-in col-md-10 mt-3 mx-auto p-4 bg-light rounded shadow">
+      <h1 class="fs-4 fw-bold">Generate a Detailed Report</h1>
+      <div class="mb-2">
+        Select a report you want to export report. It'll be exported into one <strong>pdf</strong> file
+      </div>
+      <label class="mb-2 fw-bold text-primary">Select a Report</label>
+      <div id="reports-container" class="row g-3 p-3">
+
+        <% data.forEach(report => { %>
+
+          <div class="col-md-4 pe-2">
+            <button class="d-flex gap-3 report-btn bg-light rounded text-start p-3" onclick="loadReport(this, '<%= report.sid %>')">
+              <div>
+                <i class="fa-solid fa-file-csv fs-1 mb-2"></i>
+              </div>
+               <strong>
+                 <%= report?.title %>
+               </strong>
+             </button>
+          </div>
+
+        <% }) %>
+
+      </div>
+    </div>
+    <div id="edit-report" class="fade-in d-none p-4 col-md-8 mt-5  mx-auto bg-light rounded shadow">
+
+      <div class="py-3">
+        <div class="alert alert-info mb-0">
+          Please wait while the report is being processed...
+        </div>
+      </div>
+
+    </div>
+
+    <div class="d-none">
+      <%- include('../../../components/logs-filter', {
+        filters: false, identifiers, len: 0, editable: true
+      }) %>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+  const container = document.getElementById("reports-container");
+  const report_list = document.getElementById("report-list");
+  const edit_container = document.getElementById("edit-report");
+
+  function toggleEditor() {
+
+    report_list.classList.toggle("d-none");
+    edit_container.classList.toggle("d-none");
+
+  }
+
+  function loadReport(elem, sid) {
+
+    toggleEditor();
+
+    fetchDynamicData({
+        container: edit_container,
+        url: "/dashboard/reports/edit-report?sid=" + sid
+    }, (data) => {
+
+        edit_container.innerHTML = data;
+
+    })
+
+  }
+
+  function changeRange() {
+
+    const input_range = document.getElementById("input-range");
+    const input_from = document.getElementById("input-from");
+    const input_to = document.getElementById("input-to");
+
+    input_to.value = htmlToday();
+
+    if (input_range.value === "7") {
+
+      input_from.value = htmlToday(-7);
+
+    } else if (input_range.value === "30") {
+
+      input_from.value = htmlToday(-30);
+
+    } else if (input_range.value === "90") {
+
+      input_from.value = htmlToday(-90);
+
+    } else {
+
+      input_from.value = htmlToday();
+
+    }
+
+  }
+
+  function validateRange() {
+
+    const input_from = document.getElementById("input-from");
+    const input_to = document.getElementById("input-to");
+
+    const from_date = new Date(input_from.value);
+    const to_date = new Date(input_to.value);
+
+    if (from_date > to_date) {
+
+      input_from.value = "";
+      toast("Invalid Range", "You've selected an invalid range", 3);
+
+    }
+
+  }
+
+  function submitDetailedReport(form) {
+
+    const loading_stat = $("#data-loading");
+    const id = "#detailed-report-form";
+
+    toast("Report is in queue", "You'll be notified when your report is ready to download", 2);
+
+    toggleEditor();
+    
+    submitForm(id, (filepath) => {});
+
+  }
+
+</script>

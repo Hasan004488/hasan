@@ -1,0 +1,70 @@
+<style>
+  .profile-image-wrapper {
+    width: 250px;
+    height: 250px;
+    overflow: hidden;
+    margin: auto;
+    text-align: center;
+  }
+
+  .profile-image-wrapper img {
+    width: 80%;
+  }
+</style>
+
+<div class="col-md-6 mt-5">
+  <div class="bg-light rounded shadow p-5">
+    <div class="mb-3">
+      <h4 class="fw-bold">New EITIx Role</h4>
+      <div class="text-muted small">Roles help to group users with similar permissions.</div>
+    </div>
+    <form id="create-role-form" action="/dashboard/roles/create" method="POST"
+      onsubmit="return confirmChoice(event, 'Are you ready to create a role?')">
+        <div class="pb-3 pe-2">
+
+          <div class="d-flex gap-3">
+            <%- include("form/input-box.ejs", { label: "Role Name" , name: "name" , placeholder: "Ex: Moderator, Manager" ,
+          char_limit: [0, 255], required: true, }) %>
+          </div>
+          
+          <div class="input-group-text rounded-top">Permissions</div>
+          <div class="p-2 permission-switches form-control rounded-bottom overflow-auto max-smaller">
+  
+            <% access_list.forEach(list=> { %>
+  
+              <% if (!list.protected) { %>
+  
+                <div class="p-2">
+                  <div class="form-check form-switch d-flex align-items-center">
+                    <label class="form-check-label w-100 ms-3 clickable">
+                      <input name="permissions" value="<%= list.access %>" class="form-check-input" type="checkbox"
+                        data-toggle="switchbutton">
+                      <div class="fw-bold">
+                        EITIx.<span class="text-primary">
+                          <%= list.access %>
+                        </span>
+                        <% if (list.risk==true) { %>
+                          <i class="fa fa-exclamation-triangle text-danger" title="Risky Permission"></i>
+                          <% } %>
+                      </div>
+                      <%= list.control %>
+                    </label>
+                  </div>
+                </div>
+  
+                <% } %>
+  
+                  <% }) %>
+  
+          </div>
+        </div>
+
+        <div class="text-end my-3">
+          <button type="submit" class="btn btn-primary rounded-pill px-4">
+            <i class="fa fa-add"></i>
+            Create New Role
+          </button>
+        </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,22 @@
+<% data.forEach(backup => { %>
+
+  <div class="text-secondary input-group-text d-flex justify-content-between">
+    <label class="clickable" title="<%=backup%>">
+      <input type="radio" name="backup_name" value="<%= backup %>">
+      <i class="fa fa-database ms-1"></i>
+      <strong class="px-1"><%= locals.format.truncateText(backup, 20) %></strong>
+    </label>
+    <div>
+      <a href="/dashboard/settings/backup/download/<%= backup %>" target="_blank" class="btn btn-light rounded-circle">
+        <i class="fa fa-download text-success"></i>
+      </a>
+    </div>
+  </div>
+ 
+<% }) %>
+
+<% if (data.length < 1) { %>
+
+  <span>No backups found. Please make one!</span>
+ 
+<% } %>

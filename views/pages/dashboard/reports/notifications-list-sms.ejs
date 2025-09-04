@@ -1,0 +1,55 @@
+<div class="col-12">
+  <div class="d-md-flex gap-2">
+    <div class="bg-white d-flex align-items-center justify-content-between w-100 rounded shadow p-3 border-start border-2 border-primary">
+      <div>
+        <div class="border-bottom">Sent today</div>
+        <div class="fw-bold fs-1 text-primary">
+          <span><%= counts.sent_daily || "0" %></span>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white d-flex align-items-center justify-content-between w-100 rounded shadow p-3 border-start border-2 border-primary">
+      <div>
+        <div class="border-bottom">Sent this week</div>
+        <div class="fw-bold fs-1 text-primary"><%= counts.sent_weekly || "0" %></div>
+      </div>
+    </div>
+    <div class="bg-white d-flex align-items-center justify-content-between w-100 rounded shadow p-3 border-start border-2 border-primary">
+      <div>
+        <div class="border-bottom">Sent this month</div>
+        <div class="fw-bold fs-1 text-primary"><%= counts.sent_monthly || "0" %></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-12">
+  <div class="p-4 bg-light rounded shadow">
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h4 class="fw-bold">
+        SMS Reports
+      </h4>
+      <div class="d-flex gap-2">
+        <%- include('components/search-control-buttons') %>
+      </div>
+    </div>
+
+    <%- include("components/body/search-data.ejs", {
+      options: [
+        { name: "Source", property: "source" },
+        { name: "Message ID", property: "message_id" },
+        { name: "Status", property: "status" },
+        { name: "Receiver", property: "receiver" },
+      ],
+      total_text: "Total sms reports:"
+    }) %>
+
+    <%- include("components/body/data-table.ejs") %>
+
+  </div>
+</div>
+
+<script>
+  loadData(true, true);
+</script>

@@ -1,0 +1,15 @@
+<%
+const input_label = typeof label !== "undefined" ? label : "Input label";
+const input_help = typeof help !== "undefined" ? help : "";
+%>
+<div class="form-group w-100 my-1 mb-3">
+  <label class="mb-2 fw-bold text-primary">
+    <% if (input_help) { %>
+      <i class="fa fa-circle-info" title="<%= input_help %>"></i>
+    <% } %>
+    <%- input_label %>
+  </label>
+  <div class="d-flex align-items-center position-relative">
+    <%- include("single-input-box") %>
+  </div>
+</div>

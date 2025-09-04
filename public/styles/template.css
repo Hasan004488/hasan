@@ -1,0 +1,265 @@
+
+/* These styles should be unique and should not effect any other parts of the app */
+
+.email-body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333333;
+    display: flex;
+    justify-content: center;
+}
+
+.mail-container {
+    margin: auto;
+}
+
+.mail-btn {
+    border-radius: 4px;
+}
+
+p {
+    text-align: justify;
+    margin: 0.2rem;
+}
+
+.mail-btn {
+    display: inline-block;
+    padding: .5rem 1rem;
+    border: 2px solid #d75e21;
+    color: #461700;
+    text-decoration: none;
+    margin-top: .5rem;
+}
+
+.mail-btn:hover {
+    background-color: rgb(238, 238, 238);
+}
+
+.t-primary {
+    color: #d75e21;
+    font-weight: 700
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.w-half {
+    width: 60%;
+}
+
+.bb {
+    border-bottom: 1px solid #ca815c
+}
+
+.py {
+    padding: 6px 0
+}
+
+.me {
+    margin-right: 1rem
+}
+
+.res {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.res-rev {
+    display: block;
+    gap: 0.5rem;
+}
+
+@media screen and (max-width: 768px) {
+    .res {
+        display: block;
+    }
+
+    .res-rev {
+        display: flex;
+    }
+
+    .w-half {
+        width: 100%;
+    }
+    h1 {
+        font-size: 1.2rem;
+    }
+    h2, h3 {
+        font-size: 1rem;
+    }
+}
+
+
+/* Ticket Summary */
+.ticket-summary {
+    background-color: #f8f8f8;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 8px;
+}
+
+.ticket-summary h2 {
+    margin-bottom: 10px;
+    color: #ff6600;
+}
+
+.ticket-summary table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ticket-summary td {
+    padding: 5px 0;
+}
+
+.ticket-summary td strong {
+    color: #444444;
+}
+
+.cta-button {
+    text-align: center;
+    margin: 25px 0;
+}
+
+.cta-button a {
+    display: inline-block;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(90deg, #f9751d, #f38a44);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.cta-button a:hover {
+    background: linear-gradient(90deg, #f56b1b, #f46219);
+    /* Apply hover effect to the link itself */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 8px 15px;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+/* Content Section */
+.content {
+    padding: 30px;
+    line-height: 1.6;
+    font-size: 14px;
+    color: #333333;
+}
+
+.content .highlight {
+    color: #f9751d;
+    font-weight: bold;
+}
+
+.center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px;
+}
+
+.template-container {
+    max-width: 600px;
+    background-color: #ffffff;
+    margin: 30px auto;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 50px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 768px) {
+    .template-container {
+        margin: 0;
+        border-radius: 0;
+    }
+}
+
+.content p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+.details {
+    margin: 20px 30px;
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    padding-left: 15px;
+    background: #f9f9f9;
+}
+.details h2 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #ff6600;
+}
+.details table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.details td {
+    padding: 5px 0;
+}
+.details td strong {
+    color: #444444;
+}
+.button {
+    text-align: center;
+    margin: 25px 0;
+}
+.button a {
+    display: inline-block;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(90deg, #f9751d, #f38a44);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+.button a:hover {
+    background: linear-gradient(90deg, #f56b1b, #f46219);
+}
+
+.footer {
+    text-align: center;
+    font-size: small;
+    color: #b3b3b3;
+    padding: 30px;
+    padding-bottom: 40px;
+    background-color: #242424;
+    border-top: 1px solid #e0e0e0;
+}
+.footer a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.template-hero-section {
+    padding: 30px;
+    background: url('https://eaglesidea.com/images/hero-bg.jpg') no-repeat;
+    color: white;
+}
+
+.text-center {
+    text-align: end;
+}
+
+h1, h2, h3 {
+    color: inherit;
+    margin: 0.5rem 0;
+}

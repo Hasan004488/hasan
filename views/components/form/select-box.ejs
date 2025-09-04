@@ -1,0 +1,33 @@
+<%
+const data = {
+  id: typeof id !== "undefined" ? id : "",
+  label: typeof label !== "undefined" ? label : "Input label",
+  name: typeof name !== "undefined" ? name : "",
+  options: typeof options !== "undefined" ? options : [],
+  selected: typeof selected !== "undefined" ? selected : "",
+  required: typeof required !== "undefined" ? required : false,
+  disabled: typeof disabled !== "undefined" ? disabled : false,
+  truncate: typeof truncate !== "undefined" ? truncate : 30,
+  event: typeof event !== "undefined" ? event : ""
+};
+%>
+
+<div class="form-group w-100 my-1 mb-3">
+  <label class="mb-2 fw-bold text-primary"><%- data.label %></label>
+  <select 
+    <%= data.id ? `id=${data.id}` : "" %>
+    name="<%- data.name %>"
+    <%= data.event %>
+    class="form-select w-100 rounded-pill fw-bold text-secondary"
+    <%= data.disabled ? "disabled" : "" %>
+    <%= data.required ? "required" : "" %>>
+    <% data.options.forEach(option => { %>
+      <option 
+        value="<%= option.value %>" 
+        <%= option.value === data.selected ? "selected" : "" %>
+        title="<%= option.option %>">
+        <%= option.option.length > data.truncate ? option.option.substring(0, (data.truncate - 3)) + '...' : option.option %>
+      </option>
+    <% }) %>
+  </select>
+</div>

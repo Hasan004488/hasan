@@ -1,0 +1,180 @@
+<form action="/dashboard/assets/add" method="POST" onsubmit="return addAsset(this)">
+
+    <div class="mb-3 fw-bold fs-5">Monitoring Type</div>
+
+    <div class="d-flex justify-content-center fs-6 gap-4 col-md-10 mx-auto text-center mb-3">
+      <label class="form-check form-check-inline clickable-h rounded border border-2 p-3">
+        <input class="form-check-input" type="radio" name="type" id="tcp" value="tcp" checked>
+        <div class="form-check-label" for="tcp">
+          <i class="fas fa-network-wired mb-2"></i>
+          <i class="fas fa-signal mb-2"></i>
+          <div class="fw-bold text-nowrap">
+            TCP Based
+          </div>
+        </div>
+      </label>
+      <label class="form-check form-check-inline clickable-h rounded border border-2 p-3">
+        <input class="form-check-input" type="radio" name="type" id="icmp" value="icmp">
+        <div class="form-check-label" for="icmp">
+          <i class="fas fa-broadcast-tower mb-2"></i>
+          <i class="fas fa-wave-square mb-2"></i>
+          <div class="fw-bold text-nowrap">
+            ICMP (Ping) Based
+          </div>
+        </div>
+      </label>
+    </div>
+
+    <div class="mb-3 fw-bold fs-5">Asset Information</div>
+
+    <div class="d-flex gap-2">
+      <%- include("../components/form/input-box.ejs", {
+        label: "IP Address",
+        name: "ip",
+        placeholder: "ex: 8.8.8.8",
+        char_limit: [1, 50],
+        required: true,
+        extra: "pattern=^((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$"
+      }) %>
+
+    <%- include("../components/form/input-box.ejs", {
+        label: "TCP Port",
+        name: "port",
+        placeholder: "ex: 8080",
+        type: "number",
+        num_limit: [0, 70000],
+        required: true
+      }) %>
+
+    <%- include("../components/form/input-box.ejs", {
+        label: "Timeout (In ms)",
+        type: "number",
+        name: "timeout",
+        placeholder: "timeout in miliseconds",
+        num_limit: [1, 30000],
+        required: true
+    }) %>
+    </div>
+
+    <div class="d-flex gap-2">
+      <%- include("../components/form/input-box.ejs", {
+        label: "Host name",
+        name: "host",
+        placeholder: "asset or service host Name",
+        char_limit: [1, 255],
+        required: true
+      }) %>
+      <%- include("../components/form/select-box.ejs", {
+        label: "Operating System",
+        name: "os",
+        required: true,
+        options: [
+          {
+            value: "linux",
+            option: "Linux"
+          },
+          {
+            value: "windows",
+            option: "Windows"
+          },
+          {
+            value: "freebsd",
+            option: "FreeBSD"
+          }
+        ]
+      }) %>
+
+    <%- include("../components/form/select-box.ejs", {
+        label: "Location",
+        name: "location",
+        required: true,
+        options: [
+          {
+            value: "on-prem",
+            option: "On Premises"
+          },
+          {
+            value: "remote",
+            option: "Remote"
+          },
+          {
+            value: "hybrid",
+            option: "Hybrid"
+          },
+        ]
+      }) %>
+    </div>
+
+    <div class="d-flex gap-2">
+    <%- include("../components/form/select-box.ejs", {
+        label: "Type",
+        name: "type",
+        required: true,
+        options: [
+          {
+            value: "server",
+            option: "Server"
+          },
+          {
+            value: "router",
+            option: "Router"
+          },
+          {
+            value: "switch",
+            option: "Switch"
+          },
+          {
+            value: "firewall",
+            option: "Firewall"
+          },
+        ]
+      }) %>
+
+    <%- include("../components/form/select-box.ejs", {
+        label: "Visibility",
+        name: "visibility",
+        required:true,
+        options: [
+          {
+            value: "local",
+            option: "Local"
+          },
+          {
+            value: "cloud",
+            option: "Cloud"
+          },
+          {
+            value: "both",
+            option: "Both"
+          }
+        ]
+      }) %>
+
+    <%- include("../components/form/select-box.ejs", {
+        label: "Tracking",
+        name: "tracking",
+        required:true,
+        options: [
+          {
+            value: "on",
+            option: "ON"
+          },
+          {
+            value: "off",
+            option: "OFF"
+          }
+          
+        ]
+      }) %>
+    </div>
+
+    <div class="text-end mt-3">
+        <button id="add-btn" class="btn rounded-pill btn-primary px-4" type="submit">
+            Add Asset 
+            <span class="px-2 rounded bg-light text-secondary ms-2">
+                <%= maxAsset %>
+            </span>
+        </button>
+    </div>
+
+</form>

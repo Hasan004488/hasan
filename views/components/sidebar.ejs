@@ -1,0 +1,648 @@
+<%
+let nest = typeof track !='undefined' ? track : "";
+%>
+
+<div id="sidebar" class="text-white shadow overflow-auto d-flex flex-column gap-2 p-3">
+
+  <div class="logo d-flex justify-content-between align-items-start">
+    <a href="/">
+      <img src="/images/eitix-text-logo-white.png" alt="EITIx Text Logo Dark" height="25" />
+      <div class="small py-1">
+        v<%= locals.version %> - <%= locals.role === "Super Admin" ? "Admin" : locals.role %>
+      </div>
+    </a>
+    <button class="btn d-xl-none" onclick="toggleSidebar()">
+      <i class="fa fa-close text-primary fs-5"></i>
+    </button>
+  </div>
+
+  <div id="sidebar-panel" class="accordion d-grid gap-2 overflow-auto">
+
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Dashboard",
+        icon: "fa-solid fa-house me-2",
+        name: "Dashboard",
+        url: "/dashboard",
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Attack-Surface",
+        icon: "fa fa-th-list me-2",
+        name: "Attack Surface",
+        items: [
+          {
+            id: "regular-events",
+            url: "/dashboard/surface/events/regular",
+            icon: "fa-solid fa-paper-plane me-2",
+            name: "Regular Events",
+          },
+          {
+            id: "playbook-events",
+            url: "/dashboard/surface/events/playbook",
+            icon: "fa-solid fa-filter me-2",
+            name: "Playbook Events",
+          },
+          {
+            id: "surface-configuration",
+            url: "/dashboard/surface/configuration",
+            icon: "fa-solid fa-gears me-2",
+            name: "Configuration",
+            permission: "control",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Wazuh-Logs",
+        icon: "fa fa-w me-2",
+        name: "Wazuh Logs",
+        url: "/dashboard/wazuh/logs",
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "AI-analysis",
+        icon: "fa-solid fa-robot me-2",
+        name: "AI Analysis",
+        url: "/dashboard/ai",
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Darkweb",
+        icon: "fa fa-spider",
+        name: "Darkweb",
+        items: [
+          {
+            id: "Add-darkweb-organization",
+            url: "/dashboard/darkweb#Add-darkweb-organization#Darkweb",
+            icon: "fas fa-add",
+            name: "Add Organization",
+          },
+          {
+            id: "Monitor-darkweb",
+            url: "/dashboard/darkweb/details#Darkweb",
+            icon: "fas fa-triangle-exclamation",
+            name: "Monitor Darkweb",
+          }
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "System-Vulnerabilities",
+        icon: "fa fa-skull-crossbones me-2",
+        name: "Vulnerabilities",
+        url: "/dashboard/vulnerabilities/tab/daily",
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Risks-Monitor",
+        icon: "fa-solid fa-triangle-exclamation me-2",
+        name: "Risks Monitor",
+        url: "/dashboard/risks/monitor?tab=weekly",
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Tickets",
+        icon: "fa fa-ticket me-2",
+        name: "Tickets",
+        items: [
+          {
+            id: "Create-a-Ticket",
+            url: "/dashboard/tickets/create",
+            icon: "fa fa-plus me-2",
+            name: "New Ticket",
+            permission: "createTicket",
+          },
+          {
+            id: "open-tickets",
+            url: "/dashboard/tickets?tab=open",
+            icon: "fa fa-folder-open me-2",
+            name: "Open",
+          },
+          {
+            id: "closed-tickets",
+            url: "/dashboard/tickets?tab=closed",
+            icon: "fa fa-folder me-2",
+            name: "Closed",
+          },
+          {
+            id: "expired-tickets",
+            url: "/dashboard/tickets?tab=expired",
+            icon: "fa fa-hourglass-end me-2",
+            name: "Expired",
+          },
+          {
+            id: "all-tickets",
+            url: "/dashboard/tickets?tab=all",
+            icon: "fa-solid fa-circle-check me-2",
+            name: "All",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Playbook",
+        icon: "fa-solid fa-filter me-2",
+        name: "Playbook",
+        permission: "report",
+        items: [
+          {
+            id: "Create-playbook",
+            url: "/dashboard/playbook/create#Playbook",
+            icon: "fa fa-add me-2",
+            name: "New Playbook",
+          },
+          {
+            id: "All-playbook",
+            url: "/dashboard/playbook#Playbook",
+            icon: "fa fa-list me-2",
+            name: "Playbook List",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Workflow",
+        icon: "fa-solid fa-tools me-2",
+        name: "Workflow",
+        permission: "manageUser",
+        items: [
+          {
+            id: "Create-workflow",
+            url: "/dashboard/workflow/create#Workflow",
+            icon: "fa fa-add me-2",
+            name: "New Workflow",
+          },
+          {
+            id: "All-workflow",
+            url: "/dashboard/Workflow#Workflow",
+            icon: "fa fa-list me-2",
+            name: "Workflow List",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "IoC",
+        icon: "fa-solid fa-shield-virus me-2",
+        name: "IoC",
+        items: [
+          {
+            id: "IoC-Monitor",
+            url: "/dashboard/ioc/tab/daily#IoC",
+            icon: "fa-solid fa-desktop me-2",
+            name: "Monitor IoCs",
+          },
+          {
+            id: "IoC-Management",
+            url: "/dashboard/ioc/manage#IoC",
+            icon: "fa-solid fa-circle-check me-2",
+            name: "Management"
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "UBA",
+        icon: "fa fa-user-shield",
+        name: "UBA",
+        items: [
+          /* {
+            id: "Monitor-UBA",
+            url: "/dashboard/uba#Monitor-UBA",
+            icon: "fa-solid fa-desktop",
+            name: "Monitor UBA",
+          }, */
+          {
+            id: "UBA-alerts",
+            url: "/dashboard/uba/alerts#UBA-alerts",
+            icon: "fas fa-triangle-exclamation",
+            name: "UBA Alerts",
+          },
+          {
+            id: "User-Activity",
+            url: "/dashboard/uba/activity#User-Activity",
+            icon: "fas fa-file-lines",
+            name: "User Activity",
+          },
+          {
+            id: "UBA-users",
+            url: "/dashboard/uba/list/users#UBA-users",
+            icon: "fa-solid fa-users",
+            name: "UBA Users",
+            permission: "control",
+          },
+          {
+            id: "UBA-patterns",
+            url: "/dashboard/uba/list/patterns#UBA-patterns",
+            icon: "fa-solid fa-list",
+            name: "Pattern List",
+            permission: "admin",
+          },
+          {
+            id: "UBA-actions",
+            url: "/dashboard/uba/list/actions#UBA-actions",
+            icon: "fa-solid fa-list",
+            name: "Action List",
+            permission: "admin",
+          },
+          /* {
+            id: "UBA-trend",
+            url: "/dashboard/uba/users",
+            icon: "fa-solid fa-chart-line",
+            name: "Trend Model",
+            permission: "admin",
+          },
+          {
+            id: "UBA-behavior",
+            url: "/dashboard/uba/users",
+            icon: "fa-solid fa-chart-pie",
+            name: "Behavior Model",
+            permission: "admin",
+          }, */
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "FIM",
+        icon: "fa fa-file-circle-exclamation me-2",
+        name: "FIM",
+        items: [
+          {
+            id: "FIM-Graph",
+            url: "/dashboard/fim/monitor?timing=weekly#FIM",
+            icon: "fa-solid fa-desktop me-2",
+            name: "Monitor FIM",
+          },
+          {
+            id: "FIM-Change-History",
+            url: "/dashboard/fim/changes/tab/daily#FIM",
+            icon: "fa-solid fa-record-vinyl me-2",
+            name: "FIM History",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Assets",
+        icon: "fa fa-th-list me-2",
+        name: "Assets",
+        items: [
+          {
+            id: "Create-asset",
+            url: "/dashboard/assets/create#Assets",
+            icon: "fa-solid fa-plus me-2",
+            name: "New Asset",
+            permission: "createAsset",
+          },
+          {
+            id: "Assets-Monitor",
+            url: "/dashboard/assets/monitor?tab=weekly#Assets",
+            icon: "fa-solid fa-desktop me-2",
+            name: "Monitor",
+          },
+          {
+            id: "Assets-Management",
+            url: "/dashboard/assets/manage#Assets",
+            icon: "fa-solid fa-hourglass-half me-2",
+            name: "Management",
+            permission: "modifyAsset",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Notifications",
+        icon: "fas fa-bell me-2",
+        name: "Notifications",
+        items: [
+          {
+            id: "monitor-notifications",
+            url: "/dashboard/notifications/monitor#Notifications",
+            icon: "fa-solid fa-desktop me-2",
+            name: "Monitor",
+          },
+          {
+            id: "email-notifications",
+            url: "/dashboard/notifications/list/email#Notifications",
+            icon: "fa-solid fa-envelope me-2",
+            name: "Email History",
+          },
+          {
+            id: "sms-notifications",
+            url: "/dashboard/notifications/list/sms#Notifications",
+            icon: "fa-solid fa-comment-sms me-2",
+            name: "SMS History",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Reports",
+        icon: "fa fa-newspaper me-2",
+        name: "Reporting",
+        permission: "report",
+        items: [
+          {
+            id: "Report-Schedule",
+            url: "/dashboard/reports/schedule#Reports",
+            icon: "fa-solid fa-calendar-check me-2",
+            name: "Schedule Report",
+          },
+          {
+            id: "quick-reports",
+            url: "/dashboard/reports/quick#Reports",
+            icon: "fa-solid fa-file-pdf me-2",
+            name: "Quick Report",
+          },
+          {
+            id: "detailed-reports",
+            url: "/dashboard/reports/detailed#Reports",
+            icon: "fa-solid fa-laptop-file me-2",
+            name: "Detailed Report",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Templates",
+        icon: "fa fa-table-columns me-2",
+        name: "Templates",
+        permission: "control",
+        items: [
+          {
+            id: "schedule-templates",
+            url: "/dashboard/templates/manage/schedule#Templates",
+            icon: "fa-solid fa-calendar-check me-2",
+            name: "Schedule",
+          },
+          {
+            id: "ticket-templates",
+            url: "/dashboard/templates/manage/ticket#Templates",
+            icon: "fa fa-ticket me-2 me-2",
+            name: "Ticket",
+          },
+          {
+            id: "playbook-templates",
+            url: "/dashboard/templates/manage/playbook#Templates",
+            icon: "fa-solid fa-filter me-2",
+            name: "Playbook",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Users",
+        icon: "fa fa-user me-2",
+        name: "Users",
+        permission: "manageUser",
+        items: [
+          {
+            id: "User-Management",
+            url: "/dashboard/users/manage#Users",
+            icon: "fa-solid fa-people-roof me-2",
+            name: "Manage Users",
+          },
+          {
+            id: "Role-Management",
+            url: "/dashboard/users/manage/roles#Users",
+            icon: "fa-solid fa-person-circle-check me-2",
+            name: "Manage Roles",
+            permission: "manageRole",
+          },
+          {
+            id: "Create-User",
+            url: "/dashboard/users/create#Users",
+            icon: "fa-solid fa-user-plus me-2",
+            name: "New User",
+            permission: "createUser",
+          },
+          {
+            id: "Create-Role",
+            url: "/dashboard/roles/create#Users",
+            icon: "fa-solid fa-square-plus me-2",
+            name: "New Role",
+            permission: "createRole",
+          },
+        ]
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Logs",
+        icon: "fa-solid fa-file-lines me-2",
+        name: "System Logs",
+        url: "/dashboard/eitix/logs#Logs",
+        permission: "syslog",
+      }
+    }) %>
+
+    <%- include("components/side-btn-group", {
+      data: {
+        id: "Settings",
+        icon: "fa fa-gear me-2",
+        name: "Settings",
+        items: [
+          {
+            id: "Dashboard-Control",
+            url: "/dashboard/settings/control#Settings",
+            icon: "fa-solid fa-gears me-2",
+            name: "Configure",
+            permission: "control",
+          },
+          {
+            id: "Tenant-Configure",
+            url: "/dashboard/settings/tenant#Settings",
+            icon: "fa-solid fa-bezier-curve me-2",
+            name: "Tenant Configure",
+            permission: "admin",
+          },
+          {
+            id: "Worker-Control",
+            url: "/dashboard/settings/worker#Worker-Control",
+            icon: "fa-solid fa-users me-2",
+            name: "Worker Control",
+            permission: "admin",
+          },
+          {
+            id: "API-Control",
+            url: "/dashboard/settings/api#Settings",
+            icon: "fa-solid fa-shield-halved me-2",
+            name: "API Control",
+            permission: "admin",
+          },
+          {
+            id: "Message-Queue",
+            url: "/dashboard/settings/queue#Settings",
+            icon: "fas fa-list-check me-2",
+            name: "Message Queue",
+            permission: "admin",
+          },
+          {
+            id: "Data-Management",
+            url: "/dashboard/settings/data#Settings",
+            icon: "fa-solid fa-database me-2",
+            name: "EITIx Housekeeping",
+            permission: "control",
+          },
+          {
+            id: "Wazuh-Management",
+            url: "/dashboard/settings/wazuh#Settings",
+            icon: "fa-solid fa-database me-2",
+            name: "Wazuh Housekeeping",
+            permission: "control",
+          },
+          {
+            id: "Your-Organization",
+            url: "/dashboard/settings/organization#Settings",
+            icon: "fa-solid fa-industry me-2",
+            name: "Your Organization",
+            permission: "control",
+          },
+          {
+            id: "Your-Profile",
+            url: "/dashboard/settings/profile#Settings",
+            icon: "fa-solid fa-user me-2",
+            name: "Your Profile",
+          },
+          {
+            id: "Change-Password",
+            url: "/dashboard/settings/password#Settings",
+            icon: "fa-solid fa-lock me-2",
+            name: "Change Password",
+          },
+        ]
+      }
+    }) %>
+
+    <div class="py-3"></div>
+
+  </div>
+
+  <div class="w-100 tiny text-muted p-3">
+    <div>License validity <span id="expiry_date">perpetual</span></div>
+    <footer>Copyright © <%= new Date().getFullYear() %> EaglesIdea</footer>
+  </div>
+
+</div>
+
+<script>
+  let side_btns = document.querySelectorAll(".sidebar-btn");
+
+  $(".accordion-header").on("click", function() {
+
+    if (!$(this).hasClass("collapsed")) {
+
+      let parent_height = $("#sidebar-panel").height();
+      let element_offset = $(this).offset().top;
+
+      if (element_offset > parent_height - 100) {
+
+        setTimeout(() => {
+          $('#sidebar-panel').animate({
+            scrollTop: $('#sidebar-panel').scrollTop() + 200
+          }, 300);
+        }, 100);
+
+      }
+
+    }
+
+  });
+
+  side_btns.forEach(btn => {
+
+    btn.addEventListener("click", (e) => {
+
+      e.preventDefault();
+
+      $(".side-btn").removeClass("active");
+      btn.classList.add("active");
+
+      $('.accordion-collapse').collapse('hide');
+
+      setTimeout(() => {
+
+        let href = btn.getAttribute("href");
+
+        if (href) {
+          window.location.href = href;
+        }
+
+      }, 150);
+
+    });
+
+  });
+
+  $("#<%=title%>").addClass("active");
+  if (document.getElementById("<%= nest %>")) {
+    $("#<%= nest %>").addClass("active");
+  }
+
+  $.ajax({
+    url: '/content/expiry',
+    type: 'GET',
+    success: (time) => {
+
+      $("#expiry_date").text(time);
+
+    }
+  });
+
+  function loadPage(url) {
+
+    let container = $("#load-componenets");
+
+    container.html(TEMPLATE.loader);
+
+    $.get(url, (data) => {
+
+        container.html(data);
+
+      })
+      .fail((xhr, status, err) => {
+
+        console.log(err);
+        toast("Page loading failed", err.toString(), 1);
+
+      })
+
+  }
+</script>

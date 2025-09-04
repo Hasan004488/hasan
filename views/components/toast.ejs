@@ -1,0 +1,104 @@
+<% if (locals.messages) { %>
+    <div id="toast-container" class="toast-container bottom-0 end-0 m-5">
+
+    <div id="d-toast-1" class="toast slide-in-bottom bg-white d-none" role="alert" aria-atomic="true"></div>
+    <div id="d-toast-2" class="toast slide-in-bottom bg-white d-none" role="alert" aria-atomic="true"></div>
+    <div id="d-toast-3" class="toast slide-in-bottom bg-white d-none" role="alert" aria-atomic="true"></div>
+    <div id="d-toast-4" class="toast slide-in-bottom bg-white d-none" role="alert" aria-atomic="true"></div>
+    <div id="d-toast-5" class="toast slide-in-bottom bg-white d-none" role="alert" aria-atomic="true"></div>
+
+    <% if (locals.messages.info) { %>
+        <% locals.messages.info.forEach(toast => { %>
+            <div id="primary-toast" class="toast bg-white" role="alert" aria-atomic="true">
+                <div class="toast-header bg-primary text-white">
+                    <strong class="d-flex align-items-center gap-2 me-auto">
+                    <i class="fa fa-circle-info"></i> 
+                        Hey!
+                    </strong>
+                    <small class="text-nowrap">Just Now!</small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <%- toast %>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+    <% if (locals.messages.success) { %>
+        <% locals.messages.success.forEach(toast => { %>
+        <div class="toast bg-white" role="alert" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <strong class="d-flex align-items-center gap-2 me-auto">
+                <i class="fa fa-check"></i> 
+                    Done!
+                </strong>
+                <small class="text-nowrap">Just Now!</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <%- toast %>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+    <% if (locals.messages.error) { %>
+        <% locals.messages.error.forEach(toast => { %>
+        <div class="toast bg-white" role="alert" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="d-flex align-items-center gap-2 me-auto">
+                <i class="fa fa-skull-crossbones"></i>
+                    Oops!
+                </strong>
+                <small class="text-nowrap">Just Now!</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <%- toast %>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+    <% if (locals.messages.warning) { %>
+        <% locals.messages.warning.forEach(toast => { %>
+        <div class="toast bg-white" role="alert" aria-atomic="true">
+            <div class="toast-header bg-dark text-white">
+                <strong class="d-flex align-items-center gap-2 me-auto">
+                <i class="fa fa-triangle-exclamation"></i> 
+                    Hold up!
+                </strong>
+                <small class="text-nowrap">Just Now!</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <%- toast %>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+    </div>
+<% } %>
+
+
+<script>
+
+    function toast(title = "Hey", msg = "No messages to show", slot = 1) {
+
+        let toast_content = `
+            <div class="toast-header bg-primary text-white">
+                    <strong class="d-flex align-items-center gap-2 me-auto">
+                        <i class="fa fa-circle-info"></i> 
+                        ${title}
+                    </strong>
+                    <small class="text-nowrap">Just Now!</small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            <div class="toast-body">${msg}</div>
+        `;
+
+        $('#d-toast-' + slot).removeClass("d-none");
+        $('#d-toast-' + slot).html(toast_content);
+        $('#d-toast-' + slot).toast('show');
+        
+    }
+    
+</script>

@@ -1,0 +1,52 @@
+<% if (typeof no_layout !="undefined") { %>
+
+    <!-- dynamic component -->
+    <%- body %>
+
+<% } else { %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/bootstrap.css">
+    <link rel="stylesheet" href="/styles/animation.css">
+    <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="/styles/fontawesome.all.min.css">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    
+    <title>
+        <%= typeof title !="undefined" ? locals.format.title(title) : "Dashboard" %>
+        - EITIx SOAR
+     </title>
+    
+    <meta name="description" content="<%= (typeof description != "undefined" ? description : "Client Dashboard for EITIx Web App. Eaglesidea Thread Intelligence Project.") %>">
+    <meta property="og:type" content="analysis" />
+</head>
+<body>
+
+    <!-- JQuery -->
+    <script src="/scripts/jquery.js"></script>
+    <script src="/scripts/utility.js"></script>
+
+    <!-- flash toast messaes -->
+    <%- include("components/toast") %>
+    
+    <!-- |||||||||||||| -->
+    <div class="text-secondary">
+        <%- body %>
+    </div>
+    <!-- |||||||||||||| -->
+
+
+    <!-- Others -->
+    <script src="/scripts/bootstrap.js"></script>
+    <script src="/scripts/script.js"></script>
+    <script src="/scripts/fontawesome.all.min.js"></script>
+
+</body>
+</html>
+
+<% } %>

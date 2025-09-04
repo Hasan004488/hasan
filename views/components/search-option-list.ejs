@@ -1,0 +1,5 @@
+<% options.forEach(option => { %>
+    <option value="<%= option.property %>" class="<%= option.hide ? "d-none" : "" %>">
+        <%= option.name %>
+    </option>
+<% }) %>

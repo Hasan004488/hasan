@@ -1,0 +1,93 @@
+<% let { attacksc, all_templates, templates } = data %>
+
+<div class="col-md-6 mt-5 mx-auto">
+
+  <div class="col-md bg-white rounded shadow p-5">
+
+    <div class="fs-4 fw-bold">Configure Attack Surface and Risks</div>
+    <div class="small">
+        Configure Attack surface parameters. Any kind of change in here will reflect across the server to all the users of this instance of EITIx.
+    </div>
+
+    <form class="my-3" action="/dashboard/surface/configuration/update" method="POST" onsubmit="return ascValidation(event, this);">
+
+        <div class="fw-bold my-3 text-primary">Event Detection Range</div>
+
+        <div class="input-group mb-3">
+            <label class="input-group-text rounded-pill-l">Low Range</label>
+            <input name="" type="number" class="form-control disabled" placeholder="Below Low Range" disabled >
+            <input name="low_range" type="number" class="form-control rounded-pill-r" 
+                   value="<%= attacksc.low_range ?? 5 %>" min="1" max="100" required>
+        </div>
+        
+        <div class="input-group mb-3">
+            <label class="input-group-text rounded-pill-l">Medium Range</label>
+            <input name="" type="number" class="form-control disabled" placeholder="Avobe Low Range"disabled>
+            <input name="medium_range" type="number" class="form-control rounded-pill-r" 
+            value="<%= attacksc.medium_range ?? 9 %>" 
+            min="1" max="100" required>
+        </div>
+        <div class="input-group mb-3">
+            <label class="input-group-text rounded-pill-l">High Range</label>
+            <input name="" type="number" class="form-control disabled rounded-pill-r" placeholder="Avobe Medium Range" min="1" max="100" 
+            disabled >
+        </div>
+
+        <div class="fw-bold my-3 text-primary">Risk Severity Factor</div>
+
+        <div class="input-group mb-3">
+            <label class="input-group-text rounded-pill-l col-10">Low Event Risk Severity Factor</label>
+            <input name="low_factor" type="number" class="form-control rounded-pill-r" 
+            value="<%= attacksc.low_factor ?? 1 %>" min="1" max="10" required>
+        </div>
+        <div class="input-group mb-3">
+            <label class="input-group-text rounded-pill-l col-10">Medium Event Risk Severity Factor</label>
+            <input name="medium_factor" type="number" class="form-control rounded-pill-r" 
+            value="<%= attacksc.medium_factor ?? 3 %>" min="1" max="10" required>
+        </div>
+        <div class="input-group mb-3">
+            <label class="input-group-text rounded-pill-l col-10">High Event Risk Severity Factor</label>
+            <input name="high_factor" type="number" class="form-control rounded-pill-r" 
+            value="<%= attacksc.high_factor ?? 5 %>" min="1" max="10" required>
+        </div>
+
+        <div class="my-2">
+            <button class="btn btn-primary rounded-pill" type="submit">
+              <i class="fa fa-arrow-up"></i>
+              Update Configuration
+            </button>
+        </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script>
+
+    async function ascValidation(event, form) {
+
+        event.preventDefault();
+
+        let data = new FormData(form);
+        let low_range = data.get('low_range');
+        let med_range = data.get('medium_range');
+
+        if (low_range > med_range - 2) {
+
+            toast("Invalid Inputs", "We can't update detection range like this.", 1);
+            return false;
+
+        } else {
+
+            let confirm = await customConfirm("Are you sure to update parameters?");
+            
+            if (confirm) return form.submit();
+            else return false;
+
+        }
+
+    }
+
+</script>

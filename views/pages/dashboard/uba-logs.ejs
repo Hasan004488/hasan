@@ -1,0 +1,37 @@
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow position-relative">
+
+        <div class="d-flex justify-content-between">
+            <div class="btn-group toggle-block">
+                <button class="btn btn-tab px-5" onclick="changeURL('/dashboard/uba/tab/daily/data')">
+                    <i class="fa fa-clock area_blocked"></i>
+                    Daily UBA
+                </button>
+                <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/uba/tab/archive/data')">
+                    <i class="fa fa-box area_blocked"></i>
+                    Archive UBA
+                </button>
+            </div>
+            <div class="d-flex gap-2">
+                <%- include('components/search-control-buttons') %>
+            </div>
+        </div>
+
+        <%- include("components/body/search-data.ejs", {
+        options: [
+            { name: "UBA ID", property: "id" },
+            { name: "Agent ID", property: "agent" }
+        ],
+        total_text: "Total UBA Logs found:"
+        }) %>
+
+        <%- include("components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<script>
+
+    loadData(true, true);
+
+</script>

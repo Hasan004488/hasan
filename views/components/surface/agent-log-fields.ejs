@@ -1,0 +1,74 @@
+<details>
+  <summary class="clickable border-bottom border-2 py-2 mb-2 w-100">
+    <strong>
+      Extra log fields for <span class="text-primary">New</span> Agent
+    </strong>
+    <button class="btn rounded-pill btn-sm btn-primary area_blocked">
+      <i class="fa fa-pen"></i>
+    </button>
+    <button class="btn rounded-pill btn-sm btn-danger">
+      <i class="fa fa-trash"></i>
+    </button>
+  </summary>
+  <div class="form-control d-flex gap-3 p-3 mb-3 overflow-auto" style="max-height: 50vh">
+    <div>
+      <%- include("../form/input-box.ejs", {
+        label: "Agent ID",
+        name: "agent",
+        placeholder: "Write Agent ID",
+        char_limit: [0, 25],
+        required: true
+      }) %>
+      <button class="btn btn-outline-danger rounded-pill">
+        <i class="fa fa-trash"></i>
+        Delete
+      </button>
+    </div>
+    <div class="w-100">
+      <div class="form-group w-100 my-1 mb-2">
+        <label class="fw-bold text-primary">Log Fields</label>
+      </div>
+      <div id="field-box" class="d-grid gap-3">
+        <div class="d-flex gap-3">
+          <%- include("../form/single-input-box.ejs", {
+            name: "fields",
+            char_limit: [0, 255],
+            placeholder: "Write log path here",
+            required: true
+          }) %>
+          <button class="btn btn-outline-danger rounded-pill">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="my-3 mb-3 d-flex">
+        <button type="button" class="btn btn-secondary rounded-pill" type="submit"
+          onclick="addLogField()"
+        >
+          <i class="fa fa-add"></i>
+          Add Field
+        </button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<script>
+
+function addLogField() {
+
+  $("#field-box").append(`
+    <div class="d-flex gap-3">
+      <input 
+        class="form-control w-100 rounded-pill"
+        placeholder="Write log path here" required
+      />
+      <button class="btn btn-outline-danger rounded-pill">
+        <i class="fa fa-trash"></i>
+      </button>
+    </div>
+  `);
+
+}
+
+</script>

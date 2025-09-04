@@ -1,0 +1,90 @@
+<%
+let features = [
+  {
+    icon: '✨',
+    text: 'Enhanced AI engine for better attack vectors detection',
+  },
+  {
+    icon: '💻',
+    text: 'Wazuh Housekeeping integration to keep the system clean',
+  },
+  {
+    icon: '💸',
+    text: 'Syslog cleaning to avoid data retention issues',
+  },
+  {
+    icon: '💥',
+    text: 'Database optimization for improved performance',
+  },
+]
+let bugs = [
+  'Fixed empty SMS body in SMS alerts',
+  'Internal timezone issue to ensure proper timezones in the frontend',
+  'Fixed issue with backend worker tools',
+]
+%>
+<div class="d-flex gap-4">
+  <div class="col border-2 border-end pe-4">
+    <h3 class="fw-bold">EITIx <%= locals.version %> Enterprise Edition:</h3>
+    <div>
+      <p>
+        EITIx is a powerful threat optimization tool that can also provide advanced security
+        orchestration and automation capabilities. Developed by EaglesIdea, EITIx is currently available
+        in its <%= locals.version %> version, and is designed to help users achieve maximum performance and
+        efficiency in high-performance computing environments while also enhancing their security
+        posture.
+      </p>
+      <p>
+        EITIx is powered by advanced algorithms and machine learning techniques that allow it to
+        analyze and optimize threat usage in real-time. The tool provides users with detailed
+        performance metrics, allowing them to identify performance bottlenecks and optimize code to
+        achieve maximum efficiency. But beyond that, EITIx also has powerful security orchestration and
+        automation capabilities.
+      </p>
+      <p>
+        EITIx can be configured to automatically detect security incidents and respond to them in real-
+        time. This can include everything from detecting and mitigating DDoS attacks to responding to
+        potential malware infections. EITIx can also automate routine security tasks, freeing up security personnel to
+        focus
+        on more complex issues.
+      </p>
+      <p>
+        EaglesIdea, the company behind EITIx, has a strong focus on innovation and developing cutting-
+        edge software solutions. The company is committed to providing users with the best possible
+        software tools to help them achieve their goals.
+      </p>
+      <p>
+        If you are interested in learning more about EITIx's security orchestration and automation
+        capabilities, you can contact EaglesIdea at info@eaglesidea.com or visit their website at
+        www.eaglesidea.com. With its advanced algorithms, real-time performance metrics, and
+        powerful security orchestration and automation capabilities, EITIx is poised to become a leading
+        tool for enhancing both performance and security in high-performance computing environments.
+      </p>
+      <p>
+        Copyright © <%= new Date().getFullYear() %> EaglesIdea Ltd.
+      </p>
+    </div>
+  </div>
+  <div class="col">
+    <h3 class="mb-3 fw-bold">What's New in v<%= locals.version %>?</h3>
+    <h5 class="mb-0 fw-bold">Feature Updates</h5>
+    <ul class="list-unstyled d-flex flex-column gap-2 py-2">
+      <% for( let i = 0; i < features.length; i++ ) { %>
+      <li class="d-flex gap-1">
+        <span><%= features[i].icon %></span>
+        <span><%= features[i].text %></span>
+      </li>
+      <% } %>
+    </ul>
+    <hr>
+    <h5 class="mb-0 fw-bold">Bug Fixes</h5>
+    <ul class="list-unstyled d-flex flex-column gap-2 py-2">
+      <% for( let i = 0; i < bugs.length; i++ ) { %>
+      <li class="d-flex gap-1">
+        <span>🐛</span>
+        <span><%= bugs[i] %></span>
+      </li>
+      <% } %>
+    </ul>
+  </div>
+</div>

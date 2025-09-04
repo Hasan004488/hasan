@@ -1,0 +1,73 @@
+
+
+<div class="col-12">
+
+  <div class="bg-white rounded shadow p-4">
+
+    <div class="d-flex gap-3 justify-content-between">
+      <div>
+        <div class="fs-4 fw-bold">Worker Configuration</div>
+        <div class="small col-md-8 mb-2">
+          Control and monitor the behavior of EITIx workers. You can also update their active status.
+        </div>
+      </div>
+      <div>
+        <div class="d-flex gap-2">
+          <a href="/dashboard/settings/worker/restart" 
+            class="btn rounded-pill btn-warning me-2"
+            onclick="return confirmChoice(event, 'Are you sure to reset all the workers?')">
+            <i class="fa fa-triangle-exclamation"></i>
+            Reset All Workers
+          </a>
+          <a href="/dashboard/settings/server/restart" 
+            class="btn rounded-pill btn-danger"
+            onclick="return confirmChoice(event, 'Are you sure to restart the server? This will interrupt the server appearance.')">
+            <i class="fa fa-triangle-exclamation"></i>
+            Restart Server
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="worker-container" class="py-3 row gy-3">
+
+      <div class="d-flex justify-content-center align-items-center" style="display: none;">
+          <div class="spinner-grow text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+          </div>
+      </div>
+        
+    </form>
+
+  </div>
+    
+</div>
+
+<script>
+
+  loadDynamicData({
+      url: "/dashboard/settings/worker/status",
+      type: "GET"
+  }, (data) => {
+      if (data.trim() !== "<!-- dynamic component -->") {
+          $("#worker-container").html(data);
+      } else {
+          $("#worker-container").html(alert.danger("Internal server error detected."));
+      }
+  }, 10000); // 10 seconds
+
+  $.ajax({
+      url: '/content/validation',
+      type: 'GET',
+      success: (eitix) => {
+
+          if (eitix?.validated === false) {
+
+              $("#worker-control-area").addClass("area_disabled");
+
+          }
+
+      }
+  });
+
+</script>

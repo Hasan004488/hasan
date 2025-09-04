@@ -1,0 +1,121 @@
+<% data.forEach((data) => { %>
+  <tr class="py-3 slide-in-up">
+    <td>
+      <button class="btn btn-sm drop-btn rounded-pill icon-center icon2" onclick="
+      toggleDropData(this, '#dropdata-<%= data._id %>');" 
+      data-toggle="tooltip" title="Details">
+        <i class="fa fa-angle-right"></i>
+      </button>
+    </td>
+    <td class="">
+      <%= data.sid ?? "Unknown" %>
+    </td>
+    <td class="">
+      <%= data.title ?? "Unknown" %>
+    </td>
+    <td class="text-center">
+      <i class="fa fa-user me-1"></i>
+      <%= data.users?.length ?? "0" %>
+    </td>
+    <td class="text-center">
+      <i class="fa-solid fa-flag-checkered me-1"></i>
+      <%= data.phases ?? "0" %>
+    </td>
+    <td class="text-center">
+      <div class="d-flex justify-content-center gap-2">
+        <a class="badge btn btn-success rounded-pill icon-center" href="/dashboard/workflow/update?id=<%= data._id %>">
+          <i class="fa fa-pen me-1"></i>
+          Edit
+        </a>
+        <form class="" action="/dashboard/workflow/delete" method="POST" 
+          onsubmit="return confirmChoice(event, 'Are yoy sure to delete this workflow?')">
+          <div class="d-none">
+            <input type="text" name="id" value="<%= data._id %>">
+          </div>
+          <button type="submit" class="badge btn btn-danger rounded-pill icon2">
+            <i class="fa fa-trash"></i>
+          </button>
+        </form>
+      </div>
+    </td>
+  </tr>
+  <tr id="dropdata-<%= data._id %>" class="d-none">
+    <td colspan="<%= 7 %>" class="p-3 bg-light">
+      <div class="bg-white rounded p-3 text-secondary">
+
+        <div class="p-3">
+          <% let total_steps = parseInt(data?.phases); %>
+          <div class="d-flex flex-column flex-md-row gap-3 justify-content-around align-items-center">
+            <% for( let i = 0; i < total_steps; i++ ) { %>
+              <div class="small fw-bold" title="Phase <%= i + 1 %>">
+                <span class="bg-gray rounded-pill p-2"><%= data.interval?.[i] || '1' %>d</span>- 
+                <span class="bg-gray rounded-pill p-2"><%= data.interval_h?.[i] || '0' %>h</span>-
+                <span class="bg-gray rounded-pill p-2"><%= data.interval_m?.[i] || '0' %>m</span>
+                <i class="fa fa-arrow-right"></i>
+              </div>
+            <% } %>
+          </div>
+          <div class="phases" data-progress="1">
+            <div class="phases-bar"></div>
+            <% for( let i = 0; i < total_steps; i++ ) { %>
+                <div class="step" title="Phase <%= i + 1 %>">
+                    <%= i + 1 %>
+                </div>
+            <% } %>
+            <div class="step bg-light" title="Expiry">
+                <i class="fa fa-check text-secondary"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="py-1 px-3 d-flex justify-content-between border-2 border-bottom mb-3 fw-bold small">
+          <div class="col-4">
+              Selected User
+          </div>
+          <div class="col-4 text-center">
+              Escalation Phase
+          </div>
+          <div class="col-4 text-center">
+              Forward Status
+          </div>
+        </div>
+        <div class="d-flex flex-column gap-3 mb-3 overflow-auto" style="max-height: 30vh;">
+          <% data?.users?.forEach(user => { %>
+            <div class="py-2 px-3 border bg-hover rounded-3 d-flex justify-content-between align-items-center">
+              <div class="col-4 small d-flex gap-3 align-items-center">
+                  <div class="fs-3">
+                    <img src="/content/assets/images/<%= user.profile_image || 'user-profile.png  ' %>" alt="" class="profile_image" style="height: 2.3rem; width: 2.3rem;">
+                  </div>
+                  <div>
+                      <strong>
+                          <%= user.full_name || "This user does not exist." %>
+                      </strong>
+                      <div class="text-muted">
+                          <span class="badge bg-primary"><%= user.role %></span> |
+                          <%= user.sid %>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-4 text-center">
+                <span class="badge bg-success">
+                  <i class="fa-solid fa-flag me-1"></i>
+                  <%= user?.phase %>
+                </span>
+              </div>
+              <div class="col-4 text-center">
+                  <span class="badge bg-secondary">
+                    <i class="fa-solid fa-times me-1"></i>
+                    Non-forwardable
+                  </span>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+        <div class="d-flex justify-content-between">
+          <div><strong>Created:</strong> <%= data.date?.toLocaleString() ?? "unknown time" %></div>
+          <div><strong>Updated:</strong> <%= data.updated?.toLocaleString() ?? "unknown time" %></div>
+        </div>
+      </div>
+    </td>
+  </tr>
+<% }) %>

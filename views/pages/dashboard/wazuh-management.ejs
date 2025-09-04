@@ -1,0 +1,201 @@
+<%
+let kibana_exists = data.kibana_host && data.kibana_host !== "";
+let modify_permission = access("control", locals.permissions);
+%>
+<div class="col-12">
+  <div class="col-md-8 mx-auto mt-5">
+
+    <div class="col-md bg-white rounded shadow p-5">
+
+      <div class="mb-2">
+        <img src="/images/wazuh-logo.png" alt="" height="40">
+      </div>
+
+      <div class="fs-4 fw-bold">Wazuh Data Management</div>
+      <div class="small mb-3">
+        Wazuh data is important for tracking the past events and trends from your server logs. But it can also take up a lot of space. You can manage and clean your Wazuh data from here. You can schedule the auto delete feature to run at your preferred time.
+      </div>
+
+      <% if (!kibana_exists) { %>
+      <div class="alert alert-danger">
+        <i class="fa fa-info-circle"></i>
+        To use Wazuh cleaup feature, you need to have a Kibana instance running on the same host as the Wazuh instance.
+      </div>
+      <% } %>
+
+      <div class="<%= kibana_exists ? 'fade-in' : 'area_disabled' %>">
+
+        <div class="fw-bold text-primary mb-2">Wazuh Cleanup</div>
+
+        <div class="theme-table table-responsive-sm">
+          <table class="table table-normal">
+            <thead>
+              <tr>
+                <th>Server</th>
+                <th>Schedule Cleanup</th>
+                <th>Clean Logs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div>
+                    Wazuh 1 (Kibana)
+                  </div>
+                  <div class="small">
+                    IP: <%= data.kibana_host.slice(8, 21) %>
+                  </div>
+                </td>
+                <td>
+                  <div class="mb-2">
+                    <% if (data?.wazuh_cleanup === 'on') { %>
+
+                    <a href="/dashboard/settings/wazuh/cleanup?schedule=off" class="toggle-btn bg-primary" 
+                    onclick="return confirmChoice(event, 'Are you sure to turn auto cleanup off?')">
+                      ON
+                      <span class="bg-white inline-circle"></span>
+                    </a>
+
+                    <% } else { %>
+
+                    <a href="/dashboard/settings/wazuh/cleanup?schedule=on" class="toggle-btn bg-secondary" 
+                    onclick="return confirmChoice(event, 'Are you sure to turn auto cleanup on?')">
+                      <span class="bg-white inline-circle"></span>
+                      OFF
+                    </a>
+
+                    <% } %>
+                  </div>
+                  <div class="small">
+                    Last Cleaned: <br> 
+                    <%= data?.wazuh_last_cleanup?.toLocaleDateString() || 'Never' %>
+                  </div>
+                </td>
+                <td>
+                  <div class="small mb-1">Instant Cleanup Logs</div>
+                  <form action="/dashboard/settings/wazuh/clean" method="POST" onsubmit="return cleanWazuh(event, 'instant');">
+                    <div class="d-flex align-items-center gap-2">
+
+                      <label for="">Older than</label>
+
+                      <div class="form-group">
+                        <div class="d-flex align-items-center position-relative">
+                          <input class="form-control rounded-pill" name="wazuh_cleanup_days" type="text" placeholder="Enter number of days" value="365" minlength="1" maxlength="3" min="1" max="999" style="width: 60px;" required />
+                        </div>
+                      </div>
+
+                      <label for="">days</label>
+
+                      <button type="submit" class="btn rounded-pill btn-danger px-4 ms-auto">
+                        <i class="fa fa-trash"></i>
+                        Clean
+                      </button>
+
+                    </div>
+                  </form>
+                  <hr>
+                  <div class="small mb-1">
+                    Schedule Cleanup Logs
+                    <span title="It will clean after 12:00 AM every day" class="clickable">
+                      <i class="fa fa-circle-info text-muted cursor-help ms-1 small"></i>
+                    </span>
+                  </div>
+                  <form action="/dashboard/settings/data/retention/update" method="POST" onsubmit="return confirmChoice(event, 'Are you sure to update?')">
+                    <div class="d-flex align-items-center gap-2">
+
+                      <label class="text-nowrap">
+                        Older than
+                      </label>
+
+                      <div class="form-group">
+                        <div class="d-flex align-items-center position-relative">
+                          <input class="form-control rounded-pill" name="wazuh_cleanup_days" type="text" placeholder="Enter number of days" value="<%= data?.wazuh_cleanup_days || '365' %>" minlength="1" maxlength="3" min="1" max="999" style="width: 60px;" required />
+                        </div>
+                      </div>
+
+                      <div>days</div>
+
+                      <button type="submit" class="btn rounded-pill btn-primary px-4 ms-auto">
+                        <i class="fa fa-rotate"></i>
+                        Update
+                      </button>
+
+                    </div>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  async function cleanWazuh(event, type) {
+
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+
+    if (type === "instant") {
+
+      fetch("/dashboard/settings/wazuh/clean/size?days=" + formData.get("wazuh_cleanup_days"), {
+          method: 'GET'
+        })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+
+          const data_count = data.data?.count;
+
+          customConfirm("This will permanently delete " + data_count + " Wazuh logs, are you sure to proceed?").then(confirmed => {
+
+            if (confirmed) {
+
+              fetch("/dashboard/settings/wazuh/clean", {
+                  method: 'POST',
+                  body: new URLSearchParams(formData)
+                })
+                .then(response => {
+                  if (response.ok) {
+                    return response.json();
+                  }
+                  throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                  if (data.status === "success") {
+                    toast("Cleaup Success", "Wazuh logs successfully cleaned", 1);
+                  } else {
+                    toast("Failed to clean Wazuh logs", "There was an error cleaning Wazuh logs", 1);
+                  }
+                })
+                .catch(error => {
+                  toast("Internal Server Error", 'There was a problem with the fetch operation', 1);
+                });
+
+            }
+
+          });
+        })
+        .catch(error => {
+          toast("Internal Server Error", 'There was a problem with the fetch operation', 1);
+        });
+
+    } else {
+
+      toast("Failed to check Wazuh logs size", "There was an error cleaning Wazuh logs. Please try again.", 1);
+
+    }
+
+  }
+</script>

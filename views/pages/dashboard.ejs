@@ -1,0 +1,234 @@
+<link rel="stylesheet" href="/styles/dashboard.css">
+
+<div>
+  <div id="dashboard-con" class="row g-0">
+
+    <div id="sidebar-con" class="
+      col-10 col-md-3 col-xl-2 d-none d-xl-block
+    ">
+      <%- include("../components/sidebar.ejs", { active: title }) %>
+    </div>
+
+    <div id="dashboard-body" class="col">
+
+      <!-- Navbar Component  -->
+      <div class="sticky-top">
+        <%- include("../components/navbar.ejs", { title: title }) %>
+      </div>
+
+      <div id="board-componenets" 
+        class="p-2 justify-content-center pb-5 overflow-auto"
+      >
+
+        <% if (title !== "Dashboard") { %>
+         
+          <nav class="mb-3 slide-in-left" aria-label="breadcrumb">
+            <ol class="breadcrumb align-items-center mb-0 fw-bold">
+              <li class="breadcrumb-item a-gray slide-in-left delay-1">
+                <a href="/dashboard" class="reset-a">
+                  <i class="fa fa-home"></i>
+                  Dashboard
+                </a>
+              </li>
+              <li class="breadcrumb-item slide-in-left delay-3" aria-current="page">
+                <%= locals.format.title(title) %>
+              </li>
+            </ol>
+          </nav>
+
+        <% } %>
+
+        <% try { %>
+
+          <div id="load-componenets" class="row g-2 d-flex justify-content-center">
+            <%- include(`dashboard/${file}`) %>
+          </div>
+
+        <% } catch(err) { %>
+
+          <div class="pt-5 col-6">
+            <div class="text-center">
+              <img src="/images/ui-error.png" alt="server error page" class="py-3" height="200px">
+              <h1 class="">Page Broken!</h1>
+              We're sorry! This page UI seems broken here. This is an unexpected error that occured due to <br />
+            </div>
+            <hr>
+            <div class="rounded bg-dark text-danger">
+              <pre class="p-4"><%= err.message %></pre>
+            </div>
+          </div>
+
+        <% } %>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="popup" class="popup rounded-3 p-3 d-none col-12 col-md-6 col-lg-9 bg-white fade-in">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+      <div class="title h5 fw-bold text-primary">
+        Tile here
+      </div>
+      <button id="modal-close" class="btn rounded-pill" onclick="togglePopup(null, null, false)">
+        <i class="fa fa-close"></i>
+        Close
+      </button>
+    </div>
+    <div class="body p-3 overflow-auto" style="height: 70vh;">
+      <div class="spinner-grow text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup2" class="popup rounded-3 p-3 d-none col-12 col-md-6 col-lg-8 bg-white fade-in">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+      <div class="title h5 fw-bold text-primary">
+        Tile here
+      </div>
+      <button id="modal-close" class="btn rounded-pill" onclick="toggleSecondaryPopup(null, null, false)">
+        <i class="fa fa-close"></i>
+        Close
+      </button>
+    </div>
+    <div class="body p-3 overflow-auto" style="height: 70vh;">
+      <div class="spinner-grow text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="d-none w-100 h-100 position-fixed top-0 start-0 bg-dark bg-opacity-50">
+    <div class="popup bg-white fade-in rounded-3 w-100" style="max-width: 400px;">
+      <div class="text-center px-4 py-5">
+        <div class="mb-3">
+          <i class="fa fa-exclamation-circle text-primary fa-5x"></i>
+        </div>
+        <div id="confirmMessage" class="fs-4 mb-3">Are you sure to do this action?</div>
+        <button id="confirmNo" class="btn btn-secondary rounded-pill px-4 me-2">No</button>
+        <button id="confirmYes" class="btn btn-primary rounded-pill px-4">Yes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-modal" class="d-none w-100 h-100 position-fixed top-0 start-0 bg-dark bg-opacity-50" style="z-index: 1071;">
+    <div class="popup col-11 col-md-6 col-lg-4 bg-white fade-in rounded-3">
+      <div class="text-center px-4 py-5">
+        <div class="mb-3">
+          <i class="fa fa-exclamation-circle text-secondary fa-5x"></i>
+        </div>
+        <div class="popup-message fs-4 mb-1 fw-bold">This is the popup title</div>
+        <div class="popup-body mb-3">
+          Popup body goes here...
+        </div>
+        <button class="btn btn-secondary rounded-pill px-4 me-2" onclick="toggle('#popup-modal')">Okay</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="alert-box" class="d-none">
+    <div class="text-center">
+      <img src="/images/page-error.png" alt="error page" class="py-3" height="200px">
+      <div id="browser-logout" class="d-none">
+        <h1 class="text-secondary fw-bold">Login from a new browser!</h1>
+        <p class="text-secondary">You've been logged out of this session because you've logged in from another location. <br /> Please login again to continue using EITIx</p>
+      </div>
+      <div id="session-out" class="d-none">
+        <h1 class="text-secondary fw-bold">Your session has been expired!</h1>
+        <p class="text-secondary">Please login again to continue using EITIx</p>
+      </div>
+      <div id="force-logout" class="d-none">
+        <h1 class="text-secondary fw-bold">You've been logged out!</h1>
+        <p class="text-secondary">Admin has logged you out. Please login again to continue using EITIx</p>
+      </div>
+      <div>
+          <a href="/auth/login" class="btn btn-secondary rounded-pill px-5">
+              <span>Login back to EITIx</span>
+              <i class="fa fa-arrow-right"></i>
+          </a>
+      </div>
+    </div>
+  </div>
+
+  <div id="sticky-btn-container" class="position-fixed bottom-0 end-0 p-4 d-none">
+    <button onclick="hideGotoTop()" class="btn rounded-pill btn-secondary shadow">
+      <i class="fa fa-close"></i>
+    </button>
+    <button onclick="gotoTop()" class="btn rounded-pill btn-primary p-2 px-4 shadow">
+      Go To Top
+      <i class="fa fa-arrow-up"></i>
+    </button>
+  </div>
+
+</div>
+
+<script>
+
+  function gotoTop() {
+
+    dashboard_body.animate({ scrollTop: 0 }, '300');
+
+  }
+
+  function hideGotoTop() {
+
+    sticky_btn_container.addClass('d-none');
+
+  }
+
+  const dashboard_body = $("#dashboard-body");
+  const sticky_btn_container = $('#sticky-btn-container');
+
+  $(dashboard_body).scroll(function () {
+
+    if ($(dashboard_body).scrollTop() > 300) {
+
+      sticky_btn_container.removeClass('d-none');
+
+    } else {
+
+      sticky_btn_container.addClass('d-none');
+
+    }
+
+  });
+
+  let session_check = setInterval(() => {
+
+    $.ajax({
+
+      url: `/session?active=${document.hasFocus() ? "true" : "false"}`,
+      type: 'GET',
+
+      success: (data) => {
+
+        /* DEBUG: console.log(data); */
+
+        if (data.status === "session-out") {
+
+          toggleSection('#alert-box', 'yes');
+          toggleSection('#session-out', 'yes');
+          clearInterval(session_check);
+          
+        } else if (data.status === "force-logout") {
+
+          toggleSection('#alert-box', 'yes');
+          toggleSection('#force-logout', 'yes');
+          clearInterval(session_check);
+          
+        } else if (data.status === "browser-logout") {
+          
+          toggleSection('#alert-box', 'yes');
+          toggleSection('#browser-logout', 'yes');
+          clearInterval(session_check);
+
+        }
+
+      }
+
+    });
+    
+  }, 6000); // 1 second
+
+
+</script>

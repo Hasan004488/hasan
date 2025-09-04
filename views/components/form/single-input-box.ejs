@@ -1,0 +1,28 @@
+<%
+const data = {
+  id: typeof id !== "undefined" ? id : null,
+  type: typeof type !== "undefined" ? type : "text",
+  name: typeof name !== "undefined" ? name : "",
+  value: typeof value !== "undefined" ? value : "",
+  placeholder: typeof placeholder !== "undefined" ? placeholder : "Write input here",
+  num_limit: typeof num_limit !== "undefined" ? num_limit : [],
+  char_limit: typeof char_limit !== "undefined" ? char_limit : [],
+  required: typeof required !== "undefined" ? required : false,
+  extra: typeof extra !== "undefined" ? extra : "",
+  style: typeof style !== "undefined" ? style : ""
+};
+%>
+<input
+  <%= data.id ? `id=${data.id}` : "" %>
+  class="form-control w-100 rounded-pill <%= data.style %>"
+  name="<%= data.name %>"
+  type="<%= data.type %>"
+  placeholder="<%= data.placeholder %>"
+  value="<%= data.value %>"
+  minlength="<%= data.char_limit[0] || 1 %>"
+  maxlength="<%= data.char_limit[1] || 255 %>"
+  min="<%= data.num_limit[0] || 0 %>"
+  max="<%= data.num_limit[1] || 999 %>"
+  <%= data.required ? "required" : "" %>
+  <%= data.extra %>
+/>

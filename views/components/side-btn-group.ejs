@@ -1,0 +1,36 @@
+<% 
+const { id, url, icon, name, items, target } = data;
+let nest = typeof track !='undefined' ? track : "";
+%>
+<% if (items) { %>
+    <% if(data?.permission ? access(data.permission, locals.permissions) : true) { %>
+    <div class="accordion-item d-grid">
+        <button id="<%= id %>" class="d-flex align-items-center accordion-header sidebar-btn side-btn"
+            data-bs-toggle="collapse" data-bs-target="#<%= id %>-Panel" aria-expanded="false">
+            <i class="<%= icon %> me-2"></i>
+            <%= name %>
+            <i class="fa fa-caret-down ms-auto"></i>
+        </button>
+        <div id="<%= id %>-Panel" class="accordion-collapse collapse
+        <%= nest == id ? "show" : "" %>
+            " aria-labelledby="<%= id %>">
+            <div class="accordion-body d-grid gap-2 py-2 px-1 rounded-bottom">
+                <% items.forEach(function(item) { if(item.permission ? access(item.permission, locals.permissions) : true) { %>
+                    <a id="<%= item.id %>" href="<%= item.url %>" class="side-btn sub-side-btn">
+                        <i class="<%= item.icon %> me-2"></i>
+                        <%= item.name %>
+                    </a>
+                <% }}); %>
+            </div>
+        </div>
+    </div>
+    <% } %>
+<% } else { %>
+    <% if(data?.permission ? access(data.permission, locals.permissions) : true) { %>
+        <a id="<%= id %>" href="<%= url %>" target="<%= target %>" class="sidebar-btn side-btn">
+            <i class="<%= icon %> me-2"></i>
+            <%= name %>
+        </a>
+    <% } %>
+<% } %>
+

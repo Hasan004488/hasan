@@ -1,0 +1,39 @@
+<% 
+    /* ejs code */
+%>
+
+<link rel="stylesheet" href="/styles/phases.css">
+
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow">
+
+        <div class="d-flex justify-content-between">
+            <div class="fs-4 fw-bold">Workflow List</div>
+            <div class="d-flex gap-2">
+                <a class="btn rounded-pill btn-primary" href="/dashboard/workflow/create#Workflow">
+                    <i class="fa fa-add"></i>
+                    Create New Workflow
+                </a>
+                <%- include('components/search-control-buttons') %>
+            </div>
+        </div>
+
+        <%- include("../../components/body/search-data.ejs", {
+          options: [
+            { name: "Workflow Name", property: "title" },
+            { name: "Workflow ID", property: "sid" },
+          ]
+        }) %>
+  
+        <%- include("../../components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<div class="py-4"></div>
+
+<script>
+
+    loadData(true, true);
+
+</script>

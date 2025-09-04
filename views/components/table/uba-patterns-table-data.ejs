@@ -1,0 +1,111 @@
+<% if (page < 2) { %>
+  <tr id="trow-create-new" class="d-none slide-in-up">
+    <td><span class="py-1 px-2 rounded bg-secondary text-white">Automatic</span></td>
+    <td class="fw-bold">
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 raw-input" name="pattern" type="text" value="" placeholder="ex: 1,2,3">
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 raw-input" name="implication" type="text" value="" placeholder="Implication Details">
+      </div>
+    </td>
+    <td class="text-center">
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 raw-input text-center" name="priority" type="number" value="" placeholder="Priority">
+      </div>
+    </td>
+    <td class="text-center">
+      <div class="d-flex align-items-center gap-1">
+        <select class="w-100 text-center raw-input" name="risk">
+          <option value="Low" selected>Low Risk</option>
+          <option value="Medium">Medium Risk</option>
+          <option value="High">High Risk</option>
+          <option value="Critical">Critical Risk</option>
+        </select>
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center justify-content-center gap-1">
+  
+        <button class="btn rounded-pill btn-sm btn-success px-2" data-toggle="tooltip"
+          title="Edit this pattern" onclick="updateRow(this, '#trow-create-new', 'Are you sure to create a new pattern?', '/dashboard/uba/patterns/create', null, 'POST');">
+          <span class="spinner-border d-none spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <i class="fa fa-plus"></i>
+          Create
+        </button>
+        <button class="btn rounded-pill btn-sm btn-secondary"data-toggle="tooltip"
+          title="Edit This pattern" onclick="toggle('#trow-create-new');">
+          <i class="fa fa-times"></i>
+          Cancel
+        </button>
+  
+      </div>
+    </td>
+  </tr>   
+<% } %>
+<% data.forEach((pattern, idx) => { %>
+  <tr id="trow-<%= pattern._id %>" class="slide-in-up">
+    <td><%= pattern?.sid?.toUpperCase() ?? "none" %></td>
+    <td class="fw-bold">
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 clean-input fw-bold" readonly name="pattern" type="text" value="<%= pattern?.pattern ?? "unknown" %>">
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 clean-input" readonly name="implication" type="text" value="<%= pattern.implication ?? "unknown" %>">
+      </div>
+    </td>
+    <td class="text-center">
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 text-center clean-input" readonly name="priority" type="number" value="<%= pattern.priority ?? "0" %>">
+      </div>
+    </td>
+    <td class="text-center">
+      <input class="w-100 text-center clean-input" readonly name="risk" type="text" value="<%= pattern.risk ?? "None" %>">
+    </td>
+    <td>
+      <div class="d-flex align-items-center justify-content-center gap-1">
+
+        <% if(access("control", locals.permissions)) { %>
+
+          <button class="btn rounded-pill btn-sm btn-success px-2" data-toggle="tooltip" 
+            title="Edit This pattern" onclick="editRow(this, '#trow-<%= pattern._id %>');">
+            <i class="fa fa-pen"></i>
+            Edit
+          </button>
+          <button class="d-none btn rounded-pill btn-sm btn-success px-2" data-toggle="tooltip" 
+            title="Edit This pattern" onclick="updateRow(this, '#trow-<%= pattern._id %>', 'Are you sure to update this pattern?', '/dashboard/uba/patterns/update', '<%= pattern._id %>', 'POST');">
+            <span class="spinner-border d-none spinner-border-sm me-2" role="status" aria-hidden="true"></span>            
+            <i class="fa fa-check"></i>
+            Update
+          </button>
+          <button class="d-none btn rounded-pill btn-sm btn-secondary" data-toggle="tooltip" 
+            title="Edit This pattern" onclick="editRow(this, '#trow-<%= pattern._id %>');">
+            <i class="fa fa-times"></i>
+            Cancel
+          </button>
+          <button class="btn rounded-pill btn-sm btn-danger" 
+              onclick="updateData('Are sure to permanently delete this pattern?', '/dashboard/uba/patterns/delete', '<%= pattern._id %>');" title="Permanently delete this pattern">
+              <i class="fa fa-trash"></i>
+          </button>
+
+        <% } else { %>
+
+          <button href="#" class="btn rounded-pill btn-sm btn-secondary area-muted px-2"
+            title="You don't have permission to edit pattern">
+            <i class="fa fa-pen"></i>
+            Edit
+          </button>
+          <a href="#" class="btn rounded-pill btn-sm btn-danger area-muted" data-toggle="tooltip" title="You don't have permission to delete pattern">
+            <i class="fa fa-trash"></i>
+          </a>
+
+        <% } %>
+
+      </div>
+    </td>
+  </tr>
+<% }) %>

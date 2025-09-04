@@ -1,0 +1,196 @@
+<style>
+
+  .profile-image-wrapper {
+    width: 250px;
+    height: 250px;
+    overflow: hidden;
+    margin: auto;
+    text-align: center;
+  }
+
+  .profile-image-wrapper img {
+    width: 80%;
+  }
+  
+</style>
+
+<div class="col-md-6 mt-5">
+  <div class="bg-white rounded shadow p-5">
+    <form action="/dashboard/users/edit" method="POST"
+      onsubmit="return confirmChoice(event, 'Are you ready to update information?')" enctype="multipart/form-data" class="mb-3">
+
+      <div class="d-flex gap-3">
+        <div class="position-relative mb-2">
+          <img id="user-profile-image" src="/content/assets/images/<%= data.profile_image || 'user-profile.png' %>" alt="profile image" class="profile_image" style="height: 5rem; width: 5rem;">
+          <div class="position-absolute bottom-0 end-0">
+            <input id="profile_image_input" name="profile_image" type="file" class="d-none" accept=".png, .jpg, .jpeg, .gif" onchange="previewImage(this, '#user-profile-image')">
+            <button class="btn btn-sm btn-success rounded-circle" type="button" onclick="document.getElementById('profile_image_input').click()">
+              <i class="fa fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="">
+          <h4 class="fw-bold mb-1"><%= data.full_name %></h4>
+          <div class="mx-auto mb-1">
+            <label class="text-primary fw-bold">
+              <span><%= data.role %></span>
+            </label>
+            -
+            <label class="">
+              <span><%= data.email %></span>
+            </label>
+          </div>
+          <div class="text-muted small">These information are only visible to your organization where the eitix server is being hosted.</div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="pb-3 pe-2 overflow-auto" style="height: 40vh">
+
+        <div class="d-flex gap-3">
+
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Full Name",
+            name: "full_name",
+            placeholder: "Enter fullname",
+            value: data.full_name,
+            char_limit: [0, 255],
+            required: true
+          }) %>
+    
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Phone Number",
+            name: "phone_number",
+            placeholder: "Enter user phone number",
+            value: data.phone_number,
+            char_limit: [0, 255],
+            required: true
+          }) %>
+
+        </div>
+
+        <div class="d-flex gap-3">
+
+          <%- include("../../components/form/select-box.ejs", {
+            label: "Role",
+            name: "role",
+            selected: data.role,
+            options: roles.map(role => ({ value: role.name, option: role.name })),
+            required: true
+          }) %>
+    
+          <%- include("../../components/form/select-box.ejs", {
+            label: "Gender",
+            name: "gender",
+            selected: String(data.gender),
+            options: [
+              {
+                value: "male",
+                option: "Male"
+              },
+              {
+                value: "female",
+                option: "Female"
+              },
+              {
+                value: "other",
+                option: "Other"
+              }
+            ]
+          }) %>
+
+        </div>
+  
+        <%- include("../../components/form/input-box.ejs", {
+          label: "National ID",
+          name: "national_id",
+          placeholder: "Enter user National ID",
+          value: data.national_id , 
+          char_limit: [0, 255]
+        }) %>
+
+        <div class="d-flex gap-3">
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Job Title",
+            name: "job_title",
+            placeholder: "Enter user Job Title",
+            value: data.job_title  , 
+            char_limit: [0, 255]
+          }) %>
+          
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Employment",
+            name: "employment",
+            placeholder: "Enter user employment status",
+            value: data.employment, 
+            char_limit: [0, 255]
+          }) %>
+        </div>
+
+        <div class="d-flex gap-3">
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Department",
+            name: "department",
+            placeholder: "Enter user department",
+            value: data.department, 
+            char_limit: [0, 255]
+          }) %>
+          
+          <%- include("../../components/form/input-box.ejs", {
+            label: "Organization",
+            name: "organization",
+            placeholder: "Enter user organization",
+            value: data.organization, 
+            char_limit: [0, 255]
+          }) %>
+        </div>
+  
+        <div class="d-none">
+          <input type="text" name="id" value="<%= data.sid %>">
+        </div>
+
+      </div>
+
+      <div class="d-flex gap-2 align-items-center justify-content-end py-3">
+        <a href="#change-password" class="fw-bold text-muted">Change Password?</a>
+        <button type="submit" class="btn btn-primary rounded-pill px-4">
+          <i class="fa fa-arrow-up"></i>
+          Update Information
+        </button>
+      </div>
+
+    </form>
+
+    <details id="change-password" open>
+      <summary class="text-primary fw-bold mb-3">Change Their Password</summary>
+      <form action="/auth/password/update/user" class="rounded border border-dashed border-2 border-danger p-3" method="POST" onsubmit="return confirmChoice(event, 'Are you ready to update the password?')">
+  
+        <div class="d-none">
+          <input type="text" name="id" value="<%= data.sid %>">
+        </div>
+  
+        <%- include("../../components/form/input-box.ejs", {
+          label: "Password",
+          name: "password",
+          type: "password",
+          placeholder: "Enter new password",
+          char_limit: [8, 255],
+          required: true
+        }) %>
+  
+        <div class="text-center my-3">
+          <button type="submit" class="btn btn-danger rounded-pill px-4">
+            <i class="fa fa-key"></i>
+            Change Password
+          </button>
+        </div>
+  
+      </form>
+    </details>
+
+
+  </div>
+</div>
+
+<script src="/scripts/user-creation.js"></script>

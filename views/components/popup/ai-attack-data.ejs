@@ -1,0 +1,75 @@
+<% 
+let map = attack?.ai_map || {};
+%>
+<div class="d-flex align-items-center gap-3 mb-4">
+  <div>
+    <div id="donut-chart" class="d-none donut-chart scale-in-center">
+      <div class="donut-text">
+        <span class="fw-bold text-danger" title="Impact of the attack">
+          <i class="fa fa-skull"></i>
+          <span><%= map.Impact || "None" %></span>
+        </span>
+        <span title="affected percentage">
+          <%= attack.affected || "0" %>%
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex gap-4">
+    <div class="">
+      <h4>Attack Vector:
+        <span class="text-danger">
+          <%= map.Title || "None" %>
+        </span>
+      </h4>
+      <div class="small mb-1">Total Logs: <%= locals.format.number(attack.count) || "None" %>
+      </div>
+      <div>
+        <%= map.Risk_Description || "None" %>
+      </div>
+    </div>
+    <div class="">
+      <h5>Mitre Attack</h5>
+      <% mitre_attacks = map.MITRE_ATTACK_Technique ? Object.values(map.MITRE_ATTACK_Technique) : [] %>
+      <% mitre_attacks.forEach(attack => { %>
+      <span class="badge bg-secondary"><%= attack || "None" %></span> <br>
+      <% }) %>
+    </div>
+  </div>
+</div>
+<table class="table small table-hover text-secondary w-100">
+
+  <thead class="thead text-nowrap">
+    <tr>
+      <th scope="col">Timestamp</th>
+      <th scope="col">Log ID</th>
+      <th scope="col">Description</th>
+      <th scope="col" class="text-center">Level</th>
+      <th scope="col" class="text-center">Agent ID</th>
+      <th scope="col">Agent IP</th>
+    </tr>
+  </thead>
+  <tbody id="ai-popup-data">
+    <tr>
+      <td colspan="6" class="text-center">
+        <div class="spinner-grow text-primary text-center" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="text-center">
+  <button id="popup-data-loader" class="btn btn-secondary-outline rounded-pill" onclick="loadPopupData('<%= attack.name %>', true)">
+    <i class="fa fa-arrow-down"></i>
+    Load More
+  </button>
+</div>
+<script>
+  window.eitix_affected_value = "<%= attack.affected %>";
+  document.querySelector("#donut-chart").classList.remove("d-none");
+  document.querySelector("#donut-chart").style.background = `conic-gradient(
+      var(--bs-danger) 0% ${eitix_affected_value}%,
+      #e0e0e0 ${eitix_affected_value}% 100%
+  )`;
+</script>

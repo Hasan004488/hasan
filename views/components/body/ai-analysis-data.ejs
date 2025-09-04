@@ -1,0 +1,15 @@
+<% 
+
+let colors = ["danger", "primary", "secondary"]
+
+%>
+<% data.forEach((attack, idx) => { %>
+
+<div class="col d-flex flex-column align-items-center">
+  <div class="fs-5 text-<%=colors[idx]%>"><%=attack.affected%>%</div>
+  <div class="w-100 bg-<%=colors[idx]%>-light py-4 rounded">
+    <%= locals.format.truncateText(locals.format.title(attack.name), 5) %>
+  </div>
+</div>
+
+<% }) %>

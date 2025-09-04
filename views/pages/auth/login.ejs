@@ -1,0 +1,176 @@
+<style>
+
+   body {
+      background-color: black;
+   }
+
+   .bg-dark-glass {
+      background-color: rgba(131, 77, 30, 0.419) !important;
+      max-width: 800px;
+   }
+
+</style>
+
+<div id="login-body" class="container-fluid bg-dark2">
+   <div class="container vh-100 d-flex flex-column align-items-center justify-content-center">
+      <div class="
+            p-4
+            row gap-2
+            col-12
+            rounded
+            bg-dark-glass
+            slide-in-top
+          ">
+
+         <div class="col-md d-flex align-items-center justify-content-center">
+            <div class="text-center scale-in-center delay-2">
+               <img class="py-3" src="/images/logo512.png" width="150">
+               <div class="text-white">
+                  <h5 class="fw-bold">Welcome to EITIx SOAR</h5> Your Cyber Defense Hub
+               </div>
+            </div>
+         </div>
+
+         <form id="login-form"
+         class="col-md bg-white rounded delay-2 d-flex flex-column justify-content-center py-4 scale-in-center delay-3" 
+         action="/auth/login" method="POST" style="max-width: 400px;">
+            <div class="p-4 text-dark">
+               <img src="/images/eitix-text-logo-dark.png" height="30">
+               <div class="fs-6 fw-bold mt-3">
+                  Login to Dashboard
+               </div>
+               <hr>
+               <div class="form-group mb-2">
+                  <label for="email" class="mb-2 fw-bold text-primary">Email Address</label>
+                  <input id="email" name="email" type="text" class="form-control rounded-pill border-primary"
+                     placeholder="ex: john@gmail.com" maxlength="255" required autocomplete="email">
+               </div>
+               <div class="form-group mb-2">
+                  <label for="password" class="mb-2 fw-bold text-primary">Password</label>
+                  <div class="d-flex gap-2" id="toggle-password">
+                     <input name="password" type="password" class="form-control rounded-pill border-primary" placeholder="Your password" minlength="8" maxlength="255" required autocomplete="password">
+                     <button type="button" class="btn btn-outline-primary rounded-pill icon1" style="font-size: 0.8rem;">
+                        <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                     </button>
+                  </div>
+               </div>
+               <div class="form-group mb-3">
+                  <label for="answer" class="mb-1 fw-bold text-primary">Enter the sum:</label>
+                  <div class="d-flex align-items-center gap-2">
+                     <div class="col text-nowrap fs-5" id="question">Loading...</div>
+                     <input id="answer" name="answer" type="text" class="col form-control rounded-pill border-primary" placeholder="Answer" maxlength="2" required>
+                     <button type="button" class="btn btn-outline-primary rounded-pill small icon1" onclick="generatePuzzle(); toggle('#reload-puzzle', '#reload-puzzle2')" style="font-size: 0.8rem;">
+                        <i id="reload-puzzle" class="fa fa-refresh rotate-360"></i>
+                        <i id="reload-puzzle2" class="fa fa-refresh rotate-360 d-none"></i>
+                     </button>
+                  </div>
+               </div>
+               <div>
+                  <button id="submit" type="submit" class="btn btn-primary text-light rounded-pill px-4" disabled>
+                     Continue <i class="fa fa-arrow-right"></i>
+                  </button> 
+               </div>
+
+               <script>
+
+                  const question = document.getElementById('question');
+                  const answer = document.getElementById('answer');
+                  const submitBtn = document.getElementById('submit');
+                  const answerInput = document.getElementById('answer');
+
+                  generatePuzzle();
+
+                  answerInput.addEventListener('input', () => {
+                     const answer = answerInput.value.trim();
+                     const puzzle = question.innerText.split(' = ?')[0];
+                     const correctAnswer = eval(puzzle);
+                     if (answer === correctAnswer.toString()) {
+                        submitBtn.disabled = false;
+                     } else {
+                        submitBtn.disabled = true;
+                     }
+                  });
+
+                  function generatePuzzle() {
+                     submitBtn.disabled = true;
+                     const num1 = Math.floor(Math.random() * 50);
+                     const num2 = Math.floor(Math.random() * 10);
+                     const puzzle = `${num1} + ${num2} = ?`;
+                     question.innerHTML = puzzle;
+                     answer.value = '';
+                  }
+
+               </script>
+            </div>
+         </form>
+
+      </div>
+      <p class="text-white text-muted mt-5 position-absolute bottom-0">
+         Copyright © <%= new Date().getFullYear() %> EaglesIdea Ltd.
+       </p>
+   </div>
+</div>
+
+<script>
+
+   const passInput = $('#toggle-password input');
+   const pass_btn = $('#toggle-password button');
+
+   pass_btn.on('click', function (e) {
+      
+      if (passInput.attr("type") == "text") {
+
+         passInput.attr('type', 'password');
+         pass_btn.html("<i class='fa fa-eye-slash'></i>");
+
+      } else if (passInput.attr("type") == "password") {
+
+         passInput.attr('type', 'text');
+         pass_btn.html("<i class='fa fa-eye'></i>");
+
+      }
+
+   });
+
+   function login() {
+
+      toast("Under Development", "This feature is still being worked on. Please wait for some time", 1);
+
+      let form = $('#login-form');
+      let two_factor_form = $('#two-factor-form');
+
+      form.addClass("loading-state");
+
+      setTimeout(() => {
+
+         form.addClass("d-none");
+         two_factor_form.removeClass("d-none");
+
+      }, 1000);
+
+      return false;
+
+   }
+
+</script>
+
+<script src="/scripts/three.min.js"></script>
+<script src="/scripts/vanta.min.js"></script>
+<script>
+   let body_selector = "#login-body";
+   VANTA.NET({
+      el: body_selector,
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200.00,
+      minWidth: 200.00,
+      scale: 1.00,
+      scaleMobile: 1.00,
+      points: 20.00,
+      maxDistance: 14.00,
+      spacing: 12.00,
+      color: "#ad5427",
+      backgroundColor: "#282828", 
+   })
+</script>

@@ -1,0 +1,11 @@
+<button title="Reset filters and search" type="button" class="btn rounded-pill btn-danger" onclick="loadData(true, true); toggle('#reload-icon', '#reload-icon2')">
+    <i id="reload-icon" class="fa fa-refresh rotate-360"></i>
+    <i id="reload-icon2" class="fa fa-refresh rotate-360 d-none"></i>
+    Reload
+</button>
+<button class="btn rounded-pill btn-primary icon1"
+    onclick="toggleSection('#search-container'); toggle('#search-icon', '#search-close-icon')" data-toggle="tooltip"
+    title="Search data">
+    <i id="search-icon" class="fa fa-search"></i>
+    <i id="search-close-icon" class="d-none fa fa-times"></i>
+</button>

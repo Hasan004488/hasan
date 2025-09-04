@@ -1,0 +1,6 @@
+numpy
+nltk
+gunicorn
+flask
+pymongo
+scikit-learn==1.6.1

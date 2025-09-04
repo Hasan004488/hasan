@@ -1,0 +1,161 @@
+<%
+
+// one time wrapper
+let format = (num) => {
+    return locals.format.number(num) || 0;
+}
+let { cve, ioc, risks } = notices;
+let { 
+    info_all_events, info_tickets, 
+    alert_low_events, alert_medium_events, 
+    alert_high_events
+} = risks;
+
+let notice_text = {
+    total: `${ format(info_all_events) } Event(s) received today in total!`,
+    tickets: `${ format(info_tickets) } Ticket(s) created today!`,
+    low: `${ format(alert_low_events) } Low risk event(s) received today!`,
+    medium: `${ format(alert_medium_events) } Medium risk event(s) received today!`,
+    high: `${ format(alert_high_events) } High risk event(s) received today!`,
+    cve: `${ format(cve) } Vulnerabilities (CVE) detected today!`,
+    ioc: `${ format(ioc) } Malicious IoCs detected today!`
+}
+
+%>
+
+<div class="toggler clickable" onclick="togglePopup('EITIx Notices', copyContent('#eitix-notices'))">
+
+    <marquee class="bg-white shadow-sm rounded-3" id="notice-info" behavior="scroll" direction="left">
+
+        <!-- danger notices -->
+        <% if (ioc > 0) { %>
+            <span class="mx-2 px-2 bg-danger text-white rounded">
+                <i class="fa fa-skull-crossbones"></i>
+                Warning:
+                <%= notice_text.ioc %>
+            </span>
+        <% } %>
+        <% if (alert_high_events > 0) { %>
+            <span class="mx-2 px-2 bg-danger text-white rounded">
+                <i class="fa fa-skull-crossbones"></i>
+                Warning:
+                <%= notice_text.high %>
+            </span>
+        <% } %>
+
+        <!-- alert notices -->
+        <% if (cve > 0) { %>
+            <span class="mx-2 px-2 bg-primary text-white rounded">
+                <i class="fa fa-exclamation-triangle"></i>
+                Alert:
+                <%= notice_text.cve %>
+            </span>
+        <% } %>
+        <% if (alert_medium_events > 0) { %>
+            <span class="mx-2 px-2 bg-primary text-white rounded">
+                <i class="fa fa-exclamation-triangle"></i>
+                Alert:
+                <%= notice_text.medium %>
+            </span>
+        <% } %>
+
+        <!-- info notices -->
+        <% if (info_all_events > 0) { %>
+            <span class="mx-2 px-2 bg-secondary text-white rounded">
+                <i class="fa fa-circle-info"></i>
+                Info:
+                <%- notice_text.total %>
+            </span>
+        <% } %>
+        <% if (info_tickets > 0) { %>
+            <span class="mx-2 px-2 bg-secondary text-white rounded">
+                <i class="fa fa-circle-info"></i>
+                Info:
+                <%- notice_text.tickets %>
+            </span>
+        <% } %>
+        <% if (alert_low_events > 0) { %>
+            <span class="mx-2 px-2 bg-secondary text-white rounded">
+                <i class="fa fa-circle-info"></i>
+                Info:
+                <%- notice_text.low %>
+            </span>
+        <% } %>
+
+    </marquee>
+
+</div>
+
+
+<!-- popup section -->
+<div id="eitix-notices" class="d-none">
+
+    <div class="d-flex gap-4">
+        <div class="col">
+            <div class="p-2 rounded bg-secondary text-white">
+                <i class="fa fa-circle-info me-1"></i>
+                Information Notices
+            </div>
+            <div class="py-2">
+                <ul class="list-group">
+                    <% if (info_all_events > 0) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= notice_text.total %>
+                        </li>
+                    <% } %>
+                    <% if (info_tickets > 0) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= notice_text.tickets %>
+                        </li>
+                    <% } %>
+                    <% if (alert_low_events > 0) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= notice_text.low %>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+        <div class="col">
+            <div class="p-2 rounded bg-primary text-white">
+                <i class="fa fa-exclamation-triangle me-1"></i>
+                Alert Notices
+            </div>
+            <div class="py-2">
+                <ul class="list-group">
+                    <% if (cve > 0) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= notice_text.cve %>
+                        </li>
+                    <% } %>
+                    <% if (alert_medium_events > 0) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= notice_text.medium %>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+        <div class="col">
+            <div class="p-2 rounded bg-danger text-white">
+                <i class="fa fa-skull-crossbones me-1"></i>
+                Warning Notices
+            </div>
+            <div class="py-2">
+                <ul class="list-group">
+                    <% if (ioc > 0) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= notice_text.ioc %>
+                        </li>
+                    <% } %>
+                    <% if (alert_high_events > 0) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= notice_text.high %>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>

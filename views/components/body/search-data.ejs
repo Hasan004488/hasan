@@ -1,0 +1,47 @@
+<div id="search-container" class="mb-2 d-none slide-in-top">
+  <form id="search-form" method="GET" class="slide-in-up" onsubmit="return false;">
+    <div class="d-flex my-3">
+      <select name="identifier" class="form-select bg-primary-light fw-bold rounded-pill-l ps-4" onchange="searchForm('#search-form', 'multi-search')">
+        <%- include('../../components/search-option-list') %>
+      </select>
+      <select name="oparator" class="form-select bg-primary-light rounded-0 fw-bold ps-4" onchange="searchForm('#search-form', 'multi-search')">
+        <option value="contains">Contains</option>
+        <option value="not_contains">Not Contains</option>
+        <option value="equal_to">Equal to</option>
+      </select>
+      <input name="search" type="text" class="form-control bg-light rounded-pill-r" placeholder="🔍 Search as you type here..." maxlength="255" onkeyup="searchForm('#search-form', 'multi-search')">
+    </div>
+  </form>
+</div>
+
+<div class="my-2">
+  <span>
+    <%= typeof total_text !="undefined" ? total_text : "Total available data:" %>
+  </span>
+  <strong id="data-total" class="text-primary">0</strong>
+  <span id="data-total-info">
+    <i class="fa fa-circle-info text-muted cursor-help ms-1 small"></i>
+  </span>
+</div>
+
+<script>
+
+  let searchTypingTimer;
+  const doneTypingInterval = 300; // Time in ms, 1 second
+
+  function searchForm(selector, group) {
+
+    const form = document.querySelector(selector);
+  
+    clearTimeout(searchTypingTimer); // Clear the timer
+    searchTypingTimer = setTimeout(doneTyping, doneTypingInterval); // Set a new timer
+  
+    // Function to execute when user is done typing
+    function doneTyping() {
+      const formData = new FormData(form);
+      loadData(true, false, "&" + updateSearch(formData.get("identifier"), formData.get("search"), formData.get("oparator"), group));
+    }
+    
+  }
+
+</script>

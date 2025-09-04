@@ -1,0 +1,38 @@
+<section class="bg-light" style="min-height: 100vh;">
+    <div class="container py-5 d-flex justify-content-center">
+        <form class="
+                col-sm-10
+                col-md-8
+                col-lg-6
+                bg-white
+                rounded
+                shadow
+                p-3" 
+            action="/passcode" method="POST">
+    
+            <h1 class="rounded-top p-3 text-center h5 fw-bold border-bottom">
+                Enter the passcode to verify ownership
+            </h1>
+    
+            <div class="">
+    
+                <div class="form-group py-1">
+                    <label class="mb-2 fw-bold text-primary" for="db_url">Enter Passcode</label>
+                    <input name="passcode" type="password" class="px-4 form-control rounded-pill fs-4"
+                        placeholder="X X X X" maxlength="4" required
+                        value="">
+                </div>
+    
+            </div>
+    
+            <div class="form-group py-2">
+                <button type="submit" 
+                class="btn btn-primary rounded-pill px-5">
+                    Continue to configuration   
+                    <i class="fa fa-arrow-right"></i>
+                </button>
+            </div>
+            
+        </form>
+    </div>
+</section>

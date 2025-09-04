@@ -1,0 +1,203 @@
+<% data.forEach((data) => { %>
+  <tr class="py-3 slide-in-up">
+    <td>
+      <button class="btn btn-sm drop-btn" onclick="
+      toggleDropData(this, '#dropdata-<%= data._id %>');
+    " data-toggle="tooltip" title="Details">
+        <i class="fa fa-angle-right"></i>
+      </button>
+    </td>
+    <td class="">
+      <%= data.sid ?? "None" %>
+    </td>
+    <td class="">
+      <%= locals.format.truncateText(data.title, 30) || "None" %>
+    </td>
+    <td class="text-center">
+      <% if (data.source === 'AI') { %>
+        <span class="badge bg-primary rounded-pill"><%= data.source || "None" %></span>
+      <% } else if (data.source === 'UBA') { %>
+        <span class="badge bg-success rounded-pill"><%= data.source || "None" %></span>
+      <% } else if (data.source === 'Asset') { %>
+        <span class="badge bg-danger rounded-pill"><%= data.source || "None" %></span>
+      <% } else { %>
+        <!-- wazuh -->
+        <span class="badge bg-info rounded-pill"><%= data.source || "None" %></span>
+      <% } %>
+    </td>
+    <td class="text-center text-nowrap">
+      <% 
+        let type = "<i class='fa fa-filter text-secondary border rounded-circle p-1 me-1' title='Attack Surface Playbook'></i>";
+        if (data.send_email === "on") type += "<i class='fa fa-envelope text-success border rounded-circle p-1 me-1' title='Sends email'></i>";
+        if (data.send_sms === "on") type += "<i class='fa fa-comment-sms text-primary border rounded-circle p-1' title='Sends sms'></i>";
+      %>
+      <%- type %>
+    </td>
+    <td class="text-center">
+      <%= data.max_fire ?? "None" %> times/day
+    </td>
+    <td class="text-center">
+      <%= data.meantime ?? "None" %> minutes
+    </td>
+    <td>
+      <!-- actions -->
+      <div class="d-flex justify-content-center gap-2">
+
+        <% if (data.disabled === "false") { %>
+
+          <button class="toggle-btn bg-primary" onclick="updateData('Are you sure to disable this playbook?', '/dashboard/playbook/disable?status=true', '<%= data._id %>')">
+            Enabled
+            <span class="bg-white inline-circle"></span>
+          </button>
+
+        <% } else { %>
+
+          <button class="toggle-btn bg-secondary" onclick="updateData(null, '/dashboard/playbook/disable?status=false', '<%= data._id %>')">
+            <span class="bg-white inline-circle"></span>
+            Disabled
+          </button>
+
+        <% } %>
+        
+        <form class="" action="/dashboard/playbook/update" method="GET">
+          <div class="d-none">
+            <input type="text" name="id" value="<%= data._id %>">
+          </div>
+          <button type="submit" class="btn btn-sm rounded-pill btn-success">
+            <i class="fa fa-pen"></i>
+          </button>
+        </form>
+
+        <button class="btn badge rounded-pill btn-danger" onclick="updateData('Are you sure to delete? (This is Permanent)', '/dashboard/playbook/delete', '<%= data._id %>')">
+          <i class="fa fa-trash"></i>
+        </button>
+
+      </div>
+    </td>
+  </tr>
+  <tr id="dropdata-<%= data._id %>" class="d-none">
+    <td colspan="<%= 8 %>" class="p-4 bg-dark-light">
+      <div class="rounded bg-white p-3">
+
+        <div class="d-flex flex-column flex-lg-row gap-3 justify-content-between">
+          <div class="col">
+            <h5 class="fw-bold">
+              <%= data.title %>
+            </h5>
+            <hr>
+            <div class="d-flex justify-content-between mb-3">
+              <div>
+                Total Detected Count:
+              <span class="fw-bold">
+                <%= data.fired || data.notified || "0" %>
+              </span>
+              time(s)
+              </div>
+              <div>
+                <span class="badge bg-dark">
+                  <i class="fa fa-filter"></i>
+                  Attack Surface
+                </span>
+                <% if (data.send_email === "on") { %>
+                    <span class="badge bg-success" title="This playbook sends email">
+                    <i class="fa fa-envelope"></i>
+                    Email
+                    </span>
+                <% } %>
+                <% if (data.send_sms === "on") { %>
+                    <span class="badge bg-primary" title="This playbook sends sms">
+                    <i class="fa fa-comment-sms"></i>
+                    SMS
+                    </span>
+                <% } %>
+              </div>
+            </div>
+            <div class="row g-3 my-2 text-center">
+              <div class="col-md-4">
+                <strong>Playbook Status: </strong>
+                <div class="">
+                  <% if (data.notified == data.max_fire) { %>
+                    <span class="badge bg-primary rounded-pill">
+                      Max Reached
+                    </span>
+                  <% } else if (data.firing_required) { %>
+                    <span class="badge bg-danger rounded-pill">
+                      <i class="fa fa-bell"></i>
+                      Notification Pending
+                    </span>
+                  <% } else { %>
+                    <span class="badge bg-secondary rounded-pill">
+                      Idle
+                    </span>
+                  <% } %>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <strong>Last Notified: </strong>
+                <div>
+                  <%= data.last_fired?.toLocaleString() ?? "Never Fired Yet" %>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <strong>Notified today: </strong>
+                <div>
+                  <%= data.notified ?? "0" %> times
+                  (max: <%= data.max_fire ?? "0" %>)
+                </div>
+              </div>
+              <div class="col-md-4">
+                <strong>Creation Date: </strong>
+                <div>
+                  <%= data.date?.toLocaleString() ?? "No Information" %>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <strong>Expiry Date: </strong>
+                <div>
+                  <%= data.expiry_date?.toLocaleString() ?? "No Information" %>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <strong>Reporter: </strong>
+                <div>
+                  <%= data.reporter_name ?? "No Information" %>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="fw-bold">
+              <i class="fa fa-user"></i>
+              Selected Users 
+              <span class="" title="Total selected users" onclick="return showUsers(this, '<%= data._id %>')">
+                (<%= data.users?.length || 0 %>)
+              </span>
+            </div>
+            <hr>
+            <div class="d-flex flex-column gap-3 overflow-auto max-smaller pt-1">
+              <% if (data.users) { data.users.forEach(user => { %>
+                <div class="py-2 px-3 border bg-hover rounded-3 d-flex justify-content-between align-items-center">
+                  <div class="col small d-flex gap-3 align-items-center">
+                      <div class="">
+                        <img src="/content/assets/images/<%= user?.profile_image || 'user-profile.png  ' %>" alt="" class="profile_image" style="height: 2.3rem; width: 2.3rem;">
+                      </div>
+                      <div>
+                          <strong>
+                            <%= user?.full_name %>
+                          </strong>
+                          <div class="text-muted">
+                              <span class="badge bg-primary"><%= user?.role %></span> |
+                              <%= user?.sid %>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+              <% })} %>
+            </div>
+          </div>
+        </div>
+
+    </div>
+    </td>
+  </tr>
+<% }) %>

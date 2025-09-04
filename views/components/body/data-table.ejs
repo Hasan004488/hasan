@@ -1,0 +1,113 @@
+<% let { dropdown, headers, actions, loadmore, url, query } = table; %>
+<div id="data-table-container" class="theme-table table-responsive-sm overflow-auto border border-2 rounded" style="height: 70vh">
+  <table class="table table-hover text-secondary">
+    <thead class="thead table-primary sticky-top" style="z-index: 100 !important;">
+      <tr>
+        <% if (dropdown) { %>
+        <th></th>
+        <% } %>
+        <% headers.forEach((header, idx) => { %>
+        <th class="<%= header.class %> <%= header.view ? header.view !== 'basic' ? 'd-none' : '' : '' %>" scope="col" <%= header.view ? `table-data-view=${header.view}` : '' %> <%= header.width ? `style=width:${header.width}` : "" %>>
+          <div class="d-flex w-full align-items-center justify-content-center">
+            <% if (header.sort) { %>
+            <span title="Sort this column" class="clickable px-1  me-1">
+              <i class="fa fa-arrow-up"></i>
+            </span>
+            <% } %>
+            <div id="header-<%= idx %>" class="w-100">
+              <span><%= header.text %></span>
+            </div>
+            <% if (header.filters) { %>
+            <div class="dropdown" title="Apply filter">
+              <button class="badge btn ms-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="tooltip">
+                <i class="fa fa fa-angle-down text-secondary"></i>
+              </button>
+              <div class="shadow dropdown-menu p-2 text-center">
+                <div class="mb-2">
+                  <i class="fa fa-filter"></i>
+                  <span><%= header.text %></span>
+                </div>
+                <div class="overflow-auto d-grid" style="max-height: 40vh">
+                  <% header.filters?.forEach(filter => { %>
+                  <button class="btn btn-sm d-block" onclick="loadData(true, false, updateSearch('<%=filter.field%>', '<%=filter.value%>')); filterStatus('header-<%= idx %>')">
+                    <%=filter.name%>
+                  </button>
+                  <% }) %>
+                </div>
+              </div>
+            </div>
+            <% } %>
+          </div>
+        </th>
+        <% }) %>
+        <% if (actions) { %>
+        <th class="text-center">Manage</th>
+        <% } %>
+      </tr>
+    </thead>
+    <tbody id="table-data" class="position-relative">
+    </tbody>
+  </table>
+
+  <div id="data-table-empty" class="d-flex justify-content-center py-4 text-muted">
+    <div class="text-center">
+      <div class="mb-3"><i class="fa fa-box-open fa-3x"></i></div>
+      <h5>No Data Found</h5>
+    </div>
+  </div>
+
+  <% if (loadmore !== false) { %>
+  <div class="text-center">
+    <button id="data-loader" class="d-none btn btn-secondary-outline rounded-pill" onclick="loadData()">
+      <i class="fa fa-arrow-down"></i>
+      Load More
+    </button>
+  </div>
+  <% } %>
+
+
+</div>
+
+<%
+  let query_params = new URLSearchParams((query));
+%>
+
+<script>
+  let load_amount = 0;
+  let page = 1;
+  let collection = 1;
+  let total_results = 1;
+  let default_url = "<%= url %>?"; // url to search for data
+  let default_query = "<%- query_params.toString() || '' %>"; // query coming from url
+  let current_url = default_url;
+  let xhr = null;
+  let search = {};
+  let view = "basic";
+
+  $("#data-table-container").scroll(function() {
+
+    let loadmore_btn = $('#data-loader:not(.d-none)');
+
+    if (loadmore_btn.length) {
+
+      let loadmore_offset = loadmore_btn.offset().top + loadmore_btn.height();
+      let window_scroll_top = $(window).scrollTop() + $(window).height();
+
+      if (loadmore_offset <= window_scroll_top) {
+
+        let last_load = window.last_load || 0;
+        let current_time = new Date().getTime();
+
+        if (current_time - last_load > 1000) {
+
+          loadmore_btn.click();
+          window.last_load = current_time;
+
+        }
+
+      }
+
+    }
+
+  });
+</script>

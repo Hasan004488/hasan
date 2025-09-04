@@ -1,0 +1,116 @@
+<div class="col-12">
+  <div class="d-flex gap-2 m-0">
+    <div class="dashboard-block col-md py-4">
+      <div class="text-center m-auto">
+        <div class="mb-0 fw-bold">
+          <% if (data.total_breaches > 0) { %>
+          <div class="mb-1 fs-1 text-danger">
+            <i class="fa fa-exclamation-triangle text-primary pulsate-fwd"></i>
+            <%= locals.format.number(data.total_breaches) %>
+          </div>
+          <span class="badge bg-danger status-pill">Breaches Detected</span>
+          <% } else { %>
+          <div class="mb-1">
+            <i class="fa fa-check fs-1 text-success"></i> <br>
+          </div>
+          <span class="badge bg-success status-pill">No Breaches</span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-block col-md py-4">
+      <div class="text-center m-auto">
+        <div>Last Breached</div>
+        <div class="fw-bold fs-5 text-danger">
+          <% let last_breached = data.last_breach?.createdAt ? new Date(data.last_breach?.createdAt) : '- - -' %>
+          <%= last_breached.toDateString() %>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-block col-md py-4 px-3 justify-content-center gap-2">
+      <div class="d-flex flex-column align-items-center gap-2 fw-bold text-center">
+        <div class="fs-3 text-danger">
+          <i class="fa fa-flag"></i>
+          <%= data.total_false || 0 %>
+        </div>
+        <span class="badge bg-danger status-pill">False Positive</span>
+      </div>
+    </div>
+    <div class="dashboard-block col-md py-4 px-3 justify-content-center gap-2">
+      <div class="d-flex flex-column align-items-center gap-2 fw-bold text-center">
+        <div class="fs-3 text-success">
+          <i class="fa fa-check"></i>
+          <%= data.total_resolved || 0 %>
+        </div>
+        <span class="badge bg-success status-pill">Breaches Resolved</span>
+      </div>
+    </div>
+    <div class="dashboard-block col-md py-4">
+      <div class="text-center m-auto">
+        <div class="mb-3">
+          <i class="fa-solid fa-crosshairs fa-spin fs-1 text-danger"></i>
+        </div>
+        <h5 class="fw-bold">Monitoring
+          <span class="">
+            {<%= data.searchType %>}
+          </span>
+        </h5>
+        <div class="text-danger fw-bold">
+          <%= data.searchValue %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-12">
+
+  <div class="bg-white rounded-3 p-4">
+
+    <div class="d-flex gap-3 align-items-center">
+      <h3 class="fw-bold">
+        All Darkweb Breaches
+      </h3>
+      <div class="d-flex align-items-center gap-2 ms-auto">
+        <%- include('components/search-control-buttons') %>
+      </div>
+    </div>
+
+    <div class="">
+
+      <%- include("components/body/search-data.ejs", {
+        options: [
+            { name: "Breach ID", property: "breachId" },
+            { name: "Breach Description", property: "breachDescription" },
+            { name: "Leak Name", property: "leakName" },
+            { name: "Timestamp", property: "timestamp" },
+            { name: "Ingested At", property: "ingestedAt" }
+        ],
+        total_text: "Total Breaches found:"
+      }) %>
+
+      <div class="d-flex align-items-end justify-content-between">
+        <ul class="nav nav-tabs align-items-center" id="views-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="basic-view-tab" data-bs-toggle="tab" data-bs-target="#basic-view" type="button" role="tab" aria-controls="basic-view" aria-selected="true" onclick="changeView('basic')">Basic</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="source-view-tab" data-bs-toggle="tab" data-bs-target="#source-view" type="button" role="tab" aria-controls="source-view" aria-selected="true" onclick="changeView('source')">Source</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="security-view-tab" data-bs-toggle="tab" data-bs-target="#security-view" type="button" role="tab" aria-controls="security-view" aria-selected="true" onclick="changeView('security')">Security</button>
+          </li>
+        </ul>
+      </div>
+
+      <%- include("components/body/data-table.ejs") %>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  loadData(true, true);
+</script>

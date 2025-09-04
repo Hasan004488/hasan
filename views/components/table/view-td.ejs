@@ -1,0 +1,4 @@
+<% const { view, viewName, content, extraClass } = data %>
+<td class="<%= view === viewName ? '' : 'd-none' %> <%= extraClass || '' %>" table-data-view="<%= viewName %>">
+  <%- content %>
+</td>

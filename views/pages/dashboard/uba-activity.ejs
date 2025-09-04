@@ -1,0 +1,36 @@
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow position-relative">
+
+        <div class="d-flex gap-3 align-items-center">
+            <div class="btn-group toggle-block">
+                <button class="btn btn-tab px-5" onclick="changeURL('/dashboard/uba/activity/data/daily')">
+                  <i class="fa fa-clock area_blocked"></i>
+                  Daily Activity
+                </button>
+                <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/uba/activity/data/archive')">
+                  <i class="fa fa-box area_blocked"></i>
+                  Archive Activity
+                </button>
+            </div>
+            <div class="d-flex gap-2 ms-auto">
+                <%- include('components/search-control-buttons') %>
+            </div>
+        </div>
+
+        <%- include("../../components/body/search-data.ejs", {
+            options: table.headers
+              .filter(header => header.hasOwnProperty('property'))
+              .map(header => ({ name: header.text, property: header.property })), 
+            total_text: "Total UBA activity found:"
+        }) %>
+
+        <%- include("components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<script>
+
+    loadData(true, true);
+
+</script>

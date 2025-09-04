@@ -1,0 +1,44 @@
+
+<% 
+let search_query = false;
+%>
+
+<div class="col-12">
+  <div class="p-4 bg-white rounded shadow">
+
+    <div class="d-flex align-items-center justify-content-between">
+
+      <h4 class="fw-bold">
+        Attack Surface Events (<%= locals.format.title(active) %>)
+      </h4>
+
+      <div class="d-flex gap-2">
+        <%- include('components/search-control-buttons') %>
+      </div>
+
+    </div>
+
+    <%- include("../../components/body/search-data.ejs", {
+      options: [
+        { name: "Description", property: "description" },
+        { name: "Log ID", property: "log_id" },
+        { name: "Agent ID", property: "agent_id" },
+        { name: "Rule ID", property: "rule_id" },
+        { name: "Severity Level", property: "severity" },
+        { name: "Firedtimes", property: "firedtimes" },
+        { name: "Source IP", property: "source" }
+      ],
+      total_text: "Total Attack Surface Events found today:"
+    }) %>
+
+    <%- include("../../components/body/data-table.ejs") %>
+
+  </div>
+</div>
+
+<script>
+
+  // load dynamic data
+  loadData(true);
+
+</script>

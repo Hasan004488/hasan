@@ -1,0 +1,50 @@
+<div class="d-flex flex-column align-items-center gap-3 mb-4">
+  <table class="table small table-hover text-secondary w-100">
+
+    <thead class="thead text-nowrap">
+      <tr>
+        <th scope="col">Timestamp</th>
+        <th scope="col">CVE ID</th>
+        <th scope="col" class="text-center">Information</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% data.forEach((data) => { %>
+      <tr class="py-3 slide-in-up">
+        <td>
+          <% 
+        let time_data = format.getLocaleString(data?.lastModified);
+        let time_part = time_data[1] || "";
+        let date_part = "<br/>" + time_data[0] || "";
+        if (!archive) {
+          date_part = ""
+        }
+      %>
+          <span><%- time_part + date_part  %></span>
+        </td>
+        <td class="">
+          <div class="fw-bold">
+            <span title="Click to view log preview" class="clickable" onclick="loadDynamicPopup('Wazuh Log Preview', '/dashboard/wazuh/logs/data/raw?idfs=id&operators=equal_to&types=string&values=' + '<%= data.log?.id %>&collection=<%= data.log?.group %>')">
+              <img src="/images/icons/view-log.png" alt="" height="20">
+            </span>
+            <span class="clickable" onclick="navigator.clipboard.writeText('<%= data.id %>').then(() => toast('Text Copied!', 'CVE ID copied to clipboard', 1));" title="Copy CVE ID">
+              <img src="/images/icons/copy.png" alt="" height="20">
+            </span>
+            <%= data.id || "Unknown" %>
+          </div>
+        </td>
+        <td class="text-center">
+          <a target="_blank" class="btn btn-sm btn-info rounded-pill" href="https://nvd.nist.gov/vuln/detail/<%= data?.id || ''%>">
+            <i class="fa fa-external-link"></i>
+            Check in NIST
+          </a>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <div class="text-center">
+    Showing latest data only...
+  </div>
+</div>

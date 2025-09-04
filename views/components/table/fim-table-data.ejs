@@ -1,0 +1,64 @@
+<% for(i=0; i < data.length; i++){ %>
+  <tr class="py-3 slide-in-up">
+    <td>
+      <button class="btn btn-sm drop-btn" onclick="
+        toggleDropData(this, '#dropdata-<%= data[i]._id %>');
+        fetchDropData('#dropdata-<%= data[i]._id %> .data', 'fim', '<%=data[i]._id%>', '_id');
+      "
+        data-toggle="tooltip" title="Details">
+        <i class="fa fa-angle-right"></i>
+      </button>
+    </td>
+    <td>
+      <%
+        let timestamp = data[i].date?.toLocaleString().split("T") || [];
+        let date_data = timestamp[0]?.split(", ");
+      %>
+      <span><%- date_data[0] + "<br/>" + date_data[1] || "No Information" %></span>
+    </td>
+    <td>
+      <%= data[i]?.tenant_id || "Unknown" %>
+    </td>
+    <td class="">
+      <div class="fw-bold">
+        <span title="Click to view log preview" class="clickable" onclick="loadDynamicPopup('Wazuh Log Preview', '/dashboard/wazuh/logs/data/raw?idfs=id&operators=equal_to&types=string&values=' + '<%= data[i]?.log_id %>')">
+          <img src="/images/icons/view-log.png" alt="" height="20">
+        </span>
+        <span class="clickable" onclick="navigator.clipboard.writeText('<%= data[i].path %>').then(() => toast('Text Copied!', 'Full path copied to clipboard', 1));" title="Copy Full Path">
+          <img src="/images/icons/copy.png" alt="" height="20">
+        </span>
+        <%= data[i].path?.split(/[\/\\]/)?.pop() || "No Information" %>
+      </div>
+    </td>
+    <td class="text-center">
+      <span class="badge bg-primary rounded-pill">
+        <span><%= data[i].agent || "unknown" %></span>
+      </span>
+    </td>
+    <td class="text-center">
+      <span class="badge bg-secondary rounded-pill">
+        <span><%= data[i].event || "unknown" %></span>
+      </span>
+    </td>
+    <td class="text-center">
+      <span class="badge bg-secondary rounded-pill">
+        <span><%= data[i].changes || "0" %></span>
+      </span>
+    </td>
+  </tr>
+  <tr id="dropdata-<%= data[i]._id %>" class="d-none text-secondary">
+    <td colspan="<%= 7 %>" class="p-3">
+      <div class="bg-white rounded p-3 fade-in">
+        <div class="shadow rounded p-3 mb-3">
+          <div class="fs-5 fw-bold">
+            File Changed <%= data[i].changes || "0"%> Time(s)!</div>
+          <div class="small">
+            <i class="fa fa-clock"></i>
+            <span>at <%= data[i].date?.toLocaleString() || "unknown time" %></span>
+          </div>
+        </div>
+        <div class="data"></div>
+      </div>
+    </td>
+  </tr>
+<% } %>

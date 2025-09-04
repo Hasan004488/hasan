@@ -1,0 +1,24 @@
+<% 
+  let total_results = locals.format.number(total);
+  let current_page = parseInt(pagination?.curr);
+  let total_page = parseInt(pagination?.total);
+%>
+
+<div class="py-2 mb-2 border-bottom border-primary d-flex justify-content-between">
+
+  <div>
+    <span>Showing </span>
+    <strong>
+      <%= pagination?.range[0] + " - " + pagination?.range[1] %>
+    </strong>
+    out of 
+    <strong class="text-primary"><%= total_results ?? 0 %></strong>
+    <span>available data!</span>
+  </div>
+
+  <div class="small">
+    Page <strong class="text-primary"><%= current_page %></strong>
+    out of <strong class="text-primary"><%= total_page %></strong>
+  </div>
+
+</div>

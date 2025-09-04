@@ -1,0 +1,123 @@
+
+<% 
+let files = [];
+%>
+
+<div class="mb-3">
+
+    <div id="files-container">
+        <div class="d-flex justify-content-center py-4 text-muted">
+            <div class="text-center">
+              <div class="mb-3"><i class="fa fa-file-circle-plus fa-3x"></i></div>
+              <h5>Add Files Here...</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="">
+        <button type="button" class="btn rounded-pill btn-primary px-5" onclick="addFile('#files-container')">
+            <i class="fa fa-add"></i>
+            Add File
+        </button>
+    </div>
+
+</div>
+
+<script>
+
+    const MAX_FILES = 5;
+    let added_files = parseInt("<%= already_added %>");
+    let allowed_files = "<%= allowed_files %>";
+
+    function addFile(selector) {
+
+        if (added_files >= MAX_FILES) {
+
+            return toast("Maximum Limit Reached", "Can't add more files here", 1);
+
+        } else {
+
+            // let uid = Math.random().toString(36).substring(2, 7);
+            let uid = added_files;
+
+            let form = document.querySelector(selector);
+            
+            form.appendChild(renderFileInput(uid));
+
+            added_files++;
+
+        }
+
+
+    }
+
+
+    async function removeFile(id_number) {
+
+        let ready = await customConfirm('Are you sure to remove this file?');
+        if (ready) {
+
+            let uid = "#fileinput-" + id_number;
+            get(uid).remove();
+            added_files--;
+
+        }
+
+
+    }
+
+
+    function renderFileInput(uid) {
+
+        const new_field = document.createElement('div');
+
+        new_field.id = `fileinput-${uid}`;
+        new_field.className = "row mb-3";
+
+        new_field.innerHTML = `
+            <div class="col">
+                <input name="captions" class="form-control rounded-pill" type="text" placeholder="Write File Caption Here..." required>
+            </div>
+            <div class="col d-flex gap-2">
+                <input name="file-${uid}" class="form-control rounded-pill" type="file" 
+                accept="${allowed_files}" required
+                onchange="validateFile(this)">
+                <button class="btn rounded-pill btn-outline-danger ms-2" type="button" 
+                    onclick="removeFile(${uid})" title="Deletes the last added file">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        return new_field;
+
+    }
+
+    function validateFile(input) {
+
+        const file = input.files[0];
+        
+        // Define the allowed file types
+        // no_f = make the list variable so it can be changed
+        const allowedTypes = allowed_files.split(",");
+        const fileType = file.name.substring(file.name.lastIndexOf('.'));
+        
+        if (!allowedTypes.includes(fileType.toLowerCase())) {
+            toast('Invalid file type.', 'Please select a valid file format.', 1);
+            input.value = ''; // Clear the input
+            return;
+        }
+
+        // Check file size
+        const maxSize = 10485760; // 10MB in bytes
+
+        if (file.size > 10485760) {
+
+            input.value = null;
+            toast("File size is too large", "Selected file size is more than 10MB", 1);
+
+        }
+        
+    }
+    
+</script>

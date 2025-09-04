@@ -1,0 +1,305 @@
+<form id="detailed-report-form" class="position-relative" action="/dashboard/reports/detailed" method="POST" onsubmit="submitDetailedReport(this); return false;">
+    <div class="d-none">
+        <input type="text" name="report" value="<%= report?.sid %>">
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <div class="">
+            <button type="button" class="btn btn-outline-secondary rounded-pill" title="Go Back" onclick="toggleEditor()">
+                <i class="fa fa-arrow-left"></i>
+            </button>
+        </div>
+        <div>
+            <div class="fw-bold fs-5">Report: <%= report?.title %></div>
+            <div class="fw-bold text-muted">ID: <%= report?.sid %></div>
+        </div>
+        <div class="align-self-start">
+            <button type="button" class="btn btn-outline-secondary rounded-pill" title="Report Description" onclick="togglePopup('Report Description', '<%= report?.description %>');">
+                <i class="fa fa-info-circle"></i>
+            </button>
+        </div>
+    </div>
+    <hr/>
+    <div class="p-3 overflow-auto max-small">
+
+        <% if (report?.sid === "EDR10001") { %>
+
+            <!-- alerts report -->
+            <div class="border border-gray p-3 mb-3 rounded">
+
+                <div id="logs-filter" class="">
+
+                    <div class="fw-bold text-primary my-1 mb-2">
+                        <i class="fa fa-filter"></i>
+                        Logs Filter
+                    </div>
+                    <%- include('../../../components/logs-filter', {
+                        filters: false, identifiers, len: 0, editable: true
+                    }) %>
+
+                </div>
+
+                <div class="d-flex gap-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="full_log" value="true" id="full_log_true">
+                    <label class="form-check-label" for="full_log_true">
+                      Include full log
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="full_log" value="false" id="full_log_false" checked>
+                    <label class="form-check-label" for="full_log_false">
+                      Exclude full log
+                    </label>
+                  </div>
+                </div>
+
+            </div>
+            
+        <% } %>
+
+        <% if (report?.sid === "EDR10002") { %>
+
+            <!-- fim report -->
+            <div class="border border-gray p-3 mb-3 rounded d-flex gap-3">
+
+                <div class="d-flex w-100 gap-3">
+                    <%- include("../../../components/form/select-box.ejs", {
+                        label: "Filter Type",
+                        name: "operator",
+                        selected: "contains",
+                        options: [
+                            {
+                                value: "contains",
+                                option: "File Path Contains"
+                            },
+                            {
+                                value: "equal_to",
+                                option: "File Path Equal to"
+                            }
+                        ]
+                    }) %>
+                    <%- include("../../../components/form/input-box.ejs", {
+                        label: "Enter Value",
+                        name: "file_path",
+                        placeholder: "Enter file path or file name. ex: /etc/passwd",
+                    }) %>
+                </div>
+
+            </div>
+            
+        <% } %>
+
+        <% if (report?.sid === "EDR10003") { %>
+
+            <!-- cve report -->
+            <div class="border border-gray p-3 mb-3 rounded d-flex gap-3">
+
+                <div class="d-flex w-100 gap-3">
+                    <%- include("../../../components/form/select-box.ejs", {
+                        label: "Filter Type",
+                        name: "operator",
+                        selected: "contains",
+                        options: [
+                            {
+                                value: "contains",
+                                option: "CVE ID Contains"
+                            },
+                            {
+                                value: "equal_to",
+                                option: "CVE ID Equal to"
+                            }
+                        ]
+                    }) %>
+                    <%- include("../../../components/form/input-box.ejs", {
+                        label: "Enter Value",
+                        name: "cve_id",
+                        placeholder: "Enter CVE ID. ex: CVE-2020-1234",
+                    }) %>
+                </div>
+
+            </div>
+            
+        <% } %>
+
+        <% if (report?.sid === "EDR10004") { %>
+
+            <!-- ioc report -->
+            <div class="border border-gray p-3 mb-3 rounded d-flex gap-3">
+
+                <div class="d-flex w-100 gap-3">
+                    <%- include("../../../components/form/select-box.ejs", {
+                        label: "Filter Type",
+                        name: "operator",
+                        selected: "contains",
+                        options: [
+                            {
+                                value: "contains",
+                                option: "IoC Data Contains"
+                            },
+                            {
+                                value: "equal_to",
+                                option: "IoC Data Equal to"
+                            }
+                        ]
+                    }) %>
+                    <%- include("../../../components/form/input-box.ejs", {
+                        label: "Enter Value",
+                        name: "ioc_data",
+                        placeholder: "Enter IoC Data. ex: IP Address, Domain Name, MD5 Hash",
+                    }) %>
+                </div>
+
+            </div>
+            
+        <% } %>
+
+        <% if (report?.sid === "EDR10005") { %>
+
+            <!-- pci dss report -->
+            <div class="border border-gray p-3 mb-3 rounded d-flex gap-3">
+
+                <div class="d-flex w-100 gap-3">
+                    <%- include("../../../components/form/select-box.ejs", {
+                        label: "Filter Type",
+                        name: "operator",
+                        selected: "contains",
+                        options: [
+                            {
+                                value: "contains",
+                                option: "PCI DSS Contains"
+                            }
+                        ]
+                    }) %>
+                    <%- include("../../../components/form/input-box.ejs", {
+                        label: "Enter Value",
+                        name: "pci_dss",
+                        placeholder: "Enter PCI DSS value. ex: 10.5.2, 10.5, 10",
+                    }) %>
+                </div>
+
+            </div>
+            
+        <% } %>
+
+        <% if (report?.sid === "EDR10007") { %>
+
+            <!-- fim report -->
+            <div class="border border-gray p-3 mb-3 rounded d-flex gap-3">
+
+                <div class="d-flex w-100 gap-3">
+                    <%- include("../../../components/form/select-box.ejs", {
+                        label: "Username",
+                        name: "operator",
+                        selected: "contains",
+                        options: [
+                            {
+                                value: "contains",
+                                option: "Username Contains"
+                            },
+                            {
+                                value: "equal_to",
+                                option: "Username Equal to"
+                            }
+                        ]
+                    }) %>
+                    <%- include("../../../components/form/input-box.ejs", {
+                        label: "Enter Username",
+                        name: "username",
+                        placeholder: "Enter username. ex: john.doe",
+                    }) %>
+                </div>
+
+            </div>
+            
+        <% } %>
+
+        <% if (true) { %>
+            <!-- date selection -->
+            <div class="d-flex gap-4 border border-gray p-3 mb-3 rounded">
+                <%- include("../../../components/form/select-box.ejs", {
+                    id: "input-range",
+                    label: "Enter Date Range",
+                    name: "range",
+                    selected: "1",
+                    event: "onchange=changeRange()",
+                    options: [
+                    {
+                        value: "1",
+                        option: "Today"
+                    },
+                    {
+                        value: "7",
+                        option: "Last Week"
+                    },
+                    {
+                        value: "30",
+                        option: "Last Month"
+                    },
+                    {
+                        value: "90",
+                        option: "Last Quarter"
+                    }
+                    ]
+                }) %>
+                <div class="form-group w-100">
+                    <label class="mb-2 fw-bold text-primary">
+                        <i class="fa fa-calendar"></i>
+                        Starting Date
+                    </label>
+                    <input type="date" id="input-from" class="form-control rounded-pill" name="timestamp_from" value="<%= locals.format.htmlToday() %>" min="<%= locals.format.htmlToday(-90) %>" max="<%= locals.format.htmlToday() %>" onchange="validateRange()"/>
+                </div>
+                <div class="form-group w-100">
+                    <label class="mb-2 fw-bold text-primary">
+                        <i class="fa fa-calendar"></i>
+                        Ending Date
+                    </label>
+                    <input type="date" id="input-to" class="form-control rounded-pill" name="timestamp_to" value="<%= locals.format.htmlToday() %>" max="<%= locals.format.htmlToday() %>" onchange="validateRange()"/>
+                </div>
+            </div>
+        <% } %>
+
+
+        <div class="border border-gray p-3 mb-3 rounded">
+            <%- include("../../../components/form/input-box.ejs", {
+                label: "Report Header Title",
+                name: "title",
+                value: report?.title,
+                required: true,
+            }) %>
+            <div class="d-flex gap-4">
+                <div class="col-md-5">
+                    <%- include("../../../components/form/input-box.ejs", {
+                        label: "<i class='fa fa-globe'></i> Select Tenant",
+                        name: "tenant",
+                        value: `All Tenant`,
+                        extra: "disabled"
+                    }) %>
+                </div>
+                <% agents = agents.sort((a, b) => a.id - b.id) %>
+                <%- include("../../../components/form/select-box.ejs", {
+                    label: "<i class='fa fa-desktop'></i> Select Agent",
+                    id: "agent-selection",
+                    name: "agent",
+                    required: true,
+                    options: [
+                        {value: "all", option: "All Agents"},
+                        ...agents.map(agent => ({value: agent.id, option: `${agent.id} - ${agent.name}`}))
+                    ]
+                }) %>
+            </div>
+        </div>
+    
+    </div>
+
+    <div class="my-3">
+        <button type="submit" class="btn rounded-pill btn-primary px-5 me-2">
+            <i class="fa fa-file"></i>
+            Generate Report
+        </button>
+        <a id="download-btn" href="#" class="d-none btn rounded-pill btn-success px-4">
+            <i class="fa fa-arrow-down"></i>
+            Download Report
+        </a>
+    </div>
+
+</form>

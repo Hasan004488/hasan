@@ -1,0 +1,896 @@
+<link rel="stylesheet" href="/styles/jsvectormap.min.css" />
+<link rel="stylesheet" href="/styles/apex-charts.min.css" />
+<script src="/scripts/jsvectormap.js"></script>
+<script src="/scripts/world.js"></script>
+<script src="/scripts/apex-charts.js"></script>
+
+<% 
+let titles="fs-5 fw-bold d-flex align-items-center gap-1"; 
+let description_classes="text-secondary mb-2" ;
+let circle_info_styles = "fa fa-circle-info text-muted cursor-help ms-1 small";
+%>
+
+<!-- eps row -->
+<div class="col-12">
+  <div class="m-0 p-0" id="notices-container">
+    <div class="spinner-grow" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  <div class="dashboard-block overflow-hidden" style="height: 185px;">
+    <div class="d-flex mb-2 gap-3">
+      <div class="<%= titles %>">
+        <img src="/images/icons/logs.png" alt="" height="30">
+        Live Events Tracking
+        <i title="Live Events Tracking displays the time series graph of events received." class="<%= circle_info_styles %>"></i>
+      </div>
+      <div class="btn-group toggle-block ms-auto">
+        <button class="btn btn-sm btn-tab px-3" onclick="changeEPS('1h')" title="Event Per Minute">
+          <i class="fa fa-clock"></i>
+          EPM
+        </button>
+        <button class="btn btn-sm btn-tab-off px-3" onclick="changeEPS('1d')" title="Event Per Hour">
+          <i class="fa fa-clock"></i>
+          EPH
+        </button>
+        <button class="btn btn-sm btn-tab-off px-3" onclick="changeEPS('1w')" title="Event Per Day">
+          <i class="fa fa-clock"></i>
+          EPD
+        </button>
+      </div>
+    </div>
+    <div id="events-per-sec"></div>
+  </div>
+</div>
+
+<!-- ticket status row -->
+<div class="col-12">
+  <div class="d-flex gap-2 m-0">
+    <div id="ticket-container" class="dashboard-block col-md-3">
+      <div class="d-flex justify-content-between mb-2">
+        <div class="<%= titles %>">
+          <img src="/images/icons/ticket.png" alt="" height="30">
+          Ticket Status
+          <i title="Ticket Status displays the total number of open and closed tickets from the last 24 hours." class="<%= circle_info_styles %>"></i>
+        </div>
+        <div>
+          <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/tickets">
+            <i class="fa fa-external-link"></i>
+          </a>
+        </div>
+      </div>
+      <div class="row gx-1 fw-bold h-100 ticket-boxes">
+        <div class="col-md text-center border-bottom border-5 border-info d-flex align-items-center justify-content-center slide-in-bottom">
+          <a href="/dashboard/tickets?tab=open" class="reset-a">
+            <div id="open-ticket-count" class="fs-4">
+              <div class="spinner-grow" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <small>Open</small>
+          </a>
+        </div>
+        <div class="col-md text-center border-bottom border-5 border-danger d-flex align-items-center justify-content-center slide-in-top">
+          <a href="/dashboard/tickets?tab=closed" class="reset-a">
+            <div id="closed-ticket-count" class="fs-4">
+              <div class="spinner-grow text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <small class="">Closed</small>
+          </a>
+        </div>
+        <div class="col-md text-center border-bottom border-5 border-secondary d-flex align-items-center justify-content-center slide-in-bottom">
+          <a href="/dashboard/tickets?tab=expired" class="reset-a">
+            <div id="expired-ticket-count" class="fs-4">
+              <div class="spinner-grow text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <small>Expired</small>
+          </a>
+        </div>
+        <div class="col-md text-center border-bottom border-5 border-primary d-flex align-items-center justify-content-center rounded-r slide-in-top">
+          <a href="/dashboard/tickets?tab=all" class="reset-a ">
+            <div id="all-ticket-count" class="fs-4">
+              <div class="spinner-grow" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <small>All</small>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="ioc-container" class="col-md-3 dashboard-block">
+      <div>
+        <div class="d-flex justify-content-between mb-2">
+          <div class="<%= titles %>">
+            <img src="/images/icons/bug.png" alt="" height="30">
+            IoC Highlight
+            <i title="IoC (Indicators of Compromise) Highlight displays the total number and malicious IoCs from the last 24 hours." class="fa fa-circle-info text-muted cursor-help ms-1 small"></i>
+          </div>
+          <div>
+            <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/ioc/tab/daily">
+              <i class="fa fa-external-link"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex gap-2 overflow-hidden text-center h-100">
+        <a href="/dashboard/ioc/tab/daily?ioc_count=0#IoC" class="col d-flex align-items-center justify-content-center bg-danger-light px-3 py-2 rounded">
+          <div>
+            <div id="ioc-malicious" class="fs-3 fw-bold">0</div>
+            <small>Malicious</small>
+          </div>
+        </a>
+        <a href="/dashboard/ioc/tab/daily#IoC" class="col d-flex align-items-center justify-content-center bg-primary-light px-3 py-2 rounded">
+          <div>
+            <div id="ioc-total" class="fs-3 fw-bold">0</div>
+            <small>Total IoCs</small>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div id="cve-container" class="col-md-3 dashboard-block">
+      <div>
+        <div class="d-flex justify-content-between mb-1">
+          <div class="<%= titles %> ">
+            <img src="/images/icons/alert.png" alt="" height="30">
+            CVE Found
+            <i title="CVE (Common Vulnerabilities and Exposures) found in your organization in last 24 hours." class="<%= circle_info_styles %>"></i>
+          </div>
+          <div>
+            <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/vulnerabilities/tab/daily">
+              <i class="fa fa-external-link"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="row gx-1 h-100 align-items-center py-1 fw-bold">
+        <div class="col-md text-center border-end">
+          <div id="total-cve" class="fs-4">
+            <div class="spinner-grow" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <small>Total</small>
+        </div>
+        <div class="col-md text-center text-danger">
+          <div id="daily-cve" class="fs-4">
+            <div class="spinner-grow" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <small>Today</small>
+        </div>
+      </div>
+    </div>
+
+    <div id="system-container" class="dashboard-block col-md">
+      <div class="<%= titles %> mb-2" title="An overview of system CPU and memory usage">
+        <img src="/images/icons/cpu.png" alt="" height="30">
+        <span>System Status</span>
+      </div>
+      <div class="d-flex gap-2">
+        <div class="col">
+          <div class="small">
+            CPU:
+            <span class="fw-bold text-primary">
+              <span id="cpu-usage">0</span>%
+            </span>
+          </div>
+          <div class="bg-gray mb-2 ">
+            <div id="cpu-usage-bar" class="bg-primary rounded transition" style="width: 0; height: 0.5rem;">
+            </div>
+          </div>
+          <div class="small">
+            Memory:
+            <span class="fw-bold text-danger">
+              <span id="mem-usage">0</span>%
+            </span>
+          </div>
+          <div class="bg-gray mb-2 ">
+            <div id="mem-usage-bar" class="bg-danger rounded transition" style="width: 0; height: 0.5rem;">
+            </div>
+          </div>
+          <div class="small">
+            Root Space:
+            <span class="fw-bold text-success">
+              <span id="storage-usage">0</span>%
+            </span>
+          </div>
+          <div class="bg-gray">
+            <div id="storage-usage-bar" class="bg-success roundedtransition" style="width: 0%; height: 0.5rem;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="col-12">
+
+  <div class="d-flex gap-2 m-0">
+
+    <div id="risk-container" class="dashboard-block col-md-3">
+
+      <div class="d-flex justify-content-between mb-2">
+        <div class="<%= titles %> ">
+          <img src="/images/icons/risk.png" alt="" height="30">
+          Event Risks
+          <i title="Event Risks separates the high, medium and low risk events found in last 24 hours." class="<%= circle_info_styles %>"></i>
+        </div>
+        <div>
+          <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/risks/monitor?tab=weekly">
+            <i class="fa fa-external-link"></i>
+          </a>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <div class="col">
+          <div class="d-flex gap-2">
+            <div class="fw-bold text-danger fs-4" style="min-width: 3rem;">
+              <span id="high-risk">0</span>%
+            </div>
+            <div class="col">
+              <small>High Risk Events!</small>
+              <div class="bg-gray rounded mb-2">
+                <div id="high-risk-status" class="bg-danger rounded transition" style="width: 0; height: 0.5rem;">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <div class="fw-bold text-primary fs-4" style="min-width: 3rem;">
+              <span id="medium-risk">0</span>%
+            </div>
+            <div class="col">
+              <small>Medium Risk Events!</small>
+              <div class="bg-gray rounded mb-2">
+                <div id="medium-risk-status" class="bg-primary rounded transition" style="width: 0; height: 0.5rem;">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <div class="fw-bold text-success fs-4" style="min-width: 3rem;">
+              <span id="low-risk">0</span>%
+            </div>
+            <div class="col">
+              <small>Low Risk Events!</small>
+              <div class="bg-gray rounded">
+                <div id="low-risk-status" class="bg-success rounded transition" style="width: 0%; height: 0.5rem;">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="" class="dashboard-block col-md-3">
+
+      <div class="d-flex justify-content-between mb-2">
+        <div class="<%= titles %> ">
+          <img src="/images/icons/risk.png" alt="" height="30">
+          Risk Score
+          <i title="Overall risk of your organization depending on events and other vulnerabilities from last 24 hours." class="fa fa-circle-info text-muted cursor-help ms-1 small"></i>
+        </div>
+      </div>
+      <div class="d-flex gap-2 h-100">
+        <div class="col bg-danger-light rounded d-flex align-items-center justify-content-center p-2">
+          <div class="text-center">
+            <div class="mb-0 fw-bold">
+              <span id="or-score" class="fs-1">0</span>
+              <small>/ 10</small>
+            </div>
+          </div>
+        </div>
+        <div class="col bg-primary-light rounded d-flex align-items-center justify-content-center p-2">
+          <div class="text-center">
+            <div class="mb-0 fw-bold">
+              <span id="or-grade" class="fs-2">Low</span>
+            </div>
+            <small>Risk</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="latest-cve-container" class="dashboard-block col-md">
+      <div class="d-flex justify-content-between mb-2">
+        <div class="<%= titles %> ">
+          <img src="/images/icons/risk.png" alt="" height="30">
+          Latest CVEs (Vulnerabilities)
+          <i title="CVE (Common Vulnerabilities and Exposures) found in your organization in last 24 hours." class="<%= circle_info_styles %>"></i>
+        </div>
+        <div>
+          <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/vulnerabilities/tab/daily">
+            <i class="fa fa-external-link"></i>
+          </a>
+        </div>
+      </div>
+      <div class="theme-table table-responsive-sm">
+        <table class="table table table-hover table-striped mb-0">
+          <tbody id="cve-table-body" class="small">
+            <td class="px-2">No CVEs found so far</td>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="col-12">
+
+  <div class="d-flex gap-2 m-0">
+
+    <div id="ai-analysis-container" class="dashboard-block col-md-3">
+      <div class="d-flex justify-content-between mb-3 small">
+        <div class="<%= titles %> ">
+          <img src="/images/icons/brain.png" alt="" height="30">
+          AI Analysis
+          <i title="AI Analysis displays the attack vectors found in your organization in last 24 hours." class="<%= circle_info_styles %>"></i>
+        </div>
+        <div>
+          <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/ai">
+            <i class="fa fa-external-link"></i>
+          </a>
+        </div>
+      </div>
+      <div class="small text-center">
+        <div id="ai-analysis-body" class="d-flex align-items-center justify-content-center gap-2 fw-bold">
+          No Attack Vectors Detected yet!
+        </div>
+      </div>
+    </div>
+
+    <div id="assets-container" class="dashboard-block col-md-3">
+      <div>
+        <div class="d-flex justify-content-between mb-2 small">
+          <div class="<%= titles %> ">
+            <img src="/images/icons/monitor.png" alt="" height="30">
+            Assets
+            <i title="Assets Monitor displays the assets and agents found in your organization in last 24 hours." class="<%= circle_info_styles %>"></i>
+          </div>
+          <div>
+            <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/assets/monitor#Assets">
+              <i class="fa fa-external-link"></i>
+            </a>
+          </div>
+        </div>
+        <div class="input-group">
+          <span class="border-bottom text-center flex-fill">
+            Wazuh Agents
+          </span>
+          <span class="border-bottom text-center flex-fill">
+            Cloud Assets
+          </span>
+        </div>
+      </div>
+      <div class="row gx-1 py-1 fw-bold">
+        <div class="col-md text-center">
+          <div id="wazuh-active-count" class="fs-4 text-success">
+            <div class="spinner-grow" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <small class="text-success">Active</small>
+        </div>
+        <div class="col-md text-center">
+          <div id="wazuh-inactive-count" class="fs-4">
+            <div class="spinner-grow" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <small>Inactive</small>
+        </div>
+        <div class="col-md text-center">
+          <div id="cloud-active-count" class="fs-4 text-success">
+            <div class="spinner-grow" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <small class="text-success">Active</small>
+        </div>
+        <div class="col-md text-center">
+          <div id="cloud-inactive-count" class="fs-4">
+            <div class="spinner-grow text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <small>Inactive</small>
+        </div>
+      </div>
+    </div>
+
+    <div id="fim-container" class="col-md-3 dashboard-block">
+      <div>
+        <div class="d-flex justify-content-between mb-2">
+          <div class="<%= titles %>">
+            <img src="/images/icons/file-edit.png" alt="" height="30">
+            FIM Changes
+            <i title="FIM (File Integrity Monitoring) Changes displays the changes in your organization in last 24 hours." class="<%= circle_info_styles %>"></i>
+          </div>
+          <div>
+            <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/FIM/monitor#FIM">
+              <i class="fa fa-external-link"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="row align-items-center h-100 gx-1 py-1 fw-bold">
+        <div class="col-md text-center border-end">
+          <div id="fcd-yesterday" class="fs-4">
+            <div class="spinner-grow" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <small>Yesterday</small>
+        </div>
+        <div class="col-md text-center text-primary">
+          <div id="fcd-today" class="fs-4 text-primary">
+            <div class="spinner-grow" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <small>Today</small>
+        </div>
+      </div>
+    </div>
+
+    <div id="alert-container" class="col-md dashboard-block">
+      <div>
+        <div class="d-flex justify-content-between mb-1">
+          <div class="<%= titles %> ">
+            <img src="/images/icons/paper-plane.png" alt="" height="30">
+            <span>Notifications</span>
+            <i title="Notifications displays the number of emails and SMS sent in the last 24 hours." class="<%= circle_info_styles %>"></i>
+          </div>
+          <div>
+            <a class="btn btn-sm rounded-pill btn-outline-secondary" href="/dashboard/notifications/monitor#Notifications">
+              <i class="fa fa-external-link"></i>
+            </a>
+          </div>
+        </div>
+        <div class="input-group pb-2 text-center">
+          <span class="border-bottom flex-fill small">
+            Email and SMS Sent Today
+          </span>
+        </div>
+      </div>
+
+      <div class="row gx-1 py-1 fw-bold">
+        <div class="col-md text-center">
+          <a href="/dashboard/notifications/list/email#Notifications" class="reset-a clickable-h">
+            <div id="alert-email" class="fs-4">
+              <div class="spinner-grow" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <small>Emails</small>
+          </a>
+        </div>
+        <div class="col-md text-center text-primary">
+          <a href="/dashboard/notifications/list/sms#Notifications" class="reset-a clickable-h">
+            <div id="alert-sms" class="fs-4 text-primary">
+              <div class="spinner-grow" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <small>SMS</small>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="col-12 fade-in delay-9">
+  <div class="dashboard-block">
+    <div id="world-map-container" class="pe-3">
+      <div class="spinner-grow" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <div id="world-map-info">
+      <i class="fa fa-circle-info"></i>
+      Please select an IP Address for quick view
+    </div>
+  </div>
+</div>
+
+<script>
+  function getCpuStabilityScore(cpuUsage) {
+    if (cpuUsage <= 25) {
+      return {
+        score: "E",
+        grade: 'Excellent'
+      };
+    } else if (cpuUsage > 25 && cpuUsage <= 50) {
+      return {
+        score: "G",
+        grade: 'Good'
+      };
+    } else if (cpuUsage > 50 && cpuUsage <= 75) {
+      return {
+        score: "M",
+        grade: 'Medium'
+      };
+    } else if (cpuUsage > 75 && cpuUsage <= 90) {
+      return {
+        score: "L",
+        grade: 'High'
+      };
+    } else if (cpuUsage > 90) {
+      return {
+        score: "C",
+        grade: 'Critical'
+      };
+    }
+  }
+
+  // system status
+  loadDynamicData({
+    container: "",
+    url: "/content/dashboard/status",
+    type: "GET"
+  }, (data) => {
+
+    if (data.cpu) {
+
+      let cpu_usage = parseFloat(data.cpu).toPrecision(2) ?? 0;
+      cpu_usage = cpu_usage > 99 ? 100 : cpu_usage;
+
+      let mem_usage = parseFloat(data.memory).toPrecision(2) ?? 0;
+      mem_usage = mem_usage > 99 ? 100 : mem_usage;
+
+      let storage_usage = parseFloat(data.storage).toPrecision(2) ?? 0;
+      storage_usage = storage_usage > 99 ? 100 : storage_usage;
+
+      let stability = getCpuStabilityScore(cpu_usage);
+
+      $("#cpu-usage").text(cpu_usage);
+      $("#mem-usage").text(mem_usage);
+      $("#storage-usage").text(storage_usage);
+      $("#cpu-usage-bar").css('width', cpu_usage + "%");
+      $("#mem-usage-bar").css('width', mem_usage + "%");
+      $("#storage-usage-bar").css('width', storage_usage + "%");
+
+      $("#system-stability").text(stability.score);
+      $("#system-stability").attr('title', stability.grade);
+
+    }
+
+  }, 3000); // 3s
+
+  // cve vulnerabilities
+  loadDynamicData({
+    container: "#cve-container",
+    url: "/content/dashboard/cve",
+    type: "GET"
+  }, (data) => {
+
+    $("#daily-cve").html(formatNumber(data.daily_cve));
+    $("#total-cve").html(formatNumber(data.total_cve));
+
+  }, 120000); // 2 minutes
+
+  // alerts
+  loadDynamicData({
+    container: "#alert-container",
+    url: "/content/dashboard/alerts",
+    type: "GET"
+  }, (data) => {
+
+    // changes by date
+    $("#alert-sms").html(formatNumber(data.sms_daily));
+    $("#alert-email").html(formatNumber(data.emails_daily));
+
+  }, 120000); // 2 minutes
+
+  // connectivity world map
+  loadDynamicData({
+    container: "#world-map-container",
+    url: "/dashboard/world/map",
+    type: "GET"
+  }, (data) => {
+
+    $("#world-map-container").html(data);
+
+  }, 120000); // 2 minutes
+
+  // ticket status
+  loadDynamicData({
+    container: "#ticket-container",
+    url: "/content/dashboard/tickets/count?tab=all",
+    type: "GET"
+  }, (data) => {
+
+    $("#open-ticket-count").html(data.open || 0);
+    $("#closed-ticket-count").html(data.closed || 0);
+    $("#expired-ticket-count").html(data.expired || 0);
+    $("#all-ticket-count").html(data.all || 0);
+
+  }, 120000); // 2 minutes
+
+  // ioc highlight
+  loadDynamicData({
+    container: "#ioc-container",
+    url: "/content/dashboard/ioc",
+    type: "GET"
+  }, (data) => {
+
+    // changes by date
+    $("#ioc-total").html(formatNumber(data.ioc[0]?.total));
+    $("#ioc-malicious").html(formatNumber(data.ioc[0]?.total_events));
+
+  }, 120000); // 2 minutes
+
+  // notices
+  loadDynamicData({
+    url: "/content/dashboard/notices",
+    type: "GET"
+  }, (data) => {
+
+    $("#notices-container").html(data);
+
+  }, 120000); // 2 minute
+
+  // risk monitor
+  loadDynamicData({
+    container: "#risk-container",
+    url: "/content/dashboard/risks",
+    type: "GET"
+  }, (data) => {
+
+    let low_risks = Math.ceil(data.low_risks || 0);
+    let medium_risks = Math.ceil(data.medium_risks || 0);
+    let high_risks = Math.ceil(data.high_risks || 0);
+
+    let overflow = (low_risks + medium_risks + high_risks) - 100;
+
+    if (low_risks > medium_risks) {
+
+      if (low_risks > high_risks) {
+
+        low_risks -= overflow;
+
+      } else if (high_risks > low_risks) {
+
+        high_risks -= overflow;
+
+      }
+
+    } else {
+
+      if (medium_risks > high_risks) {
+
+        medium_risks -= overflow;
+
+      } else if (high_risks > medium_risks) {
+
+        high_risks -= overflow;
+
+      }
+
+    }
+
+    let risk_score = (low_risks * 0.1) + (medium_risks * 0.5) + (high_risks * 1);
+    let or_score = ((risk_score / 100) * 10);
+
+    $("#high-risk").text(high_risks);
+    $("#medium-risk").text(medium_risks);
+    $("#low-risk").text(low_risks);
+    $("#high-risk-status").css('width', high_risks + "%");
+    $("#medium-risk-status").css('width', medium_risks + "%");
+    $("#low-risk-status").css('width', low_risks + "%");
+    $("#or-score").text(or_score.toFixed(1));
+    $("#or-grade").text(getRiskGrade(or_score).text);
+    $("#or-grade").css('color', getRiskGrade(or_score).color);
+
+  }, 60000); // 1 minute
+
+  function getRiskGrade(risk_score) {
+    if (risk_score <= 3.9) {
+      return {
+        symbol: "L",
+        text: "Low",
+        color: "var(--bs-success)"
+      };
+    } else if (risk_score > 4.0 && risk_score <= 6.9) {
+      return {
+        symbol: "M",
+        text: "Medium",
+        color: "var(--bs-primary)"
+      };
+    } else if (risk_score > 7.0 && risk_score <= 8.9) {
+      return {
+        symbol: "H",
+        text: "High",
+        "color": "var(--bs-primary)"
+      };
+    } else if (risk_score > 9.0) {
+      return {
+        symbol: "C",
+        text: "Critical",
+        color: "var(--bs-danger)"
+      };
+    }
+  }
+
+  // assets monitor
+  loadDynamicData({
+    container: "#assets-container",
+    url: "/content/dashboard/agents",
+    type: "GET"
+  }, (data) => {
+
+    $("#wazuh-active-count").html(data.wazuh.active || 0);
+    $("#wazuh-inactive-count").html(data.wazuh.inactive || 0);
+    $("#cloud-active-count").html(data.cloud.active || 0);
+    $("#cloud-inactive-count").html(data.cloud.inactive || 0);
+
+  }, 60000); // 1 minute
+
+  // fim highlight
+  loadDynamicData({
+    container: "#fim-container",
+    url: "/content/dashboard/fim",
+    type: "GET"
+  }, (data) => {
+
+    // changes by date
+    $("#fcd-today").html(formatNumber(data.fcd[0]?.changes));
+    $("#fcd-yesterday").html(formatNumber(data.fcd[1]?.changes));
+
+  }, 60000); // 1 minute
+
+  // for world connectivity map
+  function loadIPInfo(ip) {
+
+    let con_id = "#world-map-info";
+
+    fetchDynamicData({
+      container: con_id,
+      url: "/dashboard/world/map/info?ip=" + ip
+    }, (data) => {
+
+      $(con_id).html(data);
+
+      window.location.href = con_id;
+
+    })
+
+  }
+
+  function getTotalCount(obj) {
+    let totalCount = 0;
+    for (const key in obj) {
+      if (Object.hasOwnProperty.call(obj, key)) {
+        totalCount += obj[key];
+      }
+    }
+    return totalCount;
+  }
+
+  /* eps graph */
+  let zoomRange = null;
+  let eps_options = {
+    series: [{
+      name: "Events received",
+      data: []
+    }],
+    chart: {
+      type: 'area',
+      height: 125,
+      toolbar: {
+        show: false
+      },
+      zoom: {
+        enabled: false
+      },
+    },
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      width: 3,
+    },
+    markers: {
+      hover: {
+        sizeOffset: 4
+      }
+    },
+    xaxis: {
+      tickPlacement: 'on',
+      categories: [],
+      min: zoomRange ? zoomRange.min : undefined,
+      max: zoomRange ? zoomRange.max : undefined,
+    },
+    yaxis: {
+      min: 0,
+    }
+  };
+
+  let time_range = "1h";
+  let eps_url = "/content/dashboard/eps?range=1h";
+  let chart_type = "bar";
+  let eps_chart = new ApexCharts(document.querySelector("#events-per-sec"), eps_options);
+  eps_chart.render();
+
+  updateEPS(eps_url);
+  setInterval(() => updateEPS(eps_url, time_range), 30000);
+
+  function updateEPS(url, range = time_range) {
+
+    fetchDynamicData({
+      container: "#events-per-sec-container",
+      url,
+      type: "GET"
+    }, (data) => {
+
+      let categories = data?.range || [];
+
+      eps_chart.updateOptions({
+        xaxis: {
+          categories: categories,
+          min: zoomRange ? zoomRange.min : undefined,
+          max: zoomRange ? zoomRange.max : undefined,
+        }
+      }, false, true);
+
+      eps_chart.updateSeries([{
+        data: data.series_data || []
+      }]);
+
+    });
+
+  }
+
+  function changeEPS(select_range) {
+
+    eps_url = "/content/dashboard/eps?range=" + select_range;
+    time_range = select_range;
+    zoomRange = null;
+    updateEPS(eps_url, time_range);
+
+  }
+
+  // load latest cves
+  loadDynamicData({
+    container: "#latest-cve-container",
+    url: "/content/dashboard/latest-cves",
+    type: "GET"
+  }, (data) => {
+    if (data.trim() !== "<!-- dynamic component -->") {
+      $("#cve-table-body").html(data);
+    } else {
+      $("#cve-table-body").html(`<td class="p-2 text-muted text-center"><i class="fa-regular fa-circle-check text-success fs-1 mb-2"></i> <br> No CVEs found so far.</td>`);
+    }
+  }, 60000);
+
+  // ai analysis vectors
+  loadDynamicData({
+    container: "#ai-analysis-container",
+    url: "/dashboard/ai/analysis/data",
+    type: "GET"
+  }, (data) => {
+    if (data.trim() !== "<!-- dynamic component -->") {
+      $("#ai-analysis-body").html(data);
+    } else {
+      $("#ai-analysis-body").html(`<div class="p-2 small text-muted"><i class="fa-regular fa-circle-check text-success fs-1 mb-2"></i> <br> No Attack Vectors Detected yet.</div>`);
+    }
+  }, 60000);
+  
+</script>

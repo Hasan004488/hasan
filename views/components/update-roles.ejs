@@ -1,0 +1,52 @@
+<% 
+let permissions = role.permissions?.replace(/\s/g, '')?.split(",") || [];
+%>
+
+<form id="create-role-form" action="/dashboard/roles/update?role=<%= role.name %>" method="POST" class="w-100">
+
+  <div class="d-none">
+    <input type="hidden" name="name" value="<%= role.name %>">
+    <input type="hidden" name="level" value="<%= role.level %>">
+  </div>
+
+  <div class="mb-2 fw-bold text-primary">Update Role's Permissions</div>
+
+  <div class="p-3 permission-switches form-control rounded-bottom overflow-auto" style="max-height: 50vh;">
+
+    <% access_list.forEach(list => { %>
+
+    <% if (!list.protected) { %>
+
+    <div class="py-2 me-2 clickable-h">
+      <div class="form-check form-switch d-flex align-items-center">
+        <label class="form-check-label w-100 ms-3 clickable">
+          <input name="permissions" value="<%= list.access %>" class="form-check-input" type="checkbox" data-toggle="switchbutton" <%= access(list.access, permissions) ? "checked" : "" %>>
+          <div class="fw-bold">
+            <span class="text-primary">EITIx.</span>
+            <span class="text-secondary"><%= list.access %></span>
+            <% if (list.risk == true) { %>
+            <i class="fa fa-exclamation-triangle text-danger" title="Risky Permission (Recommended for admins)"></i>
+            <% } %>
+          </div>
+          <%= list.control %>
+        </label>
+      </div>
+    </div>
+
+    <% } %>
+
+    <% }) %>
+
+  </div>
+  <div class="text-end mt-3">
+    <button type="submit" class="btn rounded-pill btn-primary px-4 ms-2">
+      <i class="fa fa-arrow-up"></i>
+      Update Role
+    </button>
+    <% if (role.name !== "Admin" && role.editable === true) { %>
+    <a title="Delete Role" href="/dashboard/roles/delete?role=<%= role.name %>" class="btn btn-danger btn-sm rounded-pill ms-auto" onclick="return confirmChoice(event, 'Are sure to permanently delete this role?')">
+      <i class="fa fa-trash"></i>
+    </a>
+    <% } %>
+  </div>
+</form>

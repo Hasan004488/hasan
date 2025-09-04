@@ -1,0 +1,43 @@
+<style>
+    .theme-table table td {
+        vertical-align: top;
+    }
+</style>
+
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow position-relative">
+
+        <div class="d-flex gap-3 align-items-center">
+            <div class="btn-group toggle-block">
+                <button class="btn btn-tab px-5" onclick="changeURL('/dashboard/uba/alerts/data/daily')">
+                  <i class="fa fa-clock area_blocked"></i>
+                  Daily UBA Alerts
+                </button>
+                <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/uba/alerts/data/archive')">
+                  <i class="fa fa-box area_blocked"></i>
+                  Archive UBA Alerts
+                </button>
+            </div>
+            <div class="d-flex gap-2 ms-auto">
+                <%- include('components/search-control-buttons') %>
+            </div>
+        </div>
+
+        <%- include("components/body/search-data.ejs", {
+            options: [
+                { name: "Username", property: "username" },
+                { name: "Attack Trend", property: "attack" }
+            ],
+            total_text: "Total UBA alerts found:"
+        }) %>
+
+        <%- include("components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<script>
+
+    loadData(true, true);
+
+</script>

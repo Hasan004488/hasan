@@ -1,0 +1,205 @@
+
+<% 
+const template = data;
+const editing = data.title ? true : false;
+%>
+
+<link rel="stylesheet" type="text/css" href="/styles/quill.snow.css">
+<script type="text/javascript" src="/scripts/quill.min.js"></script>
+<link rel="stylesheet" href="/styles/template.css">
+
+<form class="col-12 row gy-3" id="edit-template" action="/dashboard/templates/edit" method="POST">
+
+    <div class="p-4 bg-white rounded shadow">
+
+      <div class="row gap-3">
+
+        <div class="col-md-8">
+            
+          <h5 class="py-2">
+              <strong>Email Reporting Template</strong>
+          </h5>
+
+          <div class="py-2">
+
+            <%- include("../../../components/form/input-box.ejs", {
+              label: "Template Name",
+              name: "title",
+              placeholder: "Add template name",
+              value: template.title,
+              char_limit: [1, 255],
+              required: true
+            }) %>
+
+            <%- include("../../../components/form/input-box.ejs", {
+              label: "Subject",
+              name: "subject",
+              placeholder: "Email Subject",
+              value: template.subject,
+              char_limit: [1, 255],
+              required: true
+            }) %>
+            
+            <div class="form-group py-2">
+                <div class="mb-2 fw-bold text-primary">Email Body</div>
+                <div id="section-a-editor" class="form-control"
+                    style="font-size: inherit; min-height: 10vh;">
+                    <%- template.section_a %>
+                </div>
+            </div>
+            <div class="py-2">
+              <span class="input-group-text">
+                <span>{ Email attachement will be added Here }</span>
+              </span>
+            </div>
+
+            <div class="mt-3 d-flex gap-3">
+                <button type="button" class="btn rounded-pill btn-secondary" onclick="
+                  submit_form('load');
+                  togglePopup('Template Preview', copyContent('#preview-content'));
+                ">
+                  <i class="fa fa-eye"></i> Load Preview
+                </button>
+                <% if (editing) { %>
+            
+                  <button type="button" class="btn rounded-pill btn-primary" onclick="submit_form('update');">
+                    <i class="fa fa-arrow-up"></i>
+                    Update Template
+                  </button>
+      
+                <% } else { %>
+      
+                  <button type="button" class="btn rounded-pill btn-primary" onclick="submit_form('create');">
+                    <i class="fa fa-add"></i>
+                    Create New Template
+                  </button>
+      
+                <% } %>
+            </div>
+
+        </div>
+
+          <div id="preview-content" class="d-none">
+                                  
+              <div class="mail-container w-half py-3">
+
+                  <div>
+                      <strong>Subject: </strong> 
+                      <span id="load-subject"><%- template.subject %></span>
+                  </div>
+                  
+                  <hr>
+
+                  <div id="load-section-a"><%- template.section_a %></div>
+                  <div id="load-footer"><%- template.footer %></div>
+
+                  <div class="alert alert-secondary mt-3">
+                    <span>{ Email attachement will be added Here }</span>
+                  </div>
+
+              </div>
+
+          </div>
+
+          <div class="d-none">
+            <input type="text" name="id" value="<%= template._id %>">
+            <input type="text" name="author" value="<%= locals.email %>">
+            <input type="text" name="type" value="<%= template.type || type %>">
+            <input type="text" name="section_a" value="">
+            <input type="text" name="edit" value="">
+          </div>
+
+      </div>
+
+      <div class="col-md border-start border-secondary">
+
+        <div class="fs-5 py-2">
+          <strong>Template Placeholders</strong>
+        </div>
+  
+        <div class="py-2">
+          <details open>
+            <summary class="fw-bold">${title}</summary>
+            <div class="small ms-3">Title of the report</div>
+          </details>
+          <details open>
+            <summary class="fw-bold">${type}</summary>
+            <div class="small ms-3">Type of the report</div>
+          </details>
+          <details open>
+            <summary class="fw-bold">${reporter_name}</summary>
+            <div class="small ms-3">Full of the reporter</div>
+          </details>
+          <details open>
+            <summary class="fw-bold">${repetition}</summary>
+            <div class="small ms-3">Report repetition date</div>
+          </details>
+          <details open>
+            <summary class="fw-bold">${last_reported_date}</summary>
+            <div class="small ms-3">Last date the report was sent</div>
+          </details>
+          <details open>
+            <summary class="fw-bold">${next_reporting_date}</summary>
+            <div class="small ms-3">Next date the report will be sent</div>
+          </details>
+        </div>
+  
+      </div>
+
+      </div>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    let form_submission_fired = false;
+
+    // make quill editors
+    const section_a_editor = new Quill('#section-a-editor', QUILL_OPTIONS);
+    
+    async function submit_form(type) {
+
+        const form = document.getElementById("edit-template");
+
+        form_submission_fired = true;
+
+        if (type == 'load') {
+
+            // load the preview
+            $("#load-subject").text(form.subject.value);
+            $("#load-section-a").html(section_a_editor.root.innerHTML);
+
+        } else {
+
+          if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+          }
+
+          let confirm = await customConfirm("Are you sure to submit?");
+
+          if (confirm) {
+
+            form.section_a.value = section_a_editor.root.innerHTML;
+            form.edit.value = type;
+            form.submit();
+
+          }
+
+        }
+        
+    }
+    
+    window.addEventListener('beforeunload', function (e) {
+
+        if (!form_submission_fired) {
+            e.preventDefault();
+        }
+
+    });
+
+
+</script>

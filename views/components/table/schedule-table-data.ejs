@@ -1,0 +1,148 @@
+<% for(i = 0; i < data.length; i++) { %>
+  <% let schedule = data[i] || {}; %>
+  <tr class="slide-in-up">
+      <td>
+        <button class="btn btn-sm drop-btn" onclick="
+        toggleDropData(this, '#dropdata-<%= schedule._id %>');
+      " data-toggle="tooltip" title="Details">
+          <i class="fa fa-angle-right"></i>
+        </button>
+      </td>
+      <td>
+        <%= schedule.sid ?? "None" %>
+      </td>
+      <td>
+          <%= schedule.title ?? "No Information" %>
+      </td>
+      <td>
+          <%= schedule.reporter_name ?? "No Information" %>
+      </td>
+      <td>
+          Every <%= schedule.repeat ?? "No Information" %> Day(s)
+      </td>
+      <td>
+          <%= schedule.next_report?.toLocaleString() ?? "No Information" %>
+      </td>
+      <td>
+          <div class="d-flex justify-content-center">
+              <% if (schedule.disabled === true) { %>
+
+                <button class="toggle-btn bg-secondary" onclick="updateData(null, '/dashboard/reports/schedule/disable?status=false', '<%= schedule._id %>')">
+                  <span class="bg-white inline-circle"></span>
+                  Disabled
+                </button>
+      
+              <% } else { %>
+
+                <button class="toggle-btn bg-primary" onclick="updateData('Are you sure to disable this report?', '/dashboard/reports/schedule/disable?status=true', '<%= schedule._id %>')">
+                  Enabled
+                  <span class="bg-white inline-circle"></span>
+                </button>
+      
+              <% } %>
+              <form class="ms-2" action="/dashboard/reports/schedule/edit" method="GET">
+                  <input class="d-none" type="text" name="id" value="<%= schedule._id %>">
+                  <button type="submit" class="btn rounded-pill btn-sm btn-success" data-toggle="tooltip">
+                      <i class="fa fa-pen"></i>
+                  </button>
+              </form>
+              <button type="button" class="ms-2 btn rounded-pill btn-sm btn-danger" data-toggle="tooltip" onclick="updateData('Are you sure to disable this report?', '/dashboard/reports/schedule/delete', '<%= schedule._id %>')">
+                <i class="fa fa-trash"></i>
+              </button>
+          </div>
+      </td>
+  </tr>
+  <tr id="dropdata-<%= schedule._id %>" class="d-none">
+    <td colspan="<%= 8 %>" class="p-3 bg-dark-light">
+      <div class="rounded bg-white p-3">
+
+        <div class="d-flex flex-column flex-lg-row gap-3 justify-content-between">
+          <div class="col-md-6">
+            <h5 class="fw-bold">
+              <%= schedule.title %>
+            </h5>
+            <hr>
+            <div class="row g-3 mt-2">
+              <div class="col-md-6">
+                <strong>Creation Date: </strong>
+                <div>
+                  <%= schedule.date?.toLocaleString() ?? "No Information" %>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <strong>Next Report: </strong>
+                <div>
+                  <%= schedule.next_report?.toLocaleString() ?? "No Information" %>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <strong>Last Reported: </strong>
+                <div>
+                  <%= schedule.last_report?.toLocaleString() ?? "No Information" %>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <strong>Reporter: </strong>
+                <div>
+                  <%= schedule.reporter_name ?? "No Information" %>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="fw-bold">
+              <i class="fa fa-user"></i>
+              Selected Users 
+              <span class="" title="Total selected users">
+                (<%= schedule.users?.length || 0 %>)
+              </span>
+            </div>
+            <hr>
+            <div class="d-flex flex-column gap-3 overflow-auto max-smaller pt-3">
+              <% if (schedule.users) { schedule.users.forEach(user => { %>
+                <div class="py-2 px-3 border bg-hover rounded-3 d-flex justify-content-between align-items-center">
+                  <div class="col small d-flex gap-3 align-items-center">
+                      <div class="">
+                        <img src="/content/assets/images/<%= user?.profile_image || 'user-profile.png  ' %>" alt="" class="profile_image" style="height: 2.3rem; width: 2.3rem;">
+                      </div>
+                      <div>
+                          <strong>
+                            <%= user?.full_name %>
+                          </strong>
+                          <div class="text-muted">
+                              <span class="badge bg-primary"><%= user?.role %></span> |
+                              <%= user?.sid %>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+              <% })} %>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <% if (!Array.isArray(schedule.reports)) schedule.reports = [schedule.reports]; %>  
+            <div class="fw-bold">
+              <i class="fa fa-user"></i>
+              Reports
+              <span class="" title="Total selected users">
+                (<%= schedule.reports?.length || 0 %>)
+              </span>
+            </div>
+            <hr>
+            <div class="d-flex flex-column gap-3 overflow-auto pt-3" style="max-height: 20vh;">
+                <% if (schedule.reports.length > 0) { schedule.reports.forEach(report => { %>
+                    <div class="py-2 px-3 border bg-hover rounded-3">
+                        <i class="fa-solid fa-file-pdf me-2"></i>
+                        <strong>
+                            <%= report %>
+                        </strong>
+                    </div>
+                <% })} %>
+            </div>
+          </div>
+        </div>
+
+    </div>
+    </td>
+  </tr>
+<% } %>

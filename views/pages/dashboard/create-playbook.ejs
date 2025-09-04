@@ -1,0 +1,819 @@
+<link rel="stylesheet" href="/styles/progress-steps.css">
+<link rel="stylesheet" href="/styles/select2.css">
+
+<!-- Circles which indicates the steps of the form: -->
+<div id="step-indicator" class="d-flex gap-2 justify-content-center align-items-center mt-4 mb-2">
+  <span class="step">1</span>
+  <span class="step">2</span>
+  <span class="step">3</span>
+  <span class="step">4</span>
+</div>
+
+<form class="col-lg-7 user-selection-form-wrapper" id="create-playbook" 
+  action="/dashboard/playbook/create" method="POST">
+
+  <!-- Basic Information -->
+  <div class="tab p-4 bg-white rounded shadow mb-3">
+
+    <div class="mb-3 fw-bold d-flex align-items-center justify-content-between">
+        <div class="fs-4 fw-bold">Basic Information</div>
+        <div class="small">By: <strong class="text-primary">
+            <%= locals.email %>
+        </strong></div>
+    </div>
+    
+    <div class="row">
+
+      <div class="d-md-flex gap-3">
+        <div class="col-md-3">
+          <%- include("../../components/form/input-box.ejs", {
+              label: "Tenant",
+              name: "tenant",
+              placeholder: "All Tenants",
+              extra: "readonly"
+          }) %>
+        </div>
+        <%- include("../../components/form/select-box.ejs", {
+          id: "source-selection",
+          label: "Event Source",
+          name: "source",
+          selected: data.source || "Wazuh",
+          event: "onchange=changeSource(this)",
+          options: [
+            {
+              value: "Wazuh",
+              option: "Wazuh Events"
+            },
+            {
+              value: "AI",
+              option: "AI Events"
+            },
+            {
+              value: "UBA",
+              option: "UBA Events"
+            },
+            {
+              value: "Asset",
+              option: "Asset Events"
+            }
+          ]
+        }) %>
+        <%- include("../../components/form/input-box.ejs", {
+          label: "Expiry date",
+          name: "expiry_date",
+          type:"date",
+          value: data.expiry_date?.toISOString()?.split("T")[0] || locals.format.htmlToday(7)
+        }) %>
+      </div>
+
+      <div class="d-md-flex gap-3">
+        <%- include("../../components/form/input-box.ejs", {
+          label: "Max Notifications (per day)",
+          name: "max_fire",
+          type:"number",
+          value: data.max_fire || 10,
+          num_limit: [1, 100],
+          required: true
+        }) %>
+        <%- include("../../components/form/input-box.ejs", {
+          label: "Notification Mean Time (in minutes)",
+          name: "meantime",
+          type:"number",
+          value: data.meantime || 30,
+          num_limit: [1, 365]
+        }) %>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- playbook conditions -->
+  <div class="tab p-4 bg-white rounded shadow mb-3">
+
+    <div class="fs-4 fw-bold mb-3">Playbook Conditions</div>
+
+    <div id="playbook-conditions">
+      <div id="source-Wazuh-options">
+        <div class="form-group py-1 mb-3">
+          <label class="fw-bold text-primary mb-1">Select Template (Optional)</label>
+          <div class="d-flex gap-3">
+            <select id="rule-selection" name="template" class="form-select w-100 rounded-pill fw-bold text-secondary" onchange="updateRule(this)">
+              <option value="default">
+                Choose Template
+              </option>
+              <% templates.forEach(template => { %>
+                <option value="<%= template.sid %>" 
+                  data-rule="<%= template.rule %>" 
+                  data-name="<%= template.title %>"
+                  <%= template.rule === data.values?.[0] ? "selected" : "" %>>
+                    <%= template.rule %> : 
+                    <%= locals.format.truncateText(template.title, 40) %>
+                </option>
+                <% }) %>
+            </select>
+            <div class="d-flex">
+              <a href="/dashboard/templates/edit/add?type=playbook#Templates" class="btn btn-secondary rounded-pill text-nowrap" target="_blank">
+                <i class="fa fa-external-link"></i>
+                <span class="d-none d-md-inline ms-1">Create Template</span>
+              </a>
+            </div>
+          </div>
+        </div>
+    
+        <%- include("../../components/form/input-box.ejs", {
+          id: "playbook-title",
+          label: "Playbook Title",
+          name: "title",
+          value: data.title || "",
+          placeholder: "Playbook title here...",
+          char_limit: [1, 255],
+          required: true
+        }) %>
+    
+        <div class="fw-bold text-primary mb-3">Playbook Rules</div>
+    
+        <div class="my-3">
+          <%- include('../../components/logs-filter', {
+            filters, identifiers, len: filters.idfs_len, editable: true
+          }) %>
+        </div>
+      </div>
+  
+      <div id="source-AI-options" class="d-none">
+        <%- include("../../components/form/input-box.ejs", {
+          id: "playbook-title",
+          label: "Playbook Title",
+          name: "title",
+          value: data.title || "",
+          placeholder: "Playbook title here...",
+          char_limit: [1, 255],
+          required: true
+        }) %>
+        <div class="d-flex gap-3">
+          <%- include("../../components/form/select-box.ejs", {
+            id: "attack-vector-selection",
+            label: "Attack Vector",
+            name: "ai_vector",
+            selected: data.ai_vector || "",
+            options: [
+              {
+                value: "malware",
+                option: "Malware"
+              },
+              {
+                value: "ransomware",
+                option: "Ransomware"
+              },
+              {
+                value: "command_and_control",
+                option: "Command and Control"
+              },
+              {
+                value: "phishing",
+                option: "Phishing"
+              },
+              {
+                value: "ssh",
+                option: "SSH"
+              },
+              {
+                value: "anomaly",
+                option: "Anomaly"
+              },
+              {
+                value: "vulnerability",
+                option: "Vulnerability"
+              },
+              {
+                value: "limit_disk",
+                option: "Limit Disk"
+              },
+              {
+                value: "authentication",
+                option: "Authentication"
+              },
+              {
+                value: "network",
+                option: "Network"
+              },
+              {
+                value: "integrity",
+                option: "Integrity"
+              },
+              {
+                value: "data_del",
+                option: "Data Deletion"
+              },
+              {
+                value: "security_tool",
+                option: "Security Tool"
+              },
+              {
+                value: "email",
+                option: "Email"
+              },
+              {
+                value: "exfiltration",
+                option: "Exfiltration"
+              },
+              {
+                value: "ddos",
+                option: "DDOS"
+              },
+              {
+                value: "man_in_the_middle",
+                option: "Man-in-the-middle"
+              }
+            ]
+          }) %>
+          <div class="col-md-4">
+            <%- include("../../components/form/input-box.ejs", {
+              label: "Logs count (if exceeds)",
+              name: "ai_logs_count",
+              type: "number",
+              value: data.ai_logs_count || 100,
+              num_limit: [1, 100000],
+              required: true
+            }) %>
+          </div>
+        </div>
+      </div>
+  
+      <div id="source-UBA-options" class="d-none">
+  
+        <div class="d-flex justify-content-center fs-6 gap-4 col-md-10 mx-auto text-center mb-3">
+          <label class="py-4 px-3 clickable-h uba-type-filter <%= data.uba_type === "activity" ? "selected" : "" %>" onclick="changeUBAType('activity')">
+            <i class="fas fas fa-user-xmark fs-2 mb-2"></i>
+            <div class="fw-bold text-nowrap">
+              Activity Based Filter
+            </div>
+          </label>
+          <label class="py-4 px-3 clickable-h uba-type-filter <%= data.uba_type === "alert" ? "selected" : "" %>" onclick="changeUBAType('alert')">
+            <i class="fas fa-user-secret fs-2 mb-2"></i>
+            <div class="fw-bold text-nowrap">
+              Alert Based Filter
+            </div>
+          </label>
+        </div>
+  
+        <div class="d-flex gap-2">
+          <div class="col-md">
+            <%- include("../../components/form/input-box.ejs", {
+              id: "playbook-title",
+              label: "Playbook Title",
+              name: "title",
+              value: data.title || "",
+              placeholder: "Playbook title here...",
+              char_limit: [1, 255],
+              required: true
+            }) %>
+          </div>
+          <div class="col-md-5">
+            <%- include("../../components/form/select-box.ejs", {
+              id: "uba-username",
+              label: "Target Username",
+              name: "uba_username",
+              selected: data.uba_username || "",
+              options: [
+                {
+                  value: "",
+                  option: "Any User"
+                },
+                ...uba_users.map(user => 
+                  ({
+                    value: user.username,
+                    option: user.username
+                  })
+                )
+              ]
+            }) %>
+          </div>
+        </div>
+  
+        <div id="uba-activity-based-filter" class="py-2">
+          <div class="d-flex gap-3">
+            <%- include("../../components/form/select-box.ejs", {
+              id: "uba-activity-selection",
+              label: "UBA Activity",
+              name: "uba_activity",
+              selected: data.uba_activity || "",
+              options: [
+                {
+                  value: "",
+                  option: "Any Action"
+                },
+                ...uba_actions.map(action =>
+                  ({
+                    value: action.action,
+                    option: action.action
+                  })
+                )
+              ]
+            }) %>
+            <div class="col-md-5">
+              <%- include("../../components/form/input-box.ejs", {
+                label: "Frequency (if exceeds)",
+                type: "number",
+                name: "uba_act_count",
+                value: data.uba_act_count || 100,
+                num_limit: [1, 100000]
+              }) %>
+            </div>
+          </div>
+        </div>
+        
+        <div id="uba-alert-based-filter" class="d-none py-2">
+          <div class="d-flex gap-3">
+            <%- include("../../components/form/select-box.ejs", {
+              id: "uba-alert-selection",
+              label: "UBA Alert",
+              name: "uba_alert",
+              selected: data.uba_alert || "",
+              truncate: 100,
+              options: [
+                {
+                  value: "",
+                  option: "Any Alert"
+                },
+                ...uba_patterns.map(pattern =>
+                  ({
+                    value: pattern.pattern,
+                    option: pattern.implication
+                  })
+                )
+              ]
+            }) %>
+          </div>
+        </div>
+  
+      </div>
+  
+      <div id="source-Asset-options" class="d-none">
+        <%- include("../../components/form/input-box.ejs", {
+          id: "playbook-title",
+          label: "Playbook Title",
+          name: "title",
+          value: data.title || "",
+          placeholder: "Playbook title here...",
+          char_limit: [1, 255],
+          required: true
+        }) %>
+        <div class="d-flex gap-3">
+          <%- include("../../components/form/select-box.ejs", {
+            id: "attack-vector-selection",
+            label: "Select asset",
+            name: "asset_sid",
+            selected: data.asset_sid || "",
+            options: assets.map(asset => 
+              ({
+                value: asset.sid,
+                option: `${asset.name || asset.host}`
+              })
+            )
+          }) %>
+          <div class="col-md-4">
+            <%- include("../../components/form/select-box.ejs", {
+              label: "Asset Event",
+              name: "asset_status",
+              selected: data.asset_status || "up",
+              options: [
+                {
+                  value: "any",
+                  option: "Up or Down"
+                },
+                {
+                  value: "up",
+                  option: "Goes Up"
+                },
+                {
+                  value: "down",
+                  option: "Goes Down"
+                }
+              ]
+            }) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  
+
+  <!-- Playbook Notification -->
+  <div class="tab p-4 bg-white rounded shadow mb-3">
+      
+    <div class="fw-bold mb-3 d-flex justify-content-between">
+      <div class="fs-4 ">
+        Playbook Users
+      </div>
+    </div>
+
+    <div class="form-group py-1 mb-3">
+      <label class="fw-bold text-primary mb-1">Select Workflow</label>
+      <div class="d-flex gap-3">
+        <select id="workflow-selectbox" name="workflow" onchange="loadWorkflow(this)">
+          <option value="default">
+            Choose Workflow
+          </option>
+          <% workflows.forEach(workflow => { %>
+            <option value="<%= workflow.sid %>"
+              <%= workflow.sid === data.workflow ? "selected" : "" %>>
+                <%= workflow.sid %> : 
+                <%= workflow.title %>
+            </option>
+          <% }) %>
+        </select>
+        <div class="d-flex gap-2">
+          <a href="/dashboard/workflow/create#Workflow" class="btn btn-secondary rounded-pill text-nowrap" target="_blank">
+            <i class="fa fa-external-link"></i>
+            <span class="d-none d-md-inline ms-1">Create New</span>
+          </a>
+          <button class="btn btn-sm btn-primary rounded-pill" type="button"
+            onclick="bringPopover('#user-selection'); updateUserTarget('phase1')">
+              <i class="fa fa-user-plus"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="py-2 px-3 d-flex justify-content-between border-2 border-bottom mb-3 fw-bold small">
+      <div class="col-4">
+          Selected User
+      </div>
+      <div class="col-4 text-center">
+          Forward Status
+      </div>
+      <div class="col-2 text-center">
+          Action
+      </div>
+    </div>
+    <div id="phase1-users" class="phase-selection user-container d-flex flex-column gap-3">
+      <div class="d-flex justify-content-center py-4 text-muted">
+        <div class="text-center">
+          <div class="mb-3"><i class="fa fa-user-plus fa-3x"></i></div>
+          <h5>Please Add Users</h5>
+        </div>
+      </div>
+    </div>
+
+    <div class="py-3">
+      <hr>
+    </div>
+
+    <div class="fs-4 fw-bold mb-3">
+      Playbook Actions
+    </div>
+
+    <div class="d-flex justify-content-center fs-6 gap-4 col-md-10 mx-auto text-center">
+      <div class="py-4 px-3 rounded border">
+        <i class="fa fa-envelope fs-1 mb-4 text-primary"></i>
+        <div class="col form-check form-switch d-flex align-items-cente">
+          <label class="form-check-label w-100 ms-3 clickable">
+              <input name="send_email" class="form-check-input" type="checkbox" data-toggle="switchbutton" <%= data.send_email === 'on' ? "checked" : "" %>>
+              <div class="text-nowrap">
+                  Send Email
+              </div>
+          </label>
+        </div>
+      </div>
+      <div class="py-4 px-3 rounded border">
+        <i class="fa fa-sms fs-1 mb-4 text-success"></i>
+        <div class="col form-check form-switch d-flex align-items-cente">
+          <label class="form-check-label w-100 ms-3 clickable">
+              <input name="send_sms" class="form-check-input" type="checkbox" data-toggle="switchbutton" <%= data.send_sms === 'on'  ? "checked" : "" %>>
+              <div class="text-nowrap">
+                  Send SMS
+              </div>
+          </label>
+        </div>
+      </div>
+      <div class="py-4 px-3 rounded border area_blocked">
+        <i class="fas fa-ban fs-1 mb-4 text-danger"></i>
+        <div class="col form-check form-switch d-flex align-items-cente">
+          <label class="form-check-label w-100 ms-3 clickable">
+              <input name="send_firewall" class="form-check-input" type="checkbox" data-toggle="switchbutton">
+              <div class="text-nowrap">
+                  Firewall Action
+              </div>
+          </label>
+        </div>
+      </div>
+    </div>
+      
+  </div>
+
+  <!-- Confirm Selection -->
+  <div class="tab p-4 py-5 bg-white rounded-pill shadow mb-3 text-center scale-in-center">
+
+    <div class="display-3">
+      <i class="fa-regular fa-circle-question"></i>
+    </div>
+    <h5 class="fs-5 fw-bold">
+      Are you ready to submit?
+    </h5>
+
+    <div class="">
+      <% if (data.title) { %>
+        Please press submit if you want to update.
+      <% } else { %>
+        Please press submit if you want to create.
+      <% } %>
+    </div>
+      
+  </div>
+
+  <div class="text-end mt-4">
+    <button class="btn btn-secondary rounded-pill px-4 me-2" type="button" id="prevBtn" onclick="nextPrev(-1)">
+      <i class="fa fa-arrow-left"></i>
+      Previous
+    </button>
+    <button class="btn btn-success rounded-pill px-4" type="button" id="nextBtn" onclick="toggleSection('#progress-next-loading-icon'); nextPrev(1)">
+      Next
+      <i class="fa fa-arrow-right"></i>
+    </button>
+  </div>
+
+  <!-- hidden fields -->
+  <div class="d-none">
+    <input name="recipients" type="text">
+    <input id="uba-type-input" name="uba_type" type="text" value="<%= data.uba_type || "activity" %>">
+    <% if (data.title) { %>
+      <input name="id" type="text" value="<%= data._id %>">
+      <input name="updating" type="text" value="true">
+    <% } %>
+  </div>
+
+  <div class="py-5"></div>
+
+</form>
+
+<%- include('./user-selection') %>
+
+<script>
+  window.eitix_progress_form_target = "#create-playbook";
+</script>
+
+<script src="/scripts/progress-steps.js"></script>
+<script src="/scripts/select2.js"></script>
+
+<script>
+
+  let form_submission_fired = false;
+  // no_f = this may stop working, use textarea instead
+  let filters = JSON.parse("<%= JSON.stringify(filters) %>".replace(/&#34;/g, '"'));
+  
+  let rule_filter_id = "";
+
+  if (filters && filters !== "") {
+
+    let { idfs, types, operators, values } = filters;
+
+    for (let index = 0; index < idfs?.length; index++) {
+      if (index === 0) {
+
+        rule_filter_id = addFilter(idfs[index], operators[index], values[index], true, true);
+
+      } else {
+
+        addFilter(idfs[index], operators[index], values[index]);
+
+      }
+    }
+
+  } else {
+
+    // default filters
+    rule_filter_id = addFilter("rule.id", "", "", true, true);
+    addFilter("rule.firedtimes");
+
+  }
+
+  activeGroup(".uba-type-filter", "selected");
+
+  $('#attack-vector-selection').select2({
+      width: '100%',
+  });
+
+  $('#rule-selection').select2({
+      width: '100%',
+  });
+
+  $('#workflow-selectbox').select2({
+      width: '100%',
+  });
+
+  $('#uba-activity-selection').select2({
+      width: '100%',
+  });
+
+  $('#uba-alert-selection').select2({
+      width: '100%',
+  });
+
+  // load workflow if exists
+  try {
+    
+    // no_f = this may stop working, use textarea instead
+    let workflow = JSON.parse("<%= JSON.stringify(data?.workflow) %>".replace(/&#34;/g, '"'));
+
+    loadWorkflow();
+
+  } catch (error) {
+
+    // ignore json parsing error
+    
+  }
+
+  let mode = "<%= data.title ? 'update' : 'create' %>";
+  let preloaded_users = [];
+  
+  try {
+    
+    // no_f = this may stop working, use textarea instead
+    let users_data = JSON.parse("<%= JSON.stringify(data.users) %>".replace(/&#34;/g, '"'));
+    if (Array.isArray(users_data)) {
+      
+      preloaded_users = users_data.map(ustr => {
+        let user = ustr?.split("-");
+        return {sid: user[1], type: user[0]}
+      }) || [];
+      
+    }
+
+  } catch (error) {
+
+    // ignore json parsing error
+    
+  }
+
+  // load users
+  loadUsers(preloaded_users);
+
+  // custom validator
+  customValidator = (callback) => {
+
+    // This function deals with validation of the form fields
+    let x, y, i, valid = true;
+    let form = document.querySelector(window.eitix_progress_form_target);
+
+    changeSource({ value: form['source'].value });
+    changeUBAType(form['uba_type'].value);
+
+    if (currentTab === 1) {
+
+      let wazuh_source = form['source'].value === "Wazuh";
+      let ai_source = form['source'].value === "AI";
+      let uba_source = form['source'].value === "UBA";
+
+      // playbook conditions
+      // function coming from logs-filter.ejs
+      if (wazuh_source && hasDuplicateFilter()) {
+
+        toast("Playbook rules collusion found", "Please do not keep any duplicate rules/filters", 1);
+        return callback(false);
+
+      } else {
+
+        if (mode === 'create') {
+
+          // both for ai playbook and wazuh playbook
+          let title_input = [...form["title"]].find(input => !input.disabled);
+          let title = title_input?.value;
+          
+          fetchDynamicData({
+            url: `/content/check/value?col=pb&field=title&val=${title}`
+          }, (response) => {
+  
+            if (response?.unique) {
+  
+              return callback(true);
+  
+            } else {
+  
+              toast("Playbook already exists", "Please set another unique title", 1);
+              return callback(false);
+  
+            }
+  
+          })
+
+        } else {
+
+          return callback(true);
+
+        }
+
+      }
+
+    } else if (currentTab === 2) {
+
+      // user selection (playbook notification)
+
+      let total = 0;
+      let atleast_one_user = false;
+      let all_tabs = document.getElementsByClassName("tab");
+      let isPhaseSelection = all_tabs[currentTab].querySelector(".phase-selection");
+
+      if (isPhaseSelection) {
+
+        let currentPhase = "phase1";
+
+        // all_users coming from user-selection.js
+        all_users.forEach(user => {
+          if (user.type === currentPhase) {
+            atleast_one_user = true;
+            return;
+          }
+        })
+
+        if (!atleast_one_user) {
+          toast("No users selected!", "Please select at least one user", 1);
+          return callback(false);
+        }
+
+      }
+
+      // off checkboxes
+      let all_checkboxes = document.querySelectorAll(".form-check-input");
+      all_checkboxes.forEach(chkbox => {
+        if (!chkbox.checked) {
+          const hiddenInput = document.createElement("input");
+          hiddenInput.type = "hidden";
+          hiddenInput.name = chkbox.name;
+          hiddenInput.value = "off";
+          chkbox.parentNode.appendChild(hiddenInput);
+        }
+      });
+
+      return callback(true);
+
+    } else if(currentTab === 3) {
+
+      form_submission_fired = true;
+      return callback(true);
+
+    } else {
+
+      form_submission_fired = false;
+      return callback(true);
+
+    }
+
+  }
+
+  function updateRule(element) {
+
+    const selected_option = element.options[element.selectedIndex];
+    const rule_filter = document.getElementById("value-" + rule_filter_id);
+
+    rule_filter.value = selected_option.getAttribute("data-rule");
+    rule_filter.value = selected_option.getAttribute("data-rule");
+    $("#playbook-title").val(selected_option.getAttribute("data-name"));
+
+  }
+
+  function changeSource(selectbox) {
+
+    let selected = selectbox.value;
+    let selected_source_options = document.getElementById(`source-${selected}-options`);
+    let all_source_options = document.getElementById("playbook-conditions");
+
+    let ai_options = document.getElementById("source-ai-options");
+    let uba_options = document.getElementById("source-uba-options");
+    let wazuh_options = document.getElementById("source-wazuh-options");
+
+    Array.from(all_source_options.children).forEach(el => el.classList.add("d-none"));
+    selected_source_options.classList.remove("d-none");
+
+    Array.from(all_source_options.querySelectorAll("input, select")).forEach(el => el.disabled = true);
+    Array.from(selected_source_options.querySelectorAll("input, select")).forEach(el => el.disabled = false);
+
+  }
+
+  function changeUBAType(type) {
+
+    if (type === 'activity') {
+
+      toggleSection('#uba-activity-based-filter', 'yes'); 
+      toggleSection('#uba-alert-based-filter', 'no');
+
+    } else {
+
+      toggleSection('#uba-alert-based-filter', 'yes');
+      toggleSection('#uba-activity-based-filter', 'no'); 
+
+    }
+
+    document.getElementById("uba-type-input").value = type;
+
+  }
+  
+  window.addEventListener('beforeunload', function (e) {
+
+    if (!form_submission_fired) {
+        e.preventDefault();
+    }
+
+  });
+
+</script>

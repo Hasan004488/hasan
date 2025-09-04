@@ -1,0 +1,40 @@
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow">
+
+        <div class="d-flex align-items-center justify-content-between">
+        
+          <h4 class="fw-bold">
+            UBA Attack Pattern List
+          </h4>
+        
+          <div class="d-flex gap-2 align-items-center">
+            <a id="Create-User" onclick="toggle('#trow-create-new')"
+            class="btn btn-primary rounded-pill" title="create new patter">
+              <i class="fab fa-delicious"></i>
+              <i class="fa fa-add"></i>
+            </a>
+            <%- include('components/search-control-buttons') %>
+          </div>
+        
+        </div>
+
+        <%- include("../../components/body/search-data.ejs", {
+          options: [
+            { name: "Pattern", property: "username" },
+            { name: "Implications", property: "fullname" }
+          ],
+          total_text: "Total users available:"
+        }) %>
+
+        <%- include("../../components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<script>
+
+  loadData(true, true);
+
+</script>
+
+<script src="/scripts/dynamic-update.js"></script>

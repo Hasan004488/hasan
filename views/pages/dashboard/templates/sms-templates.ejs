@@ -1,0 +1,107 @@
+<% 
+    /* ejs code */
+%>
+
+<link rel="stylesheet" href="/styles/template.css">
+
+<div class="col-12">
+
+  <div class="p-4 bg-white rounded shadow">
+
+    <div class="d-flex justify-content-between">
+
+      <div class="d-flex">
+        <div class="pb-2 text-nowrap btn-group" style="overflow-x: auto;">
+          <a href="/dashboard/templates/manage?tab=all#Manage-Templates" class="btn btn-tab-off px-5" id="tab-all">
+              <i class="fa fa-clipboard-list me-1"></i>
+              All Templates
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <a class="btn btn-primary" href="/dashboard/templates/add/sms">
+          <i class="fa fa-add"></i>
+          Add SMS Template
+        </a>
+      </div>
+
+    </div>
+
+    <%- include("../../components/total-results.ejs", { pagination, total }) %>
+
+    <div class="theme-table table-responsive-sm py-2">
+        <table id="ticket-table" class="table table-hover text-secondary">
+            <thead class="thead table-secondary text-secondary">
+                <tr>
+                    <th></th>
+                    <th>Template ID</th>
+                    <th>Title</th>
+                    <th>Updated</th>
+                    <th>Author</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(i = 0; i < data.length; i++) { %>
+                <% let template = data[i]; %>
+                <tr>
+                    <td>
+                    </td>
+                    <td><%= template.sid || "ETM00000" %></td>
+                    <td>
+                      <% if (template.protected === true) { %>
+                        <i class="fa fa-lock me-1" title="Protected Item"></i>
+                      <% } %>
+                      <span><%= template.title || "No Information" %></span>
+                    </td>
+                    <td><%= template.date?.toLocaleString() || "No updates" %></td>
+                    <td><%= template.author || "No Information" %></td>
+                    <td class="d-flex justify-content-center gap-2">
+                      <a href="/dashboard/templates/edit?base=<%= template.sid %>"    
+                          class="btn badge btn-primary">
+                          <i class="fa fa-pen"></i>
+                          Edit
+                      </a>
+                      <% if (template.protected != true) { %>
+                        <form class="ms-2" action="/dashboard/templates/delete" method="POST" 
+                          onsubmit="return confirmChoice(event, 'Are sure to delete this template?')">
+                          <input class="d-none" type="text" name="id" value="<%= template._id %>">
+                          <button type="submit" class="btn badge btn-danger" data-toggle="tooltip">
+                              <i class="fa fa-trash"></i>
+                              Delete
+                          </button>
+                        </form>
+                      <% } %>
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <% if (data.length < 1) { %>
+            <div class="alert alert-warning py-2">
+                <i class="fa fa-circle-info"></i>
+                No Templates Found!
+            </div>
+        <% } %>
+
+    </div>
+
+    <div>
+      <%- include("../../components/pagination.ejs", {
+          pagination, query: `?tab=${active}`
+      }) %>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+    /* dom code */
+    $("#tab-<%=active%>").removeClass("btn-tab-off");
+    $("#tab-<%=active%>").addClass("btn-tab");
+
+</script>

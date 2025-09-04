@@ -1,0 +1,147 @@
+<script src="/scripts/chart.js"></script>
+
+<div class="col-12">
+  <div class="col-md p-4 bg-white rounded-bottom shadow">
+
+    <div class="d-flex justify-content-between">
+      <div class="btn-group toggle-block">
+        <button class="btn btn-tab px-5" onclick="changeMonitor('weekly')">
+          <i class="fa fa-globe area_blocked"></i>
+          Weekly Monitor
+        </button>
+        <button class="btn btn-tab-off px-5" onclick="changeMonitor('monthly')">
+          <i class="fa fa-globe area_blocked"></i>
+          Monthly Monitor
+        </button>
+      </div>
+    </div>
+
+    <div class="my-3">
+      <div class="fs-5 fw-bold me-3">IoCs Events Trend</div>
+      <small>IoCs events' frequency collected from various agents</small>
+    </div>
+
+    <div id="ioc-monitor-container" style="min-height: 15vh;">
+      <canvas id="ioc_monitor"></canvas>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="col-12">
+
+  <div class="d-flex gap-3">
+
+    <div class="col-md p-4 bg-white rounded-bottom shadow">
+
+      <div class="d-flex justify-content-between mb-4">
+        <div class="btn-group toggle-block">
+          <button class="btn btn-tab px-5" onclick="changeURL('/dashboard/ioc/tab/daily/data')">
+            <i class="fa fa-clock area_blocked"></i>
+            Regular IoCs
+          </button>
+          <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/ioc/tab/archive/data')">
+            <i class="fa fa-box area_blocked"></i>
+            Archive IoCs
+          </button>
+        </div>
+        <div class="d-flex gap-2">
+          <%- include('components/search-control-buttons') %>
+        </div>
+      </div>
+
+      <%- include("../../components/body/search-data.ejs", {
+        options: [
+          { name: "Data", property: "data" },
+          { name: "Log ID", property: "log_id" },
+          { name: "Rule ID", property: "rule_id" },
+          { name: "Description", property: "description" },
+          { name: "Agent ID", property: "agent" },
+          { name: "Agent IP", property: "agent_ip" },
+          { name: "Agent Name", property: "agent_name" },
+          { name: "Log Source", property: "log_source" },
+          { name: "Destination", property: "destination" },
+          { name: "Full Log", property: "full_log" }
+        ]
+      }) %>
+  
+      <%- include("../../components/body/data-table.ejs") %>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  let TIMING = "<%=timing%>";
+
+  let data_set_extra = {
+    tension: 0.5,
+    pointRadius: 4,
+    pointHoverRadius: 15,
+    borderWidth: 3,
+    hoverBorderWidth: 2
+  }
+
+  let options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    maintainAspectRatio: false
+  }
+
+  const ioc_ctx = document.getElementById("ioc_monitor").getContext("2d");
+  const ioc_monitor = new Chart(ioc_ctx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: " IoC Events",
+          data: [],
+          borderColor: '#df3838',
+          backgroundColor: '#df383830',
+          fill: true,
+          ...data_set_extra
+        }
+      ],
+    },
+    options: {
+      interaction: {
+        intersect: false
+      },
+      ...options
+    }
+  });
+
+  function changeMonitor(timing) {
+
+    TIMING = timing || TIMING;
+
+    loadDynamicData({
+      container: "#ioc-monitor-container",
+      url: `/dashboard/ioc/monitor?timing=${TIMING}`,
+    }, (monitor) => {
+      
+      ioc_monitor.data.labels = monitor.iocd_range;
+      ioc_monitor.data.datasets[0].data = monitor.ioce_total;
+      ioc_monitor.update();
+
+    }, 60000); // 1 minute
+
+  }
+
+  // load dynamic data
+  loadData(true);
+  
+  // load monitor
+  changeMonitor('weekly');
+
+
+</script>

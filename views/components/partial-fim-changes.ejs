@@ -1,0 +1,85 @@
+<% 
+let total_results = locals.format.number(total);
+let current = parseInt(pagination?.curr);
+let total_page = parseInt(pagination?.total);
+%>
+
+<div class="bg-white">
+
+  <div class="py-2 mb-2 border-bottom border-primary d-flex justify-content-between">
+
+    <div>
+      <span>Showing </span>
+      <strong>
+        <%= pagination?.range[0] + " - " + pagination?.range[1] %>
+      </strong>
+      out of 
+      <strong class="text-primary"><%= total_results ?? 0 %></strong>
+      <span>files!</span>
+    </div>
+
+    <div class="small">
+      Page <strong class="text-primary"><%= current %></strong>
+      out of <strong class="text-primary"><%= total_page %></strong>
+    </div>
+
+  </div>
+
+  <div>
+    <div class="d-flex align-items-center my-2">
+      <span class="fs-5 fw-bold">
+        <span>Changes on 
+          <span class="text-primary"><%= active.agent || "All" %></span> Agent
+          <span class="badge bg-primary">
+            <i class="fa fa-desktop"></i>
+            <span><%= agent_info.name || "Select Agent" %></span>
+          </span>
+        </span>
+      </span>
+    </div>
+    <details class="<%= agent_info.ip ? " d-block" : "d-none" %>">
+      <summary class="clickable-h mb-2">
+        <strong>Agent Details</strong>
+      </summary>
+      <div class="row mx-2 py-2 border border-3">
+        <div class="col-md">
+          <div class="input-group my-2">
+            <label class="input-group-text">Host IP</label>
+            <input class="form-control" type="text" readonly value="<%= agent_info.ip || " No Information" %>">
+          </div>
+          <div class="input-group my-2">
+            <label class="input-group-text">Host Name</label>
+            <input class="form-control" type="text" readonly value="<%= agent_info.name || " No Information" %>">
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="input-group my-2">
+            <label class="input-group-text">Operating System</label>
+            <input class="form-control" type="text" readonly value="<%= agent_info.os?.name || " No Information" %>">
+          </div>
+          <div class="input-group my-2">
+            <label class="input-group-text">OS Uname</label>
+            <input class="form-control" type="text" readonly value="<%= agent_info.os?.uname || " No Information" %>">
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="input-group my-2">
+            <label class="input-group-text">OS Platform</label>
+            <input class="form-control" type="text" readonly value="<%= agent_info.os?.platform || " No Information"
+              %>">
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <%- include("./fim-table-static.ejs", {
+    search_query: {}
+  }) %>
+
+  <script>
+    $("#fim-tab-<%=active.files%>").removeClass("btn-outline-secondary");
+    $("#fim-tab-<%=active.files%>").addClass("btn-primary");
+  </script>
+
+</div>

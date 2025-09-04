@@ -1,0 +1,88 @@
+<% 
+let modify_permission = access("modifyAsset", locals.permissions);
+let delete_permission = access("deleteAsset", locals.permissions);
+%>
+  
+<% data.forEach((data) => { %>
+  <tr class="py-3 slide-in-up">
+    <td><%= data?.date?.toLocaleString() || "No Information" %></td>
+    <td><%= data?.sid?.toUpperCase() || "EA00000" %></td>
+    <td>
+      <%= data.name || data.host || "Not set" %>
+    </td>
+    <td class="text-center">
+      <% if (data.status === "active") { %>
+        <span class="badge bg-success rounded-pill">
+          <i class="fa fa-arrow-up"></i>
+          Up
+        </span>
+      <% } else { %>
+        <span class="badge bg-gray text-dark rounded-pill">
+          <i class="fa fa-arrow-down"></i>
+          Down
+        </span>
+      <% } %>
+    </td>
+    <td><%= locals.format.title(data?.category) || "Not set" %></td>
+    <td><%= data?.ip || "Not set" %></td>
+    <td class="text-center">
+
+
+      <% if (data?.tracking === 'on') { %>
+
+        <button class="toggle-btn bg-primary <%= modify_permission ? "" : "area_disabled" %>" onclick="updateData('Are you sure to turn tracking off?', '/dashboard/assets/update?track=off', '<%= data.sid %>', 'GET')">
+          Tracking
+          <span class="bg-white inline-circle"></span>
+        </button>
+
+      <% } else { %>
+
+        <button class="toggle-btn bg-secondary <%= modify_permission ? "" : "area_disabled" %>" onclick="updateData('Are you sure to turn tracking on?', '/dashboard/assets/update?track=on', '<%= data.sid %>', 'GET')">
+          <span class="bg-white inline-circle"></span>
+          Stopped
+        </button> 
+
+      <% } %>
+
+    </td>
+    <td class="text-center">
+
+      <div class="d-flex gap-2">
+        <% if(modify_permission) { %>
+  
+          <form class="" action="/dashboard/assets/create" method="GET">
+            <div class="d-none">
+              <input type="text" name="id" value="<%= data._id %>">
+              <input type="text" name="updating" value="true">
+            </div>
+            <button type="submit" class="btn btn-sm rounded-pill btn-success">
+              <i class="fa fa-pen"></i>
+              Edit
+            </button>
+          </form>
+  
+        <% } else { %>
+          <button class="btn btn-sm rounded-pill btn-success area_disabled">
+            <i class="fa fa-pen"></i>
+            Edit
+          </button>
+        <% } %>
+  
+        <% if(delete_permission) { %>
+  
+          <button type="submit" class="btn rounded-pill btn-sm btn-danger" onclick="updateData('Are sure to permanently delete this asset?', '/dashboard/assets/delete', '<%= data._id %>')">
+            <i class="fa fa-trash"></i>
+          </button>
+  
+        <% } else { %>
+  
+            <button type="button" class="btn rounded-pill btn-sm btn-danger disabled" disabled>
+              <i class="fa fa-trash"></i>
+            </button>
+  
+        <% } %>
+      </div>
+
+    </td>
+  </tr>
+<% }) %>

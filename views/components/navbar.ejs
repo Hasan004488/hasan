@@ -1,0 +1,242 @@
+<% let nav_icons="btn btn-light text-secondary" ; %>
+
+<nav id="navbar" class="navbar px-3 bg-white">
+    <div class="d-flex align-items-center">
+        <span onclick="toggleSidebar()" class="pe-3 d-xl-none toggler" type="button">
+            <i class="fa fa-bars"></i>
+        </span>
+        <span class="navbar-brand fw-bold text-dark slide-in-top">
+          <%= typeof title !="undefined" ? locals.format.title(title) : "Dashboard" %> 
+          <span class="text-muted">
+            - EITIx SOAR
+          </span>
+        </span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <span id="validation-failed-con" class="badge bg-danger p-2 d-none rounded-pill">
+          <i class="fa fa-exclamation-triangle"></i>
+          <span id="validation-failed">License key is not valid!</span>
+        </span>
+        <span class="text-muted">
+          <i class="fa fa-clock"></i>
+          <strong id="clock-time">00:00:00</strong>
+        </span>
+        <div class="position-relative">
+            <button class="btn btn-outline-primary rounded-pill" 
+                id="navbar-notifs" type="button" 
+                onclick="toggleSection('#notifs-con'); seenNotifs()"
+                title="EITIx Notifications"
+            >
+                <i id="bell-icon" class="fa fa-bell"></i>
+                <span id="process-loading" class="d-none spinner-border spinner-border-sm ms-1" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+                <span id="notifs-stat" class="fw-bold"></span>
+            </button>
+            <div style="width: 40vw; height: 50vh; overflow:auto"
+                class="d-none shadow notif-container rounded-4 p-3 scale-in-top" 
+                id="notifs-con">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="fw-bold">Notifications</div>
+                    <button class="btn btn-danger btn-sm rounded-pill px-3" onclick="toggleSection('#notifs-con');">
+                        <i class="fa fa-close"></i> Close
+                    </button>
+                </div>
+                <ul class="list p-0">
+                  No new notifications available
+                </ul>
+            </div>
+        </div>
+        <div class="dropdown position-relative">
+          <button class="btn-dropdown btn btn-light rounded-pill dropdown-toggle px-3" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="/content/assets/images/<%= locals.profile_image || 'user-profile.png' %>" alt="profile image" class="profile_image" style="height: 1.7rem; width: 1.7rem;">
+              <span class="mx-2">
+                <%= locals.username.length > 20 ? locals.username.slice(0, 17) + "..." : locals.username %>
+              </span>
+          </button>
+          <ul class="dropdown-menu position-absolute dropdown-menu-end rounded-4 p-3 border-0 shadow mt-2 scale-in-top" aria-labelledby="dropdownMenuButton2" style="z-index: 5000; width: 250px;">
+              <li class="text-center mb-2 border-bottom">
+                <img src="/content/assets/images/<%= locals.profile_image || 'user-profile.png' %>" alt="profile image" class="profile_image" style="height: 6rem; width: 6rem;">
+                <div class="fw-bold my-2">
+                  <%= locals.username.length > 20 ? locals.username.slice(0, 17) + "..." : locals.username %>
+                </div>
+              </li>
+              <li class="mb-2"><a class="dropdown-item rounded-3" href="/dashboard/settings/profile#Settings">
+                <i class="fa fa-user me-2"></i>
+                My Profile
+              </a></li>
+              <li class="mb-2">
+                <button class="dropdown-item rounded-3" type="button" title="About EITIx" 
+                  onclick="togglePopup(`About EITIx SOAR`, copyContent('#eitix-about-modal'));">
+                  <i class="fa fa-circle-info me-2"></i>
+                  About EITIx
+                </button>
+              </li>
+              <li class="">
+                <a class="w-100 rounded-pill btn btn-danger" href="/auth/logout"
+                onclick="return confirmChoice(event, 'Are you sure to sign out from EITIx?')">
+                  <i class="fa fa-sign-out me-2"></i>
+                  Logout
+                </a>
+              </li>
+          </ul>
+        </div>
+    </div>
+    <div id="eitix-about-modal" class="d-none">
+        <%- include("about-eitix") %>
+    </div>
+</nav>
+
+<div class="" style="height: 5px;">
+  <div id="data-loading" class="d-none w-100 loading-bar-animation rounded overflow-hidden">
+    <div id="data-loading-bar" class="bg-primary" role="progressbar" style="width: 0%; height: 5px;"></div>
+  </div>
+</div>
+
+<script>
+
+    const notifs_con = document.querySelector("#notifs-con .list");
+    const notifs_stat = document.getElementById("notifs-stat");
+    
+    notifs_con.addEventListener("click", (e) => {
+
+      const target = e.target;
+
+      if (target.hasAttribute("data-id")) {
+
+        let id = target.getAttribute("data-id");
+
+        $("#notif-" + id).remove();
+        notifs_stat.innerHTML = TEMPLATE.loader_sm;
+
+        $.ajax({
+          url: '/content/notifications/remove/' + id,
+          type: 'GET',
+          success: () => {
+
+            loadNotifs();
+
+          },
+          error: (err) => {
+
+            toast("Failed to perform this task", err, 2);
+            notifs_stat.innerHTML = "";
+
+          }
+        });
+
+
+      }
+
+    })
+
+    function loadNotifs() {
+
+      $.ajax({
+        url: '/content/notifications',
+        type: 'GET',
+        success: (data) => {
+
+          if (data.code === 404) {
+
+            notifs_con.innerHTML = EMSG.notFound("notifications");
+            notifs_stat.innerHTML = "";
+
+          } else if (data.body.length > 0) {
+
+            let notifs = '';
+            notifs_stat.innerHTML = data.unseen || "";
+
+            data.body?.forEach(notif => {
+              notifs += `
+                <li id="notif-${notif._id}" class="mb-2 p-3 rounded border d-flex justify-content-between align-items-center">
+                  <div>
+                    <a target="_blank" href="${notif.redirect}" class="reset-a">
+                      <div class="mb-1">${notif.message}</div>
+                    </a>
+                    <div class="small">${getElapsedTime(notif.updated)}</div>
+                  </div>
+                  <button data-id="${notif._id}" class="btn btn-light">
+                    <i class="fa fa-close text-danger area_blocked"></i>
+                  </button>
+                </li>
+              `;
+            });
+
+            notifs_con.innerHTML = notifs;
+
+          }
+
+        },
+        error: (err) => {
+
+          notifs_con.innerHTML = EMSG.server;
+          notifs_stat.innerHTML = "";
+
+        }
+      });
+
+    }
+
+    function checkValidation() {
+
+        $.ajax({
+            url: '/content/validation',
+            type: 'GET',
+            success: (eitix) => {
+
+                if (eitix?.validated === false) {
+
+                    $('#validation-failed-con').removeClass("d-none");
+                    if (eitix.type == "no_key") {
+
+                        $('#validation-failed').text("License key was not found!");
+
+                    } else if (eitix.type == "expired") {
+
+                        $('#validation-failed').text("License key have been expired!");
+
+                    }
+
+                }
+
+            }
+        });
+
+    }
+
+    function updateTime() {
+
+      // Get the element where you want to display the time
+      $("#clock-time").text(new Date().toLocaleTimeString());
+      
+    }
+
+    function seenNotifs() {
+
+      $.ajax({
+        url: '/content/notifications/seen',
+        type: 'GET',
+        success: () => {
+
+          loadNotifs();
+
+        },
+        error: (err) => {
+
+          toast("Failed to perform this task", err, 2);
+          notifs_stat.innerHTML = "";
+
+        }
+      });
+      
+    }
+    
+    loadNotifs();
+    checkValidation();
+    updateTime();
+
+    setInterval(loadNotifs, 10000);
+    setInterval(updateTime, 1000);
+
+</script>

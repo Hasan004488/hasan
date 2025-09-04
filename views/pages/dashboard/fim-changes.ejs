@@ -1,0 +1,58 @@
+<div class="col-12">
+
+  <div class="p-4 bg-light rounded-bottom shadow">
+
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+      <h4 class="fw-bold">
+        <div class="btn-group toggle-block">
+          <button class="btn btn-tab px-5" onclick="changeURL('/dashboard/fim/changes/tab/daily/data')">
+            <i class="fa fa-clock area_blocked"></i>
+            Daily FIM
+          </button>
+          <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/fim/changes/tab/archive/data')">
+            <i class="fa fa-box area_blocked"></i>
+            Archive FIM
+          </button>
+        </div>
+      </h4>
+      <div class="d-flex gap-2">
+        <%- include('components/search-control-buttons') %>
+      </div>
+    </div>
+
+    <%- include("../../components/body/search-data.ejs", {
+      options: [
+        { name: "Filename", property: "path" },
+        { name: "Log ID", property: "log_id" },
+        { name: "Md5 Before", property: "md5_before" },
+        { name: "Md5 After", property: "md5_after" },
+        { name: "Sha1 Before", property: "sha1_before" },
+        { name: "Sha1 After", property: "sha1_after" },
+        { name: "Sha256 Before", property: "sha256_before" },
+        { name: "Sha256 After", property: "sha256_after" }
+      ],
+      total_text: "Total Files detected:"
+    }) %>
+
+    <%- include("../../components/body/data-table.ejs") %>
+
+  </div>
+
+</div>
+
+<script>
+
+  loadData(true, true);
+
+  function updateActiveAgent(agent) {
+
+    if (agent) {
+      $("#active-agent").html(`Agent ${agent}`);
+    } else {
+      $("#active-agent").html("All Agent");
+    }
+
+
+  }
+
+</script>

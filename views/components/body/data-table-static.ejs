@@ -1,0 +1,236 @@
+<% 
+
+  function generateFormID() {
+    const prefix = "form";
+    const randomChars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let id = prefix;
+
+    // Append random characters to reach a total length of 11 characters
+    while (id.length < 11) {
+      const randomIndex = Math.floor(Math.random() * randomChars.length);
+      id += randomChars[randomIndex];
+    }
+
+    return id;
+  }
+
+%>
+<div class="theme-table table-responsive-sm py-2" style="min-height: 50vh">
+  <table class="table table-hover text-secondary">
+    <thead class="thead table-secondary text-secondary">
+      <tr>
+        <% if (dropdown) { %>
+          <th></th>
+        <% } %>
+        <% headers.forEach(header => { %>
+          <th class="<%= header.class %>">
+            <div class="d-flex w-full align-items-center justify-content-center">
+              <% if (header.sort) { %>
+                <button title="Sort this column" class="badge btn btn-sm btn-primary me-1">
+                  <i class="fa fa-arrow-up"></i>
+                </button>
+              <% } %>
+              <div class="w-100">
+                <span><%= header.text %></span>
+              </div>
+              <% if (header.filters) { %>
+                <div class="dropdown" title="Apply filter">
+                  <button class="badge btn ms-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="tooltip">
+                      <i class="fa fa fa-angle-down text-secondary"></i>
+                  </button>
+                  <div class="shadow dropdown-menu p-2 text-center">
+                    <div class="mb-2">
+                      <i class="fa fa-filter"></i>
+                      <span><%= header.text %></span>
+                    </div>
+                    <div class="overflow-auto d-grid" style="max-height: 40vh">
+                      <% header.filters?.forEach(filter => { %>
+                        <button 
+                          class="btn btn-sm d-block"
+                          onclick="loadData(true, false, '<%=filter.href%>')">
+                          <%=filter.name%>
+                        </button>
+                      <% }) %>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </th>
+        <% }) %>
+        <% if (actions) { %>
+          <th class="text-center">Action</th>
+        <% } %>
+      </tr>
+    </thead>
+    <tbody id="table-data">
+      <% for(i = 0; i < data.length; i++) { %>
+        <% 
+        let table_data = data[i] || {};
+        let _id = table_data._id;
+        %>
+        <tr>
+          <% if (dropdown) { %>
+      
+            <td>
+              <button class="btn btn-sm drop-btn"
+                <% if (dropdown.fetcher) { %>
+                  onclick="
+                    toggleDropData(this, '#dropdata-<%= _id %>');
+                    fetchDropData('#dropdata-<%= _id %> .data', '<%=dropdown.fetcher.collection%>', '<%=_id%>', '_id');
+                  "
+                <% } else { %>
+                  onclick="toggleDropData(this, '#dropdata-<%= _id %>')"
+                <% } %>
+              >
+                <i class="fa fa-angle-right"></i>
+              </button>
+            </td>
+      
+          <% } %>
+      
+          <% headers.forEach(header => { %>
+      
+            <td class="<%= header.class %>">
+      
+              <span class="<%= header.innerClass %>">
+      
+              <% if (header.handler) { %>
+      
+                <span><%- header.handler(table_data) %></span>
+      
+              <% } else { %>
+                
+                <% 
+                  let td_value = table_data[header.value] ?? null;
+                  let truncate_len = header.truncate;
+                %>
+                
+                <% if (td_value !== null) { %>
+                  
+                  <% if (header.truncate) { %>
+      
+                  <%
+                    let td_value_str = String(td_value);
+                    let truncated_value = td_value_str?.slice(0, truncate_len);
+                  %>
+                    <span title="<%= td_value %>"><%=
+                      truncated_value
+                      + (td_value_str.length > truncate_len ? "..." : "")
+                    %></span>
+                   
+                  <% } else { %>
+      
+                    <% if (header.type === "date") { %>
+      
+                      <span><%= td_value?.toLocaleString() %></span>
+                     
+                    <% } else { %>
+                      
+                      <span><%= td_value %></span>
+      
+                    <% } %>
+      
+                  <% } %>
+      
+                  <span><%= header.extra %></span>
+                  
+                <% } else { %>
+      
+                  <span>None</span>
+      
+                <% } %>
+      
+              <% } %>
+      
+              </span>
+      
+            </td>
+      
+          <% }) %>
+            
+          <% if (actions) { %>
+      
+            
+            <td class="text-center">
+              
+              <div class="d-flex justify-content-center">
+      
+                <% actions.forEach(action => { %>
+      
+                <%
+                // render action if it matches the condition
+                // if there's no condition applied it will render anyway
+                // also check for permission, if no then render anyway
+                if (
+                  table_data[action.condition?.field] === action.condition?.value
+                ) {
+                %>
+
+                <% let form_id = generateFormID() %>
+      
+                <form class="ms-2 <%= form_id %>" title="<%=action.title%>" action="<%= action.href %>" method="<%= action.method %>"
+                  target="<%= action.target %>"
+
+                  <% if (action.submit) { %>
+
+                    onsubmit="<%- action.submit(table_data) %>; return false"
+                    
+                  <% } else if (action.confirm) { %>
+
+                    onsubmit="return confirmChoice(event, '<%= action.confirm %>')"
+
+                  <% } %>
+
+                  >
+                  <div class="d-none">
+                    <input type="text" name="id" value="<%= table_data._id %>">
+                  </div>
+                  <button type="submit" class="btn badge rounded-pill <%= action.class %>">
+                      <%- action.body %>
+                  </button>
+                </form>
+      
+                <% } %>
+      
+                <% }) %>
+      
+              </div>
+      
+            </td>
+      
+      
+          <% } %>
+        </tr>
+        <% if (dropdown) { %>
+            
+          <tr id="dropdata-<%= _id %>" class="d-none fade-in">
+      
+            <td colspan="<%= 1 + parseInt(headers.length) + parseInt(actions ? 1 : 0) %>" class="p-3">
+      
+              <div class="data rounded bg-white p-3">
+                
+                <% if (dropdown.file) { %>
+                  <%- include(dropdown.file, {
+                    data: table_data,
+                    ...dropdown.extra
+                  }) %>
+                <% } else if (dropdown.json) { %>
+
+                  <%- locals.format.renderJSONInfo(dropdown.json[i]) %>
+
+                <% } %>
+                
+              </div>
+                
+            </td>
+      
+          </tr>
+      
+        <% } %>
+      
+      <% } %>
+    </tbody>
+  </table>
+
+</div>

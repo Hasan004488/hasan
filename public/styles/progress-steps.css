@@ -1,0 +1,54 @@
+/* Style the form */
+
+.stripe-bar {
+    width: 0.4rem;
+    height: 1.5rem;
+    background: white;
+}
+
+/* Mark input boxes that gets an error on validation: */
+input.invalid {
+    background-color: #ffdddd;
+}
+
+/* Hide all steps by default: */
+.tab {
+    display: none;
+}
+
+/* Make circles that indicate the steps of the form: */
+.step {
+    height: 2rem;
+    width: 2rem;
+    margin: 0 2px;
+    background-color: #888888;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.6;
+    font-weight: bold;
+    animation: none;
+}
+
+/* Mark the active step: */
+.step.active {
+    opacity: 1;
+    background-color: var(--bs-secondary);
+    color: white;
+    animation: pulsate-fwd 0.5s ease-in-out infinite both;
+}
+
+/* Mark the steps that are finished and valid: */
+.step.finish {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.step-bar {
+    height: 0.15rem;
+    width: 1rem;
+    background-color: rgb(179, 179, 179);
+}

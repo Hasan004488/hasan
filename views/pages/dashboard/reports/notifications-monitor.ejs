@@ -1,0 +1,107 @@
+<script src="/scripts/chart.js"></script>
+
+<div class="col-12">
+  <div class="p-4 bg-white rounded shadow">
+
+    <div class="btn-group toggle-block">
+      <button class="btn btn-tab px-5" onclick="changeMonitor('weekly')">
+        <i class="fa fa-globe area_blocked"></i>
+        Weekly Monitor
+      </button>
+      <button class="btn btn-tab-off px-5" onclick="changeMonitor('monthly')">
+        <i class="fa fa-globe area_blocked"></i>
+        Monthly Monitor
+      </button>
+    </div>
+
+    <div id="notifications-monitor-container" class="my-3">
+      <div class="fs-5 fw-bold">Reports Notification Graph</div>
+      <small>Emails and SMS notifictions sent to the users.</small>
+      <div style="min-height: 55vh;">
+        <canvas id="report_monitor"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+  let labels = [];
+  let emails_data = [];
+  let sms_data = [];
+
+  let data_set_extra = {
+      tension: 0.3,
+      pointRadius: 4,
+      pointHoverRadius: 15,
+      borderWidth: 3,
+      hoverBorderWidth: 2
+    }
+  
+    let options = {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'left'
+        },
+      },
+      maintainAspectRatio: false
+    }
+  
+    const ioc_ctx = document.getElementById("report_monitor").getContext("2d");
+    const report_monitor = new Chart(ioc_ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            fill: true,
+            label: " Emails Sent",
+            data: emails_data,
+            borderColor: '#ff7f3f',
+            backgroundColor: '#ff7f3f30',
+            ...data_set_extra
+          },
+          {
+            fill: true,
+            label: " SMS Sent",
+            data: sms_data,
+            borderColor: '#00a724',
+            backgroundColor: '#00a72430',
+            ...data_set_extra
+          }
+        ],
+      },
+      options: {
+        interaction: {
+          intersect: false
+        },
+        ...options
+      }
+    });
+
+    function changeMonitor(timing) {
+
+      loadDynamicData({
+        container: "#notifications-monitor-container",
+        url: "/dashboard/notifications/monitor/data?timing=" + timing,
+      }, (monitor) => {
+
+        report_monitor.data.labels = monitor.range;
+        report_monitor.data.datasets[0].data = monitor.emails_sent;
+        report_monitor.data.datasets[1].data = monitor.sms_sent;
+        report_monitor.update();
+
+      }, 60000); // 1 minute
+
+    }
+
+    $("#tab-<%=active%>").removeClass("btn-tab-off");
+    $("#tab-<%=active%>").addClass("btn-tab");
+
+    changeMonitor("<%=active%>");
+  
+  
+</script>

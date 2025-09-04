@@ -1,0 +1,113 @@
+<% if (page < 2) { %>
+  <tr id="trow-create-new" class="d-none slide-in-up">
+    <td><span class="py-1 px-2 rounded bg-secondary text-white">Automatic</span></td>
+    <td class="fw-bold">
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 raw-input" name="action" type="text" value="" placeholder="Name of the activity">
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 raw-input" name="description" type="text" value="" placeholder="Description">
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 raw-input" name="metadata" type="text" value="" placeholder="Comma seperated">
+      </div>
+    </td>
+    <td class="text-center">
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 raw-input text-center" name="category" type="text" value="" placeholder="Category">
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center justify-content-center gap-1">
+  
+        <button class="btn rounded-pill btn-sm btn-success px-2" data-toggle="tooltip"
+          title="Edit this action" onclick="updateRow(this, '#trow-create-new', 'Are you sure to create a new action?', '/dashboard/uba/actions/create', null, 'POST');">
+          <span class="spinner-border d-none spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <i class="fa fa-plus"></i>
+          Create
+        </button>
+        <button class="btn rounded-pill btn-sm btn-secondary"data-toggle="tooltip"
+          title="Edit This action" onclick="toggle('#trow-create-new');">
+          <i class="fa fa-times"></i>
+          Cancel
+        </button>
+  
+      </div>
+    </td>
+  </tr>   
+<% } %>
+<% data.forEach((action, idx) => { %>
+  <tr id="trow-<%= action._id %>" class="slide-in-up">
+    <td class="text-center">
+      <span class="p-2 rounded-3 bg-primary text-white fw-bold">
+        <%= action.sequence ?? "unknown" %>
+      </span>
+    </td>
+    <td class="fw-bold">
+      <div class="d-flex align-items-center gap-1">
+        <img src="/dashboard/uba/assets/icons/<%= action.action %>" alt="Icon" class="profile_image" height="30">
+        <input class="w-100 clean-input fw-bold" readonly name="action" type="text" value="<%= action.action ?? "unknown" %>">
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 clean-input" readonly name="description" type="text" value="<%= action.description ?? "unknown" %>">
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 clean-input" readonly name="metadata" type="text" value="<%= action.metadata ?? "unknown" %>">
+      </div>
+    </td>
+    <td class="text-center">
+      <div class="d-flex align-items-center gap-1">
+        <input class="w-100 text-center clean-input" readonly name="category" type="text" value="<%= action.category ?? "None" %>">
+      </div>
+    </td>
+    <td>
+      <div class="d-flex align-items-center justify-content-center gap-1">
+
+        <% if(access("control", locals.permissions)) { %>
+
+          <button class="btn rounded-pill btn-sm btn-success px-2" data-toggle="tooltip" 
+            title="Edit This action" onclick="editRow(this, '#trow-<%= action._id %>');">
+            <i class="fa fa-pen"></i>
+            Edit
+          </button>
+          <button class="d-none btn rounded-pill btn-sm btn-success px-2" data-toggle="tooltip" 
+            title="Edit This action" onclick="updateRow(this, '#trow-<%= action._id %>', 'Are you sure to update this action?', '/dashboard/uba/actions/update', '<%= action._id %>', 'POST');">
+            <span class="spinner-border d-none spinner-border-sm me-2" role="status" aria-hidden="true"></span>            
+            <i class="fa fa-check"></i>
+            Update
+          </button>
+          <button class="d-none btn rounded-pill btn-sm btn-secondary" data-toggle="tooltip" 
+            title="Edit This action" onclick="editRow(this, '#trow-<%= action._id %>');">
+            <i class="fa fa-times"></i>
+            Cancel
+          </button>
+          <button class="btn rounded-pill btn-sm btn-danger" 
+              onclick="updateData('Are sure to permanently delete this action?', '/dashboard/uba/actions/delete', '<%= action._id %>');" title="Permanently delete this action">
+              <i class="fa fa-trash"></i>
+          </button>
+
+        <% } else { %>
+
+          <button href="#" class="btn rounded-pill btn-sm btn-secondary area-muted px-2"
+            title="You don't have permission to edit action">
+            <i class="fa fa-pen"></i>
+            Edit
+          </button>
+          <a href="#" class="btn rounded-pill btn-sm btn-danger area-muted" data-toggle="tooltip" title="You don't have permission to delete action">
+            <i class="fa fa-trash"></i>
+          </a>
+
+        <% } %>
+
+      </div>
+    </td>
+  </tr>
+<% }) %>

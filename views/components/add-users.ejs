@@ -1,0 +1,90 @@
+
+
+<form class="my-3" action="/dashboard/roles/add?role=<%= role.name %>" method="POST"
+    onsubmit="return confirmChoice(event, 'This action will remove the user from previous role')">
+    <div class="d-flex">
+        <div class="input-group mb-1">
+            <input id="searchText" type="text" class="form-control" placeholder="Find EITIx user to add (type name or email)" maxlength="255">
+            <button type="submit" class="btn btn-primary px-4">
+                Add User
+            </button>
+            <button type="button" class="btn btn-danger px-3" onclick="toggleSection('#add-users-section')">
+                <i class="fa fa-close"></i>
+            </button>
+        </div>
+    </div>
+    <div id="user-search-results" class="p-2" style="max-height: 50vh; overflow:auto">
+        
+    </div>
+</form>
+
+<script>
+
+    let searchBox = document.getElementById("searchText")
+    let userResults = $("#user-search-results")
+    let searchText;
+
+    let loader_html = `
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    `;
+
+    function render_user(data) {
+        return `
+        <label class="my-2 p-2 clickable border w-100 rounded">
+            <div class="form-check">
+                <input name="users" value="${data._id}" class="form-check-input" type="radio" maxlength="255">
+                <strong>${data.full_name}</strong> - <strong class="text-primary">${data.role}</strong>
+                (${data.email})
+            </div>
+        </label>
+        `
+    }
+
+    function isOnlySpaces(str) {
+        return /^\s*$/.test(str);
+    }
+
+    searchBox.addEventListener("keyup", e => {
+
+        searchText = searchBox?.value;
+        
+        if (searchText && !isOnlySpaces(searchText)) {
+
+            userResults.html(loader_html);
+
+            $.ajax({
+
+            url: '/content/users?searchText=' + searchText,
+            type: 'GET',
+
+            success: (data) => {
+
+                let all_users = "";
+                data?.forEach(user => {
+
+                    all_users += render_user(user)
+
+                });
+                userResults.html(all_users);
+
+            },
+
+            statusCode: {
+
+                404: function() {
+
+                    userResults.html(EMSG.notFound("users"));
+
+                },
+                500: function(err) {
+
+                    userResults.html(EMSG.server);
+                    
+                }
+
+            }});
+        }
+    })
+</script>

@@ -1,0 +1,179 @@
+
+<% 
+let idfs = locals.format.toArray(filters.idfs);
+let types = locals.format.toArray(filters.types);
+let operators = locals.format.toArray(filters.operators);
+let values = locals.format.toArray(filters.values);
+%>
+
+<div class="mb-2">
+
+    <div id="filter-container" class="align-items-center w-100">
+        <!-- options will load dynamically -->
+    </div>
+
+    <% if (editable) { %>
+        <div class="d-flex justify-content-end mt-3">
+            <button type="button" class="btn rounded-pill btn-primary" onclick="addFilter()">
+                <i class="fa fa-add"></i>
+            </button>
+        </div>
+    <% } %>
+
+</div>
+
+<script>
+
+window.eitix_MAX_LOG_FILTERS = 5;
+window.eitix_added_log_filters = 0;
+window.eitix_added_log_filter_list = [];
+
+function hasDuplicateFilter() {
+
+    let filter_container = document.getElementById("filter-container");
+    let idf_selectors = filter_container.querySelectorAll('select[name="idfs"]');
+    
+    // check for duplicate selected options
+    for (let i = 0; i < idf_selectors.length; i++) {
+        for (let j = i + 1; j < idf_selectors.length; j++) {
+            if (idf_selectors[i].value === idf_selectors[j].value) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+
+}
+
+function addFilter(idf_log_value, operator = "", value = "", disabled = false, parmanent = false) {
+
+    if (eitix_added_log_filters >= eitix_MAX_LOG_FILTERS) {
+
+        return toast("Maximum Limit Reached", "Can't add more filters here", 1);
+
+    } else {
+
+        eitix_added_log_filters++;
+
+    }
+
+    let idfs_set = `
+          <% if (identifiers) { identifiers.forEach(identifier => { %>
+              <option value="<%= identifier.log %>"
+                ${idf_log_value === "<%= identifier.log %>" ? "selected" : "" }
+                data-type="<%= identifier.type %>">
+                    <%= identifier.name %>
+              </option>
+          <% })} %>
+      `;
+
+    let option_set = `
+          <option value="equal_to" ${operator === "equal_to" ? "selected" : ""}>(=) Equal To</option>
+          <option value="contains" ${operator === "contains" ? "selected" : ""}>Contains (heavy)</option>
+          <option value="not_contains" ${operator === "not_contains" ? "selected" : ""}>Not Contains (heavy)</option>
+          <option value="greater_than" ${operator === "greater_than" ? "selected" : ""}>(&gt) Greater Than</option>
+          <option value="greater_than_equal" ${operator === "greater_than_equal" ? "selected" : ""}>(≥) Greater Than Equal</option>
+          <option value="less_than" ${operator === "less_than" ? "selected" : ""}>(&lt) Less Than</option>
+          <option value="less_than_equal" ${operator === "less_than_equal" ? "selected" : ""}>(≤) Less Than Equal</option>
+          <option value="multiple_of" ${operator === "multiple_of" ? "selected" : ""}>Multiple Of</option>
+      `;
+
+    let filter_container = document.getElementById("filter-container");
+    let new_filter = document.createElement('div');
+    let id = generateRandomID(4);
+
+    let filter_content = `
+        <div id="idf-con-${id}" class="input-group w-auto">
+            <select id="idf-${id}" name="idfs"
+                class="idfs form-select rounded-pill-l text-secondary ${ disabled ? "area_disabled" : "" }"
+                onchange="updateSelector(this, '${id}');">
+                ${idfs_set}
+            </select>
+            <select id="operator-${id}" name="operators" 
+                class="form-select text-secondary">
+                ${option_set}
+            </select>
+            <div id="type-${id}">
+                <input name="types" type="text" class="d-none" value="string">
+            </div>
+        </div>
+        <input id="value-${id}" name="values" type="text" class="form-control rounded-pill-r" placeholder="Enter Search Value" value="${value}" min="0" maxlength="255" required>
+      `;
+
+    if (parmanent !== true) filter_content += `
+        <button class="btn btn-outline-danger rounded-pill ms-2" type="button" 
+            onclick="get('#filter-${id}').remove(); eitix_added_log_filters--">
+            <i class="fa fa-trash"></i>
+        </button>
+      `;
+
+    new_filter.innerHTML += `
+        <div id="filter-${id}" class="input-group my-2">
+          ${filter_content}
+        </div>
+      `;
+
+    // append the child
+    filter_container.appendChild(new_filter);
+
+    let new_elem = document.getElementById(`idf-${id}`);
+    updateSelector(new_elem, id);
+
+    return id;
+
+}
+
+function updateSelector(selector, id) {
+
+    let idf = selector;
+    let option = selector.selectedOptions[0];
+
+    let type = option.getAttribute("data-type");
+    let type_select = document.getElementById(`type-${id}`);
+    let option_select = document.getElementById(`operator-${id}`);
+    let value_text = document.getElementById(`value-${id}`);
+
+    let options = option_select.options;
+    let disabled = [];
+
+    let idf_container = document.getElementById(`idf-con-${id}`);
+    let new_type = document.createElement('div');
+    new_type.id = `type-${id}`;
+
+    if (type == "int") {
+
+        value_text.type = "number";
+        disabled = ["contains", "not_contains"];
+        new_type.innerHTML = `<input name="types" type="text" class="d-none" value="int">`;
+
+    } else {
+
+        value_text.type = "text";
+        disabled = ["greater_than", "less_than", "greater_than_equal", "less_than_equal", "multiple_of"];
+        new_type.innerHTML = `<input name="types" type="text" class="d-none" value="string">`;
+
+    }
+
+    // removing old type
+    type_select.remove();
+    // adding new type
+    idf_container.appendChild(new_type);
+
+    // disable operators
+    for (let i = 0; i < options.length; i++) {
+
+        if (disabled.includes(options[i].value)) {
+
+            options[i].style.display = "none";
+
+        } else {
+
+            options[i].style.display = "block";
+
+        }
+    }
+
+}
+
+</script>

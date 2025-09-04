@@ -1,0 +1,407 @@
+<div class="col-md-10 mt-5">
+
+  <div id="worker-control-area" class="d-flex gap-3">
+
+    <div class="col bg-white rounded shadow p-3">
+
+      <div class="fs-4 fw-bold">API List</div>
+      <div class="small">
+        These API are globally used throuhout the EITIx.
+      </div>
+
+      <div class="p-3">
+
+        <!-- Local Server, MongoDB -->
+        <div class="row gap-3 mb-3">
+          <form action="/dashboard/settings/api/update" method="POST" class="col-md p-3 rounded border">
+            <div>
+              <div class="fs-5 fw-bold d-flex align-items-center mb-3">
+                <i class="fa fa-desktop text-primary me-2"></i>
+                <span>EITIx Server</span>
+                <span class="badge rounded-pill bg-success ms-2">
+                  <i class="fa fa-globe"></i>
+                  <span>Connected</span>
+                </span>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">
+                  <span>Host Address</span>
+                </label>
+                <input name="server_ip" type="text" class="form-control" value="<%= config.server_ip %>" placeholder="http://localhost:4000">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">
+                  <span>Public IP</span>
+                </label>
+                <input name="ip" type="text" class="form-control" value="<%= config.ip %>">
+              </div>
+            </div>
+            <button class="btn rounded-pill btn-primary my-2 px-4" type="submit">Update</button>
+          </form>
+          <form action="/dashboard/settings/api/update" method="POST" class="col-md p-3 rounded border ">
+            <div>
+              <div class="fs-5 fw-bold">
+                <i class="fa fa-desktop text-primary me-2"></i>
+                <span>MongoDB Database</span>
+                <span class="badge rounded-pill bg-success">
+                  <i class="fa fa-globe"></i>
+                  <span>Connected</span>
+                </span>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Port</label>
+                <input name="db_port" type="text" class="form-control" value="<%= config.db_port %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">User</label>
+                <input name="db_user" type="text" class="form-control" value="<%= config.db_user %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Password</label>
+                <input name="db_pass" type="password" class="form-control" value="<%= config.db_pass %>">
+              </div>
+            </div>
+            <button class="btn rounded-pill btn-primary my-2 px-4" type="submit">Update</button>
+          </form>
+        </div>
+
+        <!-- EITIxHook, MISP API -->
+        <div class="row gap-3 mb-3">
+          <form action="/dashboard/settings/api/update" method="POST" class="col-md p-3 rounded border">
+            <div>
+              <div class="fs-5 fw-bold d-flex align-items-center">
+                <i class="fa fa-desktop text-primary me-2"></i>
+                <span>Redis</span>
+              </div>
+              <div class="input-group my-2" title="This field is linked with Server Host IP">
+                <label class="input-group-text">
+                  <span>Host Address</span>
+                </label>
+                <input name="redis_ip" type="text" class="form-control" value="<%= config.redis_ip %>">
+              </div>
+              <div class="input-group my-2" title="This field is not actively in use">
+                <label class="input-group-text">
+                  <span>Password</span>
+                </label>
+                <input name="ip" type="password" class="form-control" placeholder="Tenant Specific" disabled>
+              </div>
+            </div>
+            <button class="btn rounded-pill btn-primary my-2 px-4" type="submit">Update</button>
+            <button type="button" class="btn btn-outline-primary ms-2" data-url="<%= config.redis_ip %>" onclick="testConnection(this)">
+              <span class="spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+              <strong>Test</strong>
+            </button>
+          </form>
+          <form action="/dashboard/settings/api/update" method="POST" class="col-md p-3 rounded border ">
+            <div>
+              <div class="fs-5 fw-bold d-flex align-items-center">
+                <i class="fa fa-desktop text-primary me-2"></i>
+                <span>MISP API</span>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Host Address</label>
+                <input name="misp_host" type="text" class="form-control" value="<%= config.misp_host %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">
+                  <span>API key</span>
+                </label>
+                <input name="misp_key" type="password" class="form-control" value="<%= config.misp_key %>">
+              </div>
+            </div>
+            <button class="btn rounded-pill btn-primary my-2 px-4" type="submit">Update</button>
+            <button type="button" class="btn btn-outline-primary ms-2" data-url="<%= config.misp_host %>" onclick="testConnection(this, 'misp')">
+              <span class="spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+              <strong>Test</strong>
+            </button>
+          </form>
+        </div>
+
+        <!-- Wazuh API, Kiabana Server -->
+        <div class="row gap-3 mb-3">
+          <form action="/dashboard/settings/api/update" method="POST" class="col-md p-3 rounded border ">
+            <div>
+              <div class="fs-5 fw-bold d-flex align-items-center">
+                <i class="fa fa-desktop text-primary me-2"></i>
+                <span>Wazuh API</span>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Host Address</label>
+                <input name="wazuh_host" type="text" class="form-control" value="<%= config.wazuh_host %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Username</label>
+                <input name="wazuh_user" type="text" class="form-control" value="<%= config.wazuh_user %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Password</label>
+                <input name="wazuh_pass" type="password" class="form-control" value="<%= config.wazuh_pass %>">
+              </div>
+            </div>
+            <button class="btn rounded-pill btn-primary my-2 px-4" type="submit">Update</button>
+            <button type="button" class="btn btn-outline-primary ms-2" data-url="<%= urls.wazuh_api %>" onclick="testConnection(this, 'wazuh')">
+              <span class="spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+              <strong>Test</strong>
+            </button>
+          </form>
+          <form action="/dashboard/settings/api/update" method="POST" class="col-md p-3 rounded border">
+            <div>
+              <div class="fs-5 fw-bold d-flex align-items-center">
+                <i class="fa fa-desktop text-primary me-2"></i>
+                <span>Kibana Server (Wazuh)</span>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Host Address</label>
+                <input name="kibana_host" type="text" class="form-control" value="<%= config.kibana_host %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Username</label>
+                <input name="kibana_user" type="text" class="form-control" value="<%= config.kibana_user %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Password</label>
+                <input name="kibana_pass" type="password" class="form-control" value="<%= config.kibana_pass %>">
+              </div>
+            </div>
+            <button class="btn rounded-pill btn-primary my-2 px-4" type="submit">Update</button>
+            <button type="button" class="btn btn-outline-primary ms-2" data-url="<%= config.kibana_host %>" onclick="testConnection(this, 'kibana')">
+              <span class="spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+              <strong>Test</strong>
+            </button>
+          </form>
+        </div>
+
+        <!-- SMS API, PostFix -->
+        <div class="row gap-3 mb-3">
+          <form action="/dashboard/settings/api/update" method="POST" class="col-md p-3 rounded border ">
+            <div>
+              <div class="fs-5 fw-bold d-flex align-items-center">
+                <i class="fa fa-desktop text-primary me-2"></i>
+                <span>SMS API</span>
+                <select name="sms_api_type" class="form-select text-secondary ms-2">
+                  <option value="reve" <%= config.sms_api_type === "reve" ? "selected" : "" %>>
+                    Reve SMS
+                  </option>
+                  <option value="ssl" <%= config.sms_api_type === "ssl" ? "selected" : "" %>>
+                    SSL Wireless
+                  </option>
+                  <option value="rtcom" <%= config.sms_api_type === "rtcom" ? "selected" : "" %>>
+                    RT Communications
+                  </option>
+                </select>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">
+                  <span>Host Address</span>
+                </label>
+                <input name="sms_host" type="text" class="form-control" value="<%= config.sms_host %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">
+                  <span>API Key</span>
+                </label>
+                <input name="sms_api_key" type="password" class="form-control" value="<%= config.sms_api_key %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">
+                  <span>SECRET Key</span>
+                </label>
+                <input name="sms_secret_key" type="password" class="form-control" value="<%= config.sms_secret_key %>">
+              </div>
+              <div class="d-flex gap-2">
+                <div class="input-group my-2">
+                  <label class="input-group-text">
+                    <span>SID</span>
+                  </label>
+                  <input name="sms_sid" type="password" class="form-control" value="<%= config.sms_sid %>">
+                </div>
+                <div class="input-group my-2">
+                  <label class="input-group-text">
+                    <span>Caller ID</span>
+                  </label>
+                  <input name="sms_caller_id" type="text" class="form-control" value="<%= config.sms_caller_id %>">
+                </div>
+              </div>
+              <div class="mb-2">
+                <button class="btn btn-primary rounded-pill px-4" type="submit">Update</button>
+              </div>
+              <div class="input-group">
+                <input id="sms-test" class="form-control" type="phone" placeholder="Enter test phone number">
+                <button type="button" class="btn btn-outline-primary" data-url="" onclick="testConnection(this, 'mailer')">
+                  <span class="spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+                  <strong>Test</strong>
+                </button>
+              </div>
+            </div>
+          </form>
+          <form action="/dashboard/settings/api/update" method="POST" class="col-md p-3 rounded border">
+            <div>
+              <div class="fs-5 fw-bold d-flex gap-3 align-items-center">
+                <i class="fa fa-desktop text-primary"></i>
+                <span>Postfix (Mailer)</span>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Mail Server</label>
+                <input name="postfix_mail_server" type="text" class="form-control" value="<%= config.postfix_mail_server %>">
+              </div>
+              <div class="d-flex gap-2 my-2">
+                <div class="input-group">
+                  <label class="input-group-text">Host</label>
+                  <input name="postfix_host" type="text" class="form-control" value="<%= config.postfix_host %>">
+                </div>
+                <div class="input-group">
+                  <label class="input-group-text">Port</label>
+                  <input name="postfix_port" type="text" class="form-control" value="<%= config.postfix_port %>">
+                </div>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Username</label>
+                <input name="postfix_user" type="text" class="form-control" value="<%= config.postfix_user %>">
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">Password</label>
+                <input name="postfix_pass" type="password" class="form-control" value="<%= config.postfix_pass %>">
+              </div>
+            </div>
+            <div class="mb-2">
+              <button class="btn btn-primary rounded-pill px-4" type="submit">Update</button>
+            </div>
+            <div class="input-group">
+              <input id="postfix-test" class="form-control" type="email" placeholder="Enter test email address">
+              <button type="button" class="btn btn-outline-primary" data-url="" onclick="testConnection(this, 'mailer')">
+                <span class="spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+                <strong>Test</strong>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- IP Vulnerability, IP Location -->
+        <div class="row gap-3 mb-3">
+          <div class="col-md p-3 rounded border ">
+            <div>
+              <div class="fs-5 fw-bold d-flex align-items-center">
+                <i class="fa fa-globe text-primary me-2"></i>
+                <span>IP Vulnerability</span>
+                <button class="btn btn-outline-primary ms-2" data-url="<%= urls.vulns_finder %>" onclick="testConnection(this)">
+                  <span class="spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+                  <strong>Test</strong>
+                </button>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">
+                  <i class="fa fa-lock me-2"></i>
+                  <span>Host Address</span>
+                </label>
+                <input type="text" class="form-control" value="<%= urls.vulns_finder %>" readonly>
+              </div>
+            </div>
+          </div>
+          <div class="col-md p-3 rounded border ">
+            <div>
+              <div class="fs-5 fw-bold d-flex align-items-center">
+                <i class="fa fa-globe text-primary me-2"></i>
+                <span>IP Location</span>
+                <button class="btn btn-outline-primary ms-2" data-url="<%= urls.ip_location %>" onclick="testConnection(this)">
+                  <span class="spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+                  <strong>Test</strong>
+                </button>
+              </div>
+              <div class="input-group my-2">
+                <label class="input-group-text">
+                  <i class="fa fa-lock me-2"></i>
+                  <span>Host Address</span>
+                </label>
+                <input type="text" class="form-control" value="<%= urls.ip_location %>" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+  function showStatus(status) {
+
+    if (status === true) {
+
+      return `
+        <span class="badge bg-success">
+          <i class="fa fa-globe"></i>
+          <span>Connected</span>
+        </span>
+      `;
+
+    } else {
+
+      return `
+        <span class="badge bg-danger">
+          <i class="fa fa-cancel"></i>
+          <span>Unreachable</span>
+        </span>
+      `;
+
+    }
+
+  }
+
+  function testConnection(button, type) {
+
+    let url = button.getAttribute("data-url");
+
+    button.querySelector("span").classList.add("spinner-grow");
+
+    // decide the url
+    let endpoint = "/content/checkapi?url=" + url;
+
+    if (type) {
+
+      endpoint = "/content/checkapi/" + type + "?url=" + url;
+
+    }
+
+    $.get(endpoint).then((data) => {
+
+      button.querySelector("span").classList.remove("spinner-grow");
+      button.querySelector("strong").innerHTML = showStatus(data.status);
+
+      if (data.reason) {
+        toast("Connection Failure", String(data.reason), 1);
+      }
+
+
+    }).catch(err => {
+
+      button.querySelector("span").classList.remove("spinner-grow");
+      toast("Connection Error", "Please check your browser console", 1);
+      console.log(err);
+
+    })
+
+  }
+
+  $('form').submit(function(e) {
+
+    e.preventDefault();
+    let formData = $(this).serialize();
+    $.ajax({
+      url: '/dashboard/settings/api/update',
+      type: 'POST',
+      data: formData,
+      success: function(response) {
+        toast("Success", "Data updated successfully!", 1);
+      },
+      error: function(xhr, status, error) {
+        toast("Failed", "Data failed to update!", 1);
+      }
+    });
+
+  });
+</script>

@@ -1,0 +1,8 @@
+
+<% options.forEach(option => { %>
+    <option value="<%= option.property %>" 
+        <%= query?.identifier === option.property ? "selected" : "" %>
+    >
+        <%= option.name %>
+    </option>
+<% }) %>

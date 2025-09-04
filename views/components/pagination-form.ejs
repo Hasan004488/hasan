@@ -1,0 +1,38 @@
+<% 
+let current_page = parseInt(pagination?.curr);
+let total_page = parseInt(pagination?.total);
+%>
+
+<nav aria-label="Page navigation">
+
+  <ul class="pagination pagination-sm mb-0 justify-content-end">
+
+      <li class="page-item <%= current_page - 1 < 1 ? "disabled" : "" %>">
+          <button class="page-link fw-bold" onclick="visitPage(1, '<%=form%>')">
+              First
+          </button>
+      </li>
+      <li class="page-item <%= current_page - 1 < 1 ? "disabled" : "" %>">
+          <button class="page-link fw-bold"
+          onclick="visitPage('<%=current_page - 1%>', '<%=form%>')">
+              <i class="fa fa-arrow-left"></i>
+              Previous
+          </button>
+      </li>
+      <li class="page-item <%= current_page + 1 > total_page ? "disabled" : "" %>">
+          <button class="page-link fw-bold" 
+          onclick="visitPage('<%=current_page + 1%>', '<%=form%>')">
+              Next
+              <i class="fa fa-arrow-right"></i>
+          </button>
+      </li>
+      <li class="page-item <%= current_page + 1 > total_page ? "disabled" : "" %>">
+          <button class="page-link fw-bold"
+          onclick="visitPage('<%=total_page%>', '<%=form%>')">
+              Last
+          </button>
+      </li>
+
+  </ul>
+
+</nav>

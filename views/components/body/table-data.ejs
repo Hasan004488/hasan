@@ -1,0 +1,155 @@
+<% for(i = 0; i < data.length; i++) { %>
+  <% 
+  let table_data = data[i] || {};
+  let _id = table_data._id;
+  %>
+  <tr class="py-3 slide-in-up">
+    <% if (dropdown) { %>
+
+      <td>
+        <button class="btn btn-sm drop-btn"
+          <% if (dropdown.fetcher) { %>
+            onclick="
+              toggleDropData(this, '#dropdata-<%= _id %>');
+              fetchDropData('#dropdata-<%= _id %> .data', '<%=dropdown.fetcher.collection%>', '<%=_id%>', '_id');
+            "
+          <% } else { %>
+            onclick="toggleDropData(this, '#dropdata-<%= _id %>')"
+          <% } %>
+        >
+          <i class="fa fa-angle-right"></i>
+        </button>
+      </td>
+
+    <% } %>
+
+    <% values.forEach(value => { %>
+
+      <td class="<%= value.class %>">
+
+        <span class="<%= value.innerClass %>">
+
+        <% if (value.handler) { %>
+
+          <span><%- value.handler(table_data) %></span>
+
+        <% } else { %>
+          
+          <% 
+            let td_value = table_data[value.value] ?? null;
+            let truncate_len = value.truncate;
+          %>
+          
+          <% if (td_value !== null) { %>
+            
+            <% if (value.truncate) { %>
+
+            <%
+              let td_value_str = String(td_value);
+              let truncated_value = td_value_str?.slice(0, truncate_len);
+            %>
+              <span title="<%= td_value %>"><%=
+                truncated_value
+                + (td_value_str.length > truncate_len ? "..." : "")
+              %></span>
+             
+            <% } else { %>
+
+              <% if (value.type === "date") { %>
+
+                <span><%= td_value?.toLocaleString() %></span>
+               
+              <% } else { %>
+                
+                <span><%= td_value %></span>
+
+              <% } %>
+
+            <% } %>
+
+            <span><%= value.extra %></span>
+            
+          <% } else { %>
+
+            <span>No Information</span>
+
+          <% } %>
+
+        <% } %>
+
+        </span>
+
+      </td>
+
+    <% }) %>
+
+    <% if (actions) { %>
+
+      
+      <td class="text-center">
+        
+        <div class="d-flex">
+
+          <% actions.forEach(action => { %>
+
+          <%
+          // render action if it matches the condition
+          // if there's no condition applied it will render anyway
+          // also check for permission, if no then render anyway
+          if (
+            table_data[action.condition?.field] === action.condition?.value &&
+            action.permission ? locals.access(action.permission, locals.permissions) : true
+          ) {
+          %>
+
+          <form class="ms-2" target="<%= action.target %>" action="<%= action.href %>" method="<%= action.method %>" 
+            onsubmit="return confirmChoice(event, '<%= action.confirm %>')">
+            <div class="d-none">
+              <input type="text" name="id" value="<%= table_data._id %>">
+            </div>
+            <button type="submit" class="btn badge <%= action.class %>">
+                <%- action.body %>
+            </button>
+          </form>
+
+          <% } else { %>
+
+          <button class="btn badge <%= action.class %> area_disabled">
+              <%- action.body %>
+          </button>
+
+          <% } %>
+
+          <% }) %>
+
+        </div>
+
+      </td>
+
+
+    <% } %>
+  </tr>
+  <% if (dropdown) { %>
+      
+    <tr id="dropdata-<%= _id %>" class="d-none fade-in">
+
+      <td colspan="<%= 1 + parseInt(values.length) + parseInt(actions ? 1 : 0) %>" class="p-3">
+
+        <div class="data rounded bg-white p-3">
+          
+          <% if (dropdown.file) { %>
+            <%- include(dropdown.file, {
+              data: table_data,
+              ...dropdown.extra
+            }) %>
+          <% } %>
+          
+        </div>
+          
+      </td>
+
+    </tr>
+
+  <% } %>
+
+<% } %>

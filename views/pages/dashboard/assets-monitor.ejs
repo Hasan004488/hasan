@@ -1,0 +1,219 @@
+<script src="/scripts/chart.js"></script>
+
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow">
+
+      <div class="d-flex justify-content-between">
+        <div class="btn-group toggle-block">
+          <button class="btn btn-tab px-5" onclick="changeMonitor('weekly')">
+            <i class="fa fa-globe area_blocked"></i>
+            Weekly Monitor
+          </button>
+          <button class="btn btn-tab-off px-5" onclick="changeMonitor('monthly')">
+            <i class="fa fa-globe area_blocked"></i>
+            Monthly Monitor
+          </button>
+        </div>
+      </div>
+
+        <div id="assets-monitor-container">
+          
+          <div class="my-3">
+            <div class="fs-4 fw-bold d-flex">
+              <span class="me-3">Wazuh Agents</span>
+              <!-- <button class="btn btn-sm rounded-pill btn-outline-secondary" 
+              onclick="exportImage()">
+                <i class="fa fa-download"></i>
+              </button> -->
+            </div>
+            <small>Active and inactive agents from your Wazuh Server.</small>
+            <div class="my-3" style="min-height: 30vh;">
+                <canvas id="wazuh_agents"></canvas>
+            </div>
+          </div>
+
+          <div class="py-4"></div>
+  
+          <div class="my-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fs-4 fw-bold">Cloud Assets</div>
+                <small>Active and inactive assets from the list of EITIx assets.</small>
+              </div>
+              <div>
+                  <a class="btn rounded-pill btn-secondary" href="/dashboard/assets/manage#Asset-Management">Manage Assets</a>
+              </div>
+            </div>
+            <div style="min-height: 30vh;">
+              <canvas id="cloud_assets"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+
+  // global timing
+  let TIMING = "weekly";
+
+  // wazuh agents section
+
+  let w_labels = [];
+  let w_active_data = [];
+  let w_inactive_data = [];
+
+  let c_labels = [];
+  let c_active_data = [];
+  let c_inactive_data = [];
+
+  let data_set_extra = {
+    tension: 0.3,
+    pointRadius: 4,
+    pointHoverRadius: 15,
+    borderWidth: 3,
+    hoverBorderWidth: 2
+  }
+
+  const wazuh_ctx = document.getElementById("wazuh_agents").getContext("2d");
+  const wazuh_ctx_options = {
+    type: "line",
+    data: {
+      labels: w_labels,
+      datasets: [
+        {
+          fill: true,
+          label: " Active Agents",
+          data: w_active_data,
+          borderColor: '#ff7f3f',
+          backgroundColor: '#ff7f3f30',
+          ...data_set_extra
+        },
+        {
+          fill: true,
+          label: " Inactive Agents",
+          data: w_inactive_data,
+          borderColor: '#5e6580',
+          backgroundColor: '#5e658030',
+          ...data_set_extra
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'left'
+        },
+      },
+      maintainAspectRatio: false,
+      layout: {
+        canvas: {
+          backgroundColor: "white"
+        }
+      }
+    },
+  };
+
+  let wazuh_agents = new Chart(wazuh_ctx, wazuh_ctx_options);
+
+  const cloud_ctx = document.getElementById("cloud_assets").getContext("2d");
+  const cloud_asset = new Chart(cloud_ctx, {
+    type: "line",
+    data: {
+      labels: c_labels,
+      datasets: [
+        {
+          fill: true,
+          label: " Active Assets",
+          data: c_active_data,
+          borderColor: '#ff7f3f',
+          backgroundColor: '#ff7f3f30',
+          ...data_set_extra
+        },
+        {
+          fill: true,
+          label: " Inactive Assets",
+          data: c_inactive_data,
+          borderColor: '#5e6580',
+          backgroundColor: '#5e658030',
+          ...data_set_extra
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'left'
+        },
+      },
+      maintainAspectRatio: false,
+    }
+  });
+
+  function changeStyle(type) {
+
+    wazuh_agents.destroy();
+    wazuh_ctx_options.type = type;
+    wazuh_agents = new Chart(wazuh_ctx, wazuh_ctx_options);
+
+  }
+
+  function exportImage() {
+
+    const canvas = wazuh_agents.canvas;
+    let image = canvas.toDataURL('image/png');
+    downloadImage(image);
+
+  }
+
+  function downloadImage(chartImage) {
+
+    const link = document.createElement('a');
+    link.href = chartImage;
+    link.download = 'chart.png';
+    link.click();
+
+  }
+
+  function changeMonitor(timing) {
+
+    TIMING = timing || TIMING;
+
+    loadDynamicData({
+      container: "#assets-monitor-container",
+      url: `/dashboard/assets/monitor/data?timing=${timing}`,
+    }, (monitor) => {
+      
+      wazuh_agents.data.labels = monitor.wazuh_agents.range;
+      wazuh_agents.data.datasets[0].data = monitor.wazuh_agents?.active;
+      wazuh_agents.data.datasets[1].data = monitor.wazuh_agents?.inactive;
+      wazuh_agents.update();
+
+      cloud_asset.data.labels = monitor.cloud_assets.range;
+      cloud_asset.data.datasets[0].data = monitor.cloud_assets.active;
+      cloud_asset.data.datasets[1].data = monitor.cloud_assets.inactive;
+      cloud_asset.update();
+
+    }, 60000); // 1 minute
+
+  }
+
+  $("#assets-tab-<%=active%>").removeClass("btn-tab-off");
+  $("#assets-tab-<%=active%>").addClass("btn-tab");
+
+  changeMonitor("<%=active%>");
+
+</script>

@@ -1,0 +1,38 @@
+<div class="col-12">
+
+  <div class="p-4 bg-light rounded shadow">
+
+    <div class="d-flex justify-content-between align-items-center">
+
+      <h4 class="fw-bold">
+        <%= locals.format.title(type) %> Templates
+      </h4>
+
+      <div class="d-flex gap-2">
+        <a href="/dashboard/templates/edit/add?type=<%=type%>" class="btn rounded-pill btn-primary">
+          <i class="fa fa-add"></i>
+          Add New Template
+        </a>
+        <%- include('components/search-control-buttons') %>
+      </div>
+
+    </div>
+
+    <%- include("components/body/search-data.ejs", {
+      options: [
+        { name: "Title", property: "title" },
+        { name: "Template ID", property: "sid" },
+        { name: "Rule", property: "rule", hide: type !== "playbook" },
+      ],
+      total_text: "Total templates:"
+    }) %>
+
+    <%- include("components/body/data-table.ejs") %>
+
+  </div>
+
+</div>
+
+<script>
+  loadData(true, true);
+</script>

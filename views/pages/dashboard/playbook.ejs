@@ -1,0 +1,51 @@
+<% 
+  /* ejs code */
+%>
+
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow">
+
+        <div class="d-flex justify-content-between">
+          <div class="btn-group toggle-block">
+            <button class="btn btn-tab px-5" onclick="changeURL('/dashboard/playbook/data/active')">
+              <i class="fa fa-circle text-success"></i>
+              Active
+            </button>
+            <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/playbook/data/inactive')">
+              <i class="fa fa-circle text-danger"></i>
+              Inactive
+            </button>
+            <button class="btn btn-tab-off px-5" onclick="changeURL('/dashboard/playbook/data/all')">
+              <i class="fa fa-list"></i>
+              All
+            </button>
+          </div>
+          <div class="d-flex gap-2">
+              <a class="btn rounded-pill btn-primary" href="/dashboard/playbook/create">
+                  <i class="fa fa-add"></i>
+                  Create New Playbook
+              </a>
+              <%- include('components/search-control-buttons') %>
+          </div>
+        </div>
+
+        <%- include("components/body/search-data.ejs", {
+          options: [
+            { name: "Title", property: "title" },
+            { name: "Playbook ID", property: "sid" }
+          ],
+          total_text: "Total playbooks:"
+        }) %>
+
+        <%- include("components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<div class="py-4"></div>
+
+<script>
+
+  loadData(true, true);
+
+</script>

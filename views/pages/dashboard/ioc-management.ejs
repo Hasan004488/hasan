@@ -1,0 +1,31 @@
+
+<div class="col-md-6 mt-5">
+
+  <div class="bg-light rounded shadow p-5">
+    <div class="fs-5 fw-bold">IoC Domain Inclusive List</div>
+    <div class="small">
+        These domain names will be considered as IoC item. Add more domain extensions after the existing ones.
+    </div>
+    <form class="py-3" action="/dashboard/ioc/manage/whitelist" method="POST">
+      <div class="form-group">
+        <label class="mb-2 fw-bold text-primary">Add to Inclusive List
+          <span class="text-secondary">(Comma seperated values)</span>
+        </label>
+        <textarea name="domains" id="" cols="30" rows="5" 
+        class="form-control"
+        minlength="100"
+        maxlength="100000"
+        required
+        autocomplete="off"
+        ><%= data.whitelist?.join(", ") %></textarea>
+      </div>
+      <div class="my-3">
+        <button class="btn rounded-pill btn-primary" type="submit">
+          <i class="fa fa-arrow-up"></i>
+          Update List
+        </button>
+      </div>
+    </form>
+  </div>
+  
+</div>

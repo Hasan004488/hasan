@@ -1,0 +1,264 @@
+
+<% let pre_detec = {}, assets = [] %>
+
+<style>
+    .active {
+        color: var(--bs-light);
+        background: var(--bs-primary);
+    }
+</style>
+
+<form class="col-lg-10 mt-lg-5 user-selection-form-wrapper" id="create-schedule" action="/dashboard/reports/schedule/create" method="POST">
+
+  <!-- Basic Information -->
+  <div class="p-4 bg-light rounded shadow mb-3">
+
+    <div class="mb-3 fw-bold d-flex align-items-center justify-content-between">
+        <div class="fs-4 fw-bold mb-3">
+          <i class="fa fa-circle-info"></i>
+          Basic Information
+        </div>
+        <div class="small">By: <strong class="text-primary">
+            <%= locals.email %>
+        </strong></div>
+    </div>
+
+    <div class="d-flex gap-3">
+        
+        <%- include("../../components/form/select-box.ejs", {
+          label: "Report Frequency",
+          name: "repeat",
+          selected: schedule.repeat || "1",
+          required: true,
+          options: [
+            {
+              value: 1,
+              option: "Daily"
+            },
+            {
+              value: 7,
+              option: "Weekly"
+            },
+            {
+              value: 30,
+              option: "Monthly"
+            },
+            {
+              value: 90,
+              option: "Quarterly"
+            },
+          ],
+          required: true
+        }) %>
+
+        <%- include("../../components/form/input-box.ejs", {
+          label: "Time",
+          name: "time",
+          type:"time",
+          value: schedule.time || "00:00",
+        }) %>
+        
+    </div>
+
+    <div class="d-flex gap-3">
+
+      <%- include("../../components/form/select-box.ejs", {
+        label: "Report Type",
+        name: "type",
+        selected: schedule.type || "quick",
+        options: [
+          {
+            value: "quick",
+            option: "Quick Reports"
+          }
+        ]
+      }) %>
+
+      <%- include("../../components/form/select-box.ejs", {
+        label: "Default Template",
+        name: "template",
+        selected: schedule.template || "",
+        options: templates.map(t => ({value: t.sid, option: t.title}))
+      }) %>
+
+    </div>
+
+
+  </div>
+
+  <!-- Quick report settings -->
+  <div class="p-4 bg-light rounded shadow mb-3">
+
+    <div class="fs-4 fw-bold mb-3">
+      <i class="fa fa-gear"></i>
+      Quick report settings
+    </div>
+
+    <%- include('./reports/load-quick-reports.ejs', {
+      config: schedule
+    }) %>
+      
+  </div>
+
+  <!-- user selection -->
+  <div class="p-4 bg-light rounded shadow mb-3">
+      
+    <div class="fs-5 fw-bold text-secondary d-flex justify-content-between mb-3">
+        <div class="fs-4 fw-bold mb-3">
+            <i class="fa fa-user"></i>
+            User Selection
+        </div>
+    </div>
+
+    <div class="text-secondary">
+        <div class="form-group mb-3">
+
+          <div class="d-flex gap-3 justify-content-between mb-2">
+            <div class="fw-bold text-primary">Email users using this schedule</div>
+            <button class="btn btn-sm btn-outline-dark rounded-3" type="button"
+                onclick="bringPopover('#user-selection'); updateUserTarget('direct')"
+            >
+                <i class="fa fa-user-plus"></i>
+                Add Users
+            </button>
+          </div>
+
+            <div class="p-3 form-control text-secondary">
+              <div class="row">
+                <div class="col border-end border-secondary">
+                  <div class="py-2 px-3 d-flex justify-content-between border-2 border-bottom mb-3 fw-bold small">
+                    <div class="col-4">
+                        Selected User
+                    </div>
+                    <div class="col-4 text-center">
+                        Forward Status
+                    </div>
+                    <div class="col-2 text-center">
+                        Action
+                    </div>
+                  </div>
+                  <div id="direct-users" class="user-container d-flex flex-column gap-3 py-4"></div>
+                </div>
+              </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="text-end mb-2">
+      <% if (schedule.title) { %>
+        <button type="submit" class="btn rounded-pill btn-primary px-4">
+          <i class="fa fa-rotate me-2"></i>
+          Update Report Schedule
+        </button>
+      <% } else { %>
+        <button type="submit" class="btn rounded-pill btn-primary px-4">
+          <i class="fa fa-add me-2"></i>
+          Create New Report Schedule
+        </button>
+      <% } %>
+    </div>
+      
+  </div>
+
+  <!-- hidden input by js -->
+  <div class="d-none">
+    <input name="recipients" type="text" value="">
+    <% if (schedule.title) { %>
+      <input name="id" type="text" value="<%= schedule._id %>">
+      <input name="updating" type="text" value="true">
+    <% } %>
+  </div>
+
+</form>
+
+<form id="user-selection" class="d-none col-md-4 position-fixed bg-white rounded-3 shadow p-3 px-4 z-100 overflow-auto" onsubmit="return updateUsers('#user-selection')">
+
+  <h5 class="fw-bold mb-2 d-flex align-items-center justify-content-between">
+      <span>Select Users</span>
+      <button class="btn btn-outline-danger" type="button" onclick="bringPopover('#user-selection');">
+          <i class="fa fa-close"></i>
+      </button>
+  </h5>
+
+  <div id="user-selection-box" class="overflow-auto" style="height: 50vh;"></div>
+
+  <div class="py-3">
+      <button class="btn btn-primary rounded-pill px-5">
+          Add users <i class="fa fa-arrow-right"></i>
+      </button>
+  </div>
+
+</form>
+
+<script src="/scripts/quick-reports.js"></script>
+<script src="/scripts/user-selection.js"></script>
+
+<script>
+
+  let form_submission_fired = false;
+
+  // load users
+  let preloaded_users = [];
+  
+  try {
+
+    // no_f = this may stop working, use textarea instead
+    let users_data = JSON.parse("<%= JSON.stringify(schedule.users) %>".replace(/&#34;/g, '"'));
+    if (Array.isArray(users_data)) {
+      
+      preloaded_users = users_data.map(ustr => {
+        let user = ustr?.split("-");
+        return {sid: user[1], type: user[0]}
+      }) || [];
+      
+    }
+
+  } catch (error) {
+
+    // ignore json parsing error
+    
+  }
+  
+  loadUsers(preloaded_users);
+  updateUserList();
+
+  // main form submission
+  $("#create-schedule").submit(async e => {
+
+    form_submission_fired = true;
+
+    e.preventDefault();
+
+    // load form data
+    const form = document.querySelector('#create-schedule');
+
+    let selected_users = all_users.filter(u => u.type != null);
+
+    form['recipients'].value = selected_users.map(u => u.sid);
+
+    if (form['reports'].length > 0 && selected_users.length > 0) {
+
+        let ready = await customConfirm('Are your sure to submit?');
+        
+        if (ready) form.submit();
+
+    } else {
+
+        toast("Can't create this schedule!", "Please select atleast one user and one report to continue", 1);
+
+    }
+
+  });
+  
+
+  window.addEventListener('beforeunload', function (e) {
+
+      if (!form_submission_fired) {
+          e.preventDefault();
+      }
+
+  });
+
+</script>

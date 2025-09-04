@@ -1,0 +1,84 @@
+<div class="col-md-8 mx-auto bg-white rounded shadow p-4">
+
+    <div class="d-flex justify-content-between">
+
+        <div>
+
+            <div class="fs-4 fw-bold">EITIx Tenants</div>
+            <div class="small">
+                EITIx supports multiple wazuh server to connect with EITIx and identifies them as tenants.
+            </div>
+
+        </div>
+
+        <div>
+            <button class="btn btn-primary px-4 rounded-pill" type="button" 
+            onclick="toggleTenantAdd()">
+            <i class="fa fa-add"></i>
+            Add New Tenant
+            </button>
+        </div>
+
+    </div>
+
+    <%- include('./body/data-table-static.ejs', {
+        data,
+        dropdown: {
+            json: data
+        },
+        actions: false,
+        headers: [
+            { text: "Tenant ID", value: "tenant_id" },
+            { text: "Name", value: "name" },
+            { text: "Owner", value: "tenant_owner" },
+            /* { text: "Incoming", class:"text-center fw-bold", handler: (data) => {
+                return data.is_running ? "YES" : "NO"
+            } }, */
+        ],
+        actions: [
+        {
+            class: "btn-secondary",
+            condition: { field: "status", value: "INACTIVE" },
+            title: "Activate Tenant",
+            confirm: "Are you ready to activate?",
+            body: `INACTIVE`,
+            submit: (data) => {
+                return `tenantQuickUpdate('/dashboard/settings/tenant/update?action=activate', '${data._id}')`
+            }
+        },
+        {
+            class: "btn-success",
+            condition: { field: "status", value: "ACTIVE" },
+            title: "De-activate Tenant",
+            confirm: "Are you sure to deactivate?",
+            body: `ACTIVE`,
+            submit: (data) => {
+                return `tenantQuickUpdate('/dashboard/settings/tenant/update?action=deactivate', '${data._id}')`
+            }
+        },
+        {
+            class: "btn-primary",
+            title: "Edit this tenant",
+            body: `<i class="fa fa-pen"></i>`,
+            submit: (data) => {
+                return `editTenant('${data.tenant_id}')`
+            },
+        },
+        {
+            class: "btn-danger",
+            title: "Delete Tenant",
+            confirm: "Are you sure to delete this tenant permanently?",
+            body: `<i class="fa fa-trash"></i>`,
+            submit: (data) => {
+                return `tenantQuickUpdate('/dashboard/settings/tenant/update?action=delete', '${data._id}')`
+            }
+        }
+        ]
+    }) %>
+
+    <div class="alert alert-secondary py-2">
+        <i class="fa fa-circle-info me-2"></i> 
+        Changes will affect the upcoming data only!
+    </div>
+
+</div>

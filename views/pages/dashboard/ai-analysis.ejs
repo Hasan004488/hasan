@@ -1,0 +1,474 @@
+<script src="/scripts/apex-charts.js"></script>
+<script>
+  // date of the selected chart
+  let SELECTED_DATE = new Date();
+</script>
+<div class="col-12">
+  <div class="p-4 bg-white rounded shadow">
+    <div class="mb-3 position-relative">
+
+      <div class="d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center mb-3">
+        <div class="col-6">
+          <h4 class="fw-bold mb-2">
+            Attack vectors found in the logs
+          </h4>
+          <div class="fw-bold">
+            <span class="text-muted">
+              Selected date:
+            </span>
+            <span class="text-secondary" id="selected-date">
+              <%= new Date().toDateString() %>
+            </span>
+          </div>
+        </div>
+        <div id="selected-chart-date-container" class="d-none ms-auto">
+          <button class="btn btn-danger px-4 rounded-pill" onclick="resetChart()">
+            <i class="fa fa-times me-2"></i>
+            Selected: <span id="selected-chart-date"></span>
+          </button>
+        </div>
+        <div id="monitor-buttons" class="ms-auto btn-group toggle-block">
+          <button class="btn btn-tab px-5" onclick="changeMonitor('daily'); resetChart(); SELECTED_DATE = new Date(); updateTable(null, false)">
+            <i class="fa fa-globe area_blocked"></i>
+            Daily
+          </button>
+          <button class="btn btn-tab-off px-4" onclick="changeMonitor('weekly'); resetChart()">
+            <i class="fa fa-globe area_blocked"></i>
+            Weekly
+          </button>
+          <button class="btn btn-tab-off px-4" onclick="changeMonitor('monthly'); resetChart()">
+            <i class="fa fa-globe area_blocked"></i>
+            Monthly
+          </button>
+        </div>
+        <button title="Reload Chart" class="btn btn-tab-off" onclick="changeMonitor(); resetChart()">
+          <i class="fa fa-rotate"></i>
+        </button>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 shadow-lg rounded-3 mb-5 p-3">
+        <!-- <div id="pie-container"></div> -->
+        <div id="analysis-monitor-container" class="col mb-4 overflow-auto">
+          <div id="analysis_monitor" class="col clickable"></div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="fw-bold">
+          Attack Vectors List
+          <span class="" id="selected-attack"></span>
+        </h4>
+        <div>
+          <button id="show-all-btn" type="button" class="d-none btn rounded-pill btn-secondary me-2" onclick="resetTable();">
+            <i class="fa fa-list"></i>
+            Show All
+          </button>
+        </div>
+      </div>
+
+      <div id="ai-table">
+        <%- include("../../components/body/data-table.ejs") %>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // global timing
+  let TIMING = "<%=timing%>";
+  let MODE = "single"; // single day chart or multiple day chart
+  let RANGE = [];
+  let SERIES = [];
+  let TOTAL = [];
+  let DEFAULT_WIDTH = 1000;
+  let CLAMP_LIMIT = 5; // no percentage value can go less than this limit
+  let DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  let options = {
+    series: [],
+    colors: ['#ff7f3f', '#ff3f4f', '#f7c625', '#29385c', '#0aad5c', '#490073', '#078c8a', '#5e040a', '#3926a6', '#210207'],
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: true,
+      events: {
+        dataPointSelection: function(event, chartContext, config) {
+          if (MODE === "single") {
+
+            updateTable(chartContext.w.config.xaxis.categories[config.dataPointIndex], true);
+
+          } else {
+
+            selectDate(config.dataPointIndex);
+
+          }
+        }
+      }
+    },
+    plotOptions: {
+      bar: {
+        columnWidth: '80px',
+        distributed: true,
+        horizontal: false,
+        textAnchor: 'start',
+        dataLabels: {
+          position: 'top',
+          total: {
+            enabled: true,
+            offsetY: 20,
+            formatter: function(val, opts) {
+              return formatNumber(TOTAL[opts.dataPointIndex]);
+            },
+            style: {
+              color: 'white',
+              fontSize: '12px',
+              fontWeight: 600
+            }
+          }
+        }
+      },
+    },
+    dataLabels: {
+      enabled: true,
+      offsetY: -20,
+      formatter: function(value, opts) {
+        return SERIES[opts.dataPointIndex]?.y + '%';
+      },
+      style: {
+        colors: ['#ffffff97'],
+      },
+      background: {
+        enabled: true,
+        foreColor: '#333',
+      }
+    },
+    tooltip: {
+      y: {
+        formatter: function(value, opts) {
+          if (MODE === "single") {
+            return SERIES[opts.dataPointIndex]?.y + '%';
+          } else {
+            return value + '%';
+          }
+        },
+        title: {
+          formatter: (seriesName) => {
+            if (MODE === "single") {
+              return "Affected"
+            } else {
+              return seriesName
+            }
+          }
+        },
+      }
+    },
+    fill: {
+      opacity: 1
+    },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'left',
+      showForSingleSeries: true,
+      onItemClick: {
+        toggleDataSeries: false
+      },
+    },
+    noData: {
+      text: 'No Data available for today!',
+      align: 'center',
+      verticalAlign: 'middle',
+      style: {
+        color: '#999',
+        fontSize: '34px'
+      }
+    }
+  };
+
+  let analysis_monitor = new ApexCharts(document.querySelector("#analysis_monitor"), options);
+
+  function changeMonitor(timing) {
+
+    TIMING = timing || TIMING;
+
+    fetchDynamicData({
+      container: "#analysis-monitor-container",
+      url: `/dashboard/ai/monitor/data?timing=${TIMING}`,
+    }, (monitor) => {
+
+      if (TIMING == "daily") {
+
+        loadSingleChart(monitor);
+
+      } else {
+
+        loadMultiChart(monitor);
+
+        // scrolls the chart to the right
+        $("#analysis-monitor-container").animate({
+          scrollLeft: $("#analysis_monitor").width() + 1000
+        }, 1000);
+
+      }
+
+
+    }, 20000); // 1 minute
+
+  }
+
+  function dayName(dateString) {
+
+    let date = new Date(dateString);
+    return DAYS[date.getDay()];
+
+  }
+
+  /**
+   * Updates the AI Table component with the selected date and attack.
+   * 
+   * @param {string} [series_name] - The name of the attack to show in the table. If undefined, the table will show all attacks for the selected date.
+   * @param {boolean} [scroll] - If true, the table will be scrolled to the top of the page. If false, the page will not be scrolled.
+   */
+  function updateTable(series_name, scroll) {
+
+    let attack_param = "";
+
+    $("#selected-date").html(SELECTED_DATE.toDateString());
+
+    if (series_name) {
+
+      $("#selected-attack").html(`<span class="badge bg-primary rounded-pill">${series_name}</span>`);
+      attack_param = `&attack=${series_name}`;
+
+    }
+
+    loadData(true, false, `date=${getDateString(SELECTED_DATE)}${attack_param}`);
+
+    $("#board-componenets").animate({
+      scrollTop: 300
+    }, 1000);
+
+    if (scroll) {
+
+      $("#show-all-btn").removeClass("d-none");
+      window.location.href = "#ai-table";
+
+    } else {
+
+      $("#show-all-btn").addClass("d-none");
+
+    }
+
+  }
+
+  function resetTable() {
+
+    $("#show-all-btn").addClass("d-none");
+    $("#selected-attack").html("");
+    loadData(true, false, `date=${SELECTED_DATE.toISOString().split("T")[0]}`);
+    window.location.href = "#ai-table";
+
+  }
+
+  function selectDate(date_index) {
+
+    SELECTED_DATE = new Date(RANGE[date_index]);
+    MODE = "single";
+
+    $("#monitor-buttons").addClass("d-none");
+    $("#selected-chart-date-container").removeClass("d-none");
+    $("#selected-chart-date").html(SELECTED_DATE.toDateString());
+
+    fetchDynamicData({
+      container: "#analysis-monitor-container",
+      url: `/dashboard/ai/monitor/data?timing=${TIMING}&date=${getDateString(SELECTED_DATE)}`,
+    }, (monitor) => {
+
+      loadSingleChart(monitor);
+      updateTable(null, false);
+
+    });
+
+  }
+
+  function resetChart() {
+    MODE = TIMING === "daily" ? "single" : "multiple";
+    changeMonitor();
+    $("#selected-chart-date-container").addClass("d-none");
+    $("#monitor-buttons").removeClass("d-none");
+  }
+
+  function loadSingleChart(monitor) {
+
+    let graph_data = monitor.series;
+    let range = graph_data.map(o => o.name);
+    let series = graph_data.map(o => {
+      return {
+        x: o.name,
+        y: o.data[0]
+      }
+    });
+    let display_width = $("#analysis-monitor-container").width();
+
+    RANGE = range;
+    SERIES = series;
+
+    analysis_monitor.updateOptions({
+      series: [{
+        data: clampData(series, CLAMP_LIMIT) || [],
+      }],
+      plotOptions: {
+        bar: {
+          distributed: true,
+        },
+      },
+      dataLabels: {
+        enabled: true
+      },
+      chart: {
+        width: Math.max(RANGE?.length * 100 || 0, display_width),
+        stacked: false,
+        animations: {
+          enabled: true
+        }
+      },
+      xaxis: {
+        categories: range || []
+      }
+    });
+
+  }
+
+  function loadMultiChart(monitor) {
+
+    let display_width = $("#analysis-monitor-container").width();
+
+    RANGE = monitor.range;
+    TOTAL = monitor.total;
+    analysis_monitor.updateOptions({
+      series: monitor.series || [],
+      plotOptions: {
+        bar: {
+          distributed: false,
+          dataLabels: {
+            enabled: false,
+          }
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      chart: {
+        width: Math.max(RANGE?.length * 100 || 0, display_width),
+        stacked: true,
+        animations: {
+          enabled: false
+        },
+        zoom: {
+          enabled: true,
+          type: 'x',
+          resetIcon: {
+            offsetX: -10,
+            offsetY: 0,
+            fillColor: '#fff',
+            strokeColor: '#37474F'
+          },
+          selection: {
+            background: '#90CAF9',
+            border: '#0D47A1'
+          }
+        }
+      },
+      xaxis: {
+        categories: monitor.range || []
+      }
+    });
+
+  }
+
+  function clampData(data_array, limit) {
+
+    const new_array = data_array.map(o => ({
+      x: o.x,
+      y: o.y < limit ? String(limit) : o.y
+    }));
+    return new_array;
+
+  }
+
+  // firing section
+  changeMonitor();
+  analysis_monitor.render();
+  loadData();
+
+  async function loadPopupData(attack_name, page_increment = false) {
+
+    window.ai_popup_page = window.ai_popup_page || 1;
+
+    if (page_increment) {
+      window.ai_popup_page += 1;
+    } else {
+      window.ai_popup_page = 1;
+    }
+
+    const table_body = await waitForElement("ai-popup-data");
+
+    if (table_body) {
+
+      if (!page_increment) {
+        table_body.innerHTML = "";
+      }
+
+      console.log("loading popup, page:", window.ai_popup_page);
+
+      fetch(`/dashboard/ai/data/attack/logs/${attack_name}?page=${window.ai_popup_page}`)
+        .then(res => res.json())
+        .then(data => {
+
+          if (data) {
+
+            data.forEach(log => {
+              const log_row = document.createElement("tr");
+              log_row.className = "clickable";
+              log_row.onclick = () => loadDynamicPopup('Wazuh Log Preview', `/dashboard/wazuh/logs/data/raw?idfs=id&operators=equal_to&types=string&values=${log.id}&date=${new Date(log.timestamp).toISOString()}`);
+              const log_timestamp = new Date(log.timestamp);
+              log_row.innerHTML = `
+              <td class="text-nowrap">
+                ${log_timestamp.toLocaleString() || "Unknown"}
+              </td>
+              <td class="">
+                ${log.id || "Unknown"}
+              </td>
+              <td class="">
+                ${truncateText(log.rule?.description, 100) || "No Information"}
+              </td>
+              <td class="text-center">
+                <span class="badge bg-secondary rounded-pill">
+                  ${log.rule.level || "Unknown"}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-primary rounded-pill">
+                  ${log.agent.id || "Unknown"}
+                </span>
+              </td>
+              <td class="">
+                ${log.agent.ip || "Unknown"}
+              </td>
+            `;
+              table_body.appendChild(log_row);
+            });
+
+          } else {
+
+            // disable
+            $("#popup-data-loader").addClass("disabled");
+
+          }
+
+        });
+
+    }
+
+  }
+</script>

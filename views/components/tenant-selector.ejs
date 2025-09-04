@@ -1,0 +1,14 @@
+<div class="d-flex gap-2">
+    <div class="align-self-center">
+      <i class="fa fa-database text-muted fs-5"></i>
+    </div>
+    <select name="" 
+      class="form-select rounded-pill <%= tenants.length < 2 ? "area_disabled" : "" %>"
+      onchange="changeTenant(this)" style="max-width: 20vw;">
+      <% tenants.forEach(tenant => { %>
+        <option class="pe-3" value="<%= tenant.tenant_id %>">
+          <%= tenant.name %>
+        </option>
+      <% }) %>
+    </select>
+  </div>

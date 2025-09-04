@@ -1,0 +1,30 @@
+<%
+const input_label = typeof label !== "undefined" ? label : "Input label";
+const data = {
+  id: typeof id !== "undefined" ? id : "",
+  name: typeof name !== "undefined" ? name : "",
+  value: typeof value !== "undefined" ? value : "",
+  placeholder: typeof placeholder !== "undefined" ? placeholder : "Write input here",
+  cols: typeof cols !== "undefined" ? cols : 30,
+  rows: typeof rows !== "undefined" ? rows : 5,
+  char_limit: typeof char_limit !== "undefined" ? char_limit : [],
+  required: typeof required !== "undefined" ? required : false,
+  extra: typeof extra !== "undefined" ? extra : "",
+  style: typeof style !== "undefined" ? style : ""
+};
+%>
+<div class="form-group w-100 my-1 mb-3">
+  <label class="mb-2 fw-bold text-primary"><%= input_label %></label>
+  <textarea 
+    name="<%= data.name %>"
+    id="<%= data.id %>"
+    class="form-control w-100 <%= data.style %>"
+    cols="<%= data.cols %>"
+    rows="<%= data.rows %>"
+    minlength="<%= data.char_limit[0] || 1 %>"
+    maxlength="<%= data.char_limit[1] || 500 %>"
+    placeholder="<%= data.placeholder %>"
+    <%= data.required ? "required" : "" %>
+    <%= data.extra %>
+  ><%= data.value %></textarea>
+</div>

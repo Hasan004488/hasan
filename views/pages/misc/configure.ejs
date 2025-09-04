@@ -1,0 +1,129 @@
+<section class="bg-light" style="min-height: 100vh;">
+  <div class="container py-5 d-flex justify-content-center">
+    <form class="
+    col-sm-10
+    col-md-8
+    col-lg-6
+    bg-white
+    rounded
+    shadow
+    p-4" action="/configure" method="POST" onsubmit="return confirm('Ready to configure?')">
+
+      <h1 class="rounded-top p-3 text-center h5 fw-bold border-bottom">Configure Eitix Dashboard!</h1>
+
+      <div class="">
+
+        <div class="py-2 mb-2">
+          <img class="me-2" src="/images/eitix-text-logo-dark.png" height="25">
+        </div>
+        <div class="mb-2 fw-bold text-primary">
+          <i class="fa fa-circle-info"></i>
+          EITIx Database Configuration
+        </div>
+        <div class="input-group py-1">
+          <label class="input-group-text rounded-pill-l" for="db_user">Database Username</label>
+          <input name="db_user" type="text" class="form-control rounded-pill-r" placeholder="Your Mongodb Database Username" maxlength="255" required value="<%= config.db_user || "mongo_admin" %>">
+        </div>
+        <div class="input-group py-1">
+          <label class="input-group-text rounded-pill-l" for="db_pass">Database Password</label>
+          <input name="db_pass" type="password" class="form-control rounded-pill-r" placeholder="Your Mongodb Database Password" maxlength="255" required value="<%= config.db_pass || "E171x0b98e30609be1f" %>">
+        </div>
+        <div class="input-group py-1">
+          <label class="input-group-text rounded-pill-l" for="db_port">Database Port</label>
+          <input name="db_port" type="text" class="form-control rounded-pill-r" placeholder="Your Mongodb Database Port" maxlength="255" required value="<%= config.db_port || "27017" %>">
+        </div>
+
+        <div class="alert alert-warning my-2">
+          <i class="fa fa-exclamation-triangle"></i>
+          Caution! Configuration process resets various parts of EITIx but doesn't delete any data.
+        </div>
+
+        <!-- Additional Section -->
+        <div class="accordion-item my-3">
+          <button type="button" id="add-config-header" class="accordion-header btn rounded-pill" data-bs-toggle="collapse" data-bs-target="#additional-config" aria-expanded="false">
+            Additional Configuration Control
+            <i class="fa fa-caret-down ms-auto"></i>
+          </button>
+          <!-- keep this panel open when the title is a nested button -->
+          <div id="additional-config" class="accordion-collapse collapse" aria-labelledby="#add-config-header">
+            <div class="accordion-body p-2">
+              <label class="clickable input-group-text mb-2" onclick="uncheckAll()">
+                <i class="fa fa-cancel"></i>
+                <strong class="px-2">Uncheck All</strong>
+              </label>
+              <label class="clickable input-group-text mb-2">
+                <input type="checkbox" name="db_admin" checked>
+                <strong class="px-2">Set EITIx admin privilege</strong>
+              </label>
+              <label class="clickable input-group-text mb-2">
+                <input type="checkbox" name="reset_org" checked>
+                <strong class="px-2">Set Organization Information</strong>
+              </label>
+              <label class="clickable input-group-text mb-2">
+                <input type="checkbox" name="reload_templates" checked>
+                <strong class="px-2">Set Email and SMS templates</strong>
+              </label>
+              <label class="clickable input-group-text mb-2">
+                <input type="checkbox" name="reset_cleaner" checked>
+                <strong class="px-2">Set Houskeeping Data</strong>
+              </label>
+              <label class="clickable input-group-text mb-2">
+                <input type="checkbox" name="reset_roles" checked>
+                <strong class="px-2">Set Roles and Permissions</strong>
+              </label>
+              <label class="clickable input-group-text mb-2">
+                <input type="checkbox" name="create_indexes" checked>
+                <strong class="px-2">Set Database Rules</strong>
+              </label>
+              <label class="clickable input-group-text mb-2">
+                <input type="checkbox" name="reset_workers" checked>
+                <strong class="px-2">Set Worker Configurations</strong>
+              </label>
+              <label class="clickable input-group-text mb-2">
+                <input type="checkbox" name="reset_ioc" checked>
+                <strong class="px-2">Set IoC Whitelist</strong>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Submit Section -->
+      <div class="form-group mb-2">
+        <button type="submit" class="btn btn-primary rounded-pill me-2 px-5">
+          <i class="fa fa-check"></i>
+          Submit
+        </button>
+        <!-- <a href="/reset?type=hard" class="btn btn-danger rounded-pill"
+        onclick="return confirmChoice(event, `Are you sure to reset EITIx? This action will make EITIx unusable until it's configured again.`)">
+          <i class="fa fa-exclamation-triangle"></i>
+          Reset EITIx
+        </a> -->
+        <a href="/dashboard" class="btn btn-secondary rounded-pill px-4">
+          <i class="fa fa-arrow-left"></i>
+          Back To Dashboard
+        </a>
+      </div>
+
+    </form>
+  </div>
+</section>
+
+<script>
+
+  function uncheckAll() {
+
+    const container = document.getElementById("additional-config");
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+
+    // Loop through the child checkboxes and uncheck them
+    checkboxes.forEach(function (checkbox) {
+
+      checkbox.checked = false;
+
+    });
+
+  }
+
+</script>

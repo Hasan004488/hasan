@@ -1,0 +1,63 @@
+<% let { attacksc, all_templates, templates } = data %>
+
+<div class="col-md-8 mt-5 mx-auto">
+
+  <div class="col-md bg-light rounded shadow p-5">
+
+    <div class="fs-4 fw-bold">Customize Agent Log Fields for Attack Surface</div>
+    <div class="small">
+      Specify extra log fields that you want to include in the uploading load of attack surface for each agent.
+    </div>
+
+    <form class="my-3" action="" method="POST" onsubmit="return ascValidation(this);">
+
+      <div id="log-fields-box">
+        <%- include("../../components/surface/agent-log-fields.ejs") %>
+      </div>
+
+      <div class="my-3 d-flex gap-3">
+        <button class="btn btn-secondary rounded-pill" type="button" onclick="addAgentFields()">
+          <i class="fa fa-add"></i>
+          Add New Agent
+        </button>
+        <button class="btn btn-primary rounded-pill" type="submit">
+          <i class="fa fa-arrow-up"></i>
+          Update Whitelist
+        </button>
+      </div>
+
+    </form>
+
+    <div class="alert alert-secondary py-2">
+      <i class="fa fa-circle-info me-2"></i> 
+      Configuration will affect the upcoming data only!
+    </div>
+
+  </div>
+  
+</div>
+
+<script>
+
+  function addAgentFields() {
+
+    let container = $("#log-fields-box");
+
+    $.ajax({
+      url: `/dashboard/surface/customization/data/fields`,
+      type: 'GET',
+      success: (data) => {
+
+        container.append(data);
+
+      },
+      error: (xhr, status, err) => {
+
+        toast()
+
+      }
+    })
+    
+  }
+
+</script>

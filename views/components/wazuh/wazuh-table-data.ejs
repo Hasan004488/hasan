@@ -1,0 +1,62 @@
+<% data.forEach((ldata) => { %>
+<% 
+      let _id = ldata._id;
+      let col = ldata.group;
+    %>
+<tr class="slide-in-up">
+  <td>
+    <%
+          let timestamp = new Date(ldata.timestamp);
+        %>
+    <span class="text-nowrap"><%= timestamp.toLocaleTimeString() || "No Information" %></span><br>
+    <span><%= timestamp.toLocaleDateString() || "No Information" %></span>
+  </td>
+  <td class="">
+    <%= ldata.tenant_id || "default" %>
+  </td>
+  <td class="">
+    <span title="Click to view log preview" class="clickable" onclick="loadDynamicPopup('Wazuh Log Preview', '/dashboard/wazuh/logs/data/raw?idfs=id&operators=equal_to&types=string&values=' + '<%= ldata.id %>&collection=<%= col %>')">
+      <img src="/images/icons/view-log.png" alt="" height="20">
+    </span>
+    <span class="clickable copy-icon" onclick="navigator.clipboard.writeText('<%= ldata.id %>').then(() => toast('Text Copied!', 'Log ID copied to clipboard', 1));" title="Copy Log ID">
+      <img src="/images/icons/copy.png" alt="" height="20">
+    </span>
+    <span class="fw-bold">
+      <%= ldata.id || "unknown" %>
+    </span>
+  </td>
+  <td><%= locals.format.truncateText(ldata.rule?.description, 40) || "No Information" %></td>
+  <td class="text-center">
+    <span class="badge bg-primary rounded-pill">
+      <%= ldata.agent?.id || "Unknown" %>
+    </span>
+  </td>
+  <td class="text-center">
+    <span class="badge bg-secondary rounded-pill">
+      <%= ldata.rule?.id || "unknown" %>
+    </span>
+  </td>
+  <td class="text-center fs-5 fw-bold">
+    <%= ldata.rule?.level || "unknown" %>
+  </td>
+  <td class="text-center">
+    <% if (access("createTicket", locals.permissions)) { %>
+
+    <a class="badge btn btn-primary rounded-pill mx-2" href="/dashboard/tickets/create?log_id=<%= ldata.id %>" target="_blank">
+      <i class="fa fa-add"></i>
+      Ticket
+    </a>
+
+    <% } %>
+  </td>
+</tr>
+
+<tr id="dropdata-<%= _id %>" class="d-none">
+  <td colspan="<%= 7 %>" class="p-3">
+    <div class="bg-white rounded p-3">
+      <div class="data"></div>
+    </div>
+  </td>
+</tr>
+
+<% }) %>

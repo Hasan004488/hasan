@@ -1,0 +1,49 @@
+<% data.forEach((data) => { %>
+  <tr class="py-3 slide-in-up">
+    <td>
+      <% let timestamp = new Date(data.timestamp) %>
+      <%= timestamp?.toLocaleTimeString() || "Unknown time" %> <br>
+      <%= timestamp?.toLocaleDateString() || "Unknown time" %>
+    </td>
+    <td class="">
+      <div class="fw-bold">
+        <span class="clickable" onclick="navigator.clipboard.writeText('<%= data.username %>').then(() => toast('Text Copied!', 'Username copied to clipboard', 1));" title="Copy Username">
+          <img src="/images/icons/copy.png" alt="" height="20">
+        </span>
+        <%= data.username || "Unknown" %>
+      </div>
+    </td>
+    <td class="text-center">
+      <%= data?.agent_ip || "None" %>
+    </td>
+    <td class="text-center">
+      <%= data.data?.dstip || "None" %>
+    </td>
+    <td class="text-center fw-bold">
+      <% if (data.anomaly) { %>
+        <span class="text-danger" title="<%= data.anomaly %>">
+          <i class="fas fa-triangle-exclamation"></i>
+          <%= data.sequence || "0" %>
+        </span>
+      <% } else { %>
+        <span class="">
+          <%= data.sequence || "0" %>
+        </span>
+      <% } %>
+    </td>
+    <td class="text-center">
+      <span title="Click to view log preview" class="clickable" onclick="toggleSecondaryPopup('Activity logs', null, '/dashboard/uba/activity/logs?id=<%= data._id %>&type=<%= tab %>')" title="View activity logs">
+        <img src="/images/icons/view-log.png" alt="" height="20">
+        <strong class="ms-1" style="line-height: 1;">
+          <%= data.frequency || "0" %>
+        </strong>
+      </span>
+    </td>
+    <td class="">
+      <img src="/dashboard/uba/assets/icons/<%= data.action %>" alt="Icon" class="profile_image" height="30">
+      <span class="bg-secondary-light text-dark p-2 rounded">
+        <%= data.action || "None" %>
+      </span>
+    </td>
+  </tr>
+<% }) %>

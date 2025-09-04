@@ -1,0 +1,34 @@
+<% data.forEach((data) => { %>
+    <tr class="py-3 slide-in-up">
+        <td>
+            <%= data?.sent?.toLocaleString() || 'No Information'%>
+        </td>
+        <td title="<%= data?.source %>">
+            <%= locals.format.truncateText(data?.source, 10) || 'No Information'%>
+        </td>
+        <td class="text-nowrap" title="<%= data?.message_id %>">
+            <%= locals.format.truncateText(data?.message_id, 20)  || 'No Information'%>
+        </td>
+        <td class="text-center">
+            <span class="badge bg-secondary rounded-pill">
+                <%= data?.status || 'No Information'%>
+            </span>
+        </td>
+        <% if (channel === 'sms') { %>
+            <%
+                let chars = data.characters;
+                let count = data.length;
+                let char_text = '';
+                if (chars) {
+                    char_text = `${chars} (${ count || 0 } sms)`;
+                } else char_text = "";
+            %>
+            <td class="text-center">
+                <%= char_text %>
+            </td>
+        <% } %>
+        <td title="<%= data?.receiver %>">
+            <%= locals.format.truncateText(data?.receiver, 40) || 'No Information'%>
+        </td>
+    </tr>
+<% }) %>

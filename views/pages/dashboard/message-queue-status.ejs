@@ -1,0 +1,82 @@
+<div class="row mt-4 w-100">
+  <% Object.entries(queueStats).forEach(([queueName, stats]) => { %>
+  <div class="mb-4">
+    <div class="" id="queue-<%= stats.name %>">
+      <div class="row text-center">
+        <div class="col-4">
+          <div class="bg-warning bg-opacity-25 py-4 px-2 rounded">
+            <h1 class="fw-bold" id="<%= queueName %>-waiting"><%= stats.waiting || 0 %></h1>
+            <small>Waiting</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="bg-info bg-opacity-25 py-4 px-2 rounded">
+            <h1 class="fw-bold" id="<%= queueName %>-active"><%= stats.active || 0 %></h1>
+            <small>Active</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="bg-danger bg-opacity-25 py-4 px-2 rounded">
+            <h1 class="fw-bold" id="<%= queueName %>-failed"><%= stats.failed || 0 %></h1>
+            <small>Failed</small>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="d-flex flex-column gap-4">
+          <% stats.last10tasks.slice(0, 10).forEach((task) => { %>
+          <div class="bg-light border p-3 rounded">
+            <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center gap-2 fw-bold">
+                <div>
+                  <span class="<%= task.status === "failed" ? 'bg-danger' : task.status === "active" ? 'bg-info' : 'bg-primary' %> text-white rounded-pill px-2 py-1">
+                    <% if (task.status === 'failed') { %>
+                    Failed
+                    <i class="fa fa-times"></i>
+                    <% } else if (task.status === 'active') { %>
+                    Active
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <% } else if (task.status === 'waiting') { %>
+                    Waiting
+                    <i class="fa fa-clock"></i>
+                    <% } %>
+                  </span>
+                </div>
+                <div class="fs-5">
+                  <%- task.id.length > 12 ? task.id.slice(0, 12) + "..." : task.id %>. <%- task.name %>
+                </div>
+              </div>
+              <div class="ms-auto">
+                <a class="btn btn-sm btn-light">
+                  <i class="fa fa-rotate"></i>
+                </a>
+                <a class="btn btn-sm btn-light text-danger">
+                  <i class="fa fa-trash"></i>
+                </a>
+              </div>
+            </div>
+            <div>
+              <%- task.data.message %>
+            </div>
+            <% if (task.status === 'failed') { %>
+            <div class="text-danger">
+              Failed Reason: <%- task.failedReason %>
+            </div>
+            <% } %>
+            <div class="">
+              <i class="fa fa-clock text-muted"></i>
+              <%- new Date(task.data.time).toLocaleString() %>
+            </div>
+          </div>
+          <% }); %>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <% }); %>
+    <div class="py-2"></div>
+    <div class="text-center">
+      Showing latest data only...
+    </div>
+  </div>
+</div>

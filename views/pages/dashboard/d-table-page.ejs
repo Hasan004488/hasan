@@ -1,0 +1,89 @@
+<div class="col-12">
+    <div class="p-4 bg-white rounded shadow">
+
+        <div class="d-flex align-items-center justify-content-between">
+          <h4 class="fw-bold">
+            <%= table.name %>
+          </h4>
+          <div class="d-flex gap-2 align-items-center">
+            <a href="/dashboard/uba/export/<%= page %>"
+            class="btn btn-info rounded-pill" title="Export the whole database">
+              <i class="fa-solid fa-file-export"></i>
+              Export
+            </a>
+            <label class="btn btn-secondary rounded-pill">
+              <i id="file-import-loading" class="d-none fa-spin fa-spinner"></i>
+              <i id="file-import-icon" class="fa-solid fa-file-import"></i>
+              Import
+              <span title="You may export a list first then import according to the format">
+                <i class="fa fa-circle-info cursor-help ms-1 small"></i>
+              </span>
+              <input type="file" id="uba-import-json" accept=".json,.csv" hidden>
+            </label>
+            <a title="Create a new row" onclick="toggle('#trow-create-new')"
+            class="btn btn-success rounded-pill">
+              <i class="fa-solid fa-database"></i>
+              <i class="fa-solid fa-add"></i>
+            </a>
+            <%- include('components/search-control-buttons') %>
+          </div>
+        </div>
+
+        <%- include("../../components/body/search-data.ejs", {
+          options: table.headers
+            .filter(header => header.hasOwnProperty('property'))
+            .map(header => ({ name: header.text, property: header.property })), 
+          total_text: table.total_text
+        }) %>
+
+        <%- include("../../components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<script>
+
+  loadData(true, true);
+
+  document.getElementById('uba-import-json').addEventListener('change', function(e) {
+
+    let file = e.target.files[0];
+    let reader = new FileReader();
+
+    reader.onload = function(e) {
+
+      toggle("#file-import-loading", "#file-import-icon");
+      document.getElementById('uba-import-json').value = "";
+
+      $.ajax({
+        url: '/dashboard/uba/import/<%= page %>',
+        type: 'POST',
+        data: {
+          data_str: e.target.result
+        },
+        success: function(data) {
+          toggle("#file-import-loading", "#file-import-icon");
+          if (data.status) {
+            toast('Success!', 'File imported successfully.', 2);
+            loadData(true, true);
+          } else {
+            console.log(data);
+            toast('Failed to import!', "Please check out the console", 2);
+          }
+        },
+        error: function(err) {
+          toggle("#file-import-loading", "#file-import-icon");
+          console.error(err);
+          toast('Failed to import!', "Please check out the console", 2);
+        }
+      });
+
+    };
+
+    reader.readAsText(file);
+
+  });
+
+</script>
+
+<script src="/scripts/dynamic-update.js"></script>

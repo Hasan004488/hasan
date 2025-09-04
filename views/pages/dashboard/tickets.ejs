@@ -1,0 +1,48 @@
+
+
+<style>
+    .form-check-input {
+        cursor: pointer;
+        background: var(--bs-light);
+    }
+</style>
+
+<div class="col-12">
+    <div class="p-4 bg-light rounded shadow">
+        
+        <div class="d-flex align-items-center justify-content-between">
+            <h4 class="fs-4 fw-bold">
+                <%= locals.format.title(active) %> Tickets In the System
+            </h4>
+            <div class="d-flex gap-2">
+                <% if(access("createTicket", locals.permissions)) { %>
+                    <a class="btn btn-primary rounded-pill px-3" href="/dashboard/tickets/create">
+                        <i class="fa fa-add"></i>
+                          Create new Ticket
+                      </a>
+                <% } %>
+                <%- include('components/search-control-buttons') %>
+            </div>
+            
+        </div>
+
+        <%- include("../../components/body/search-data.ejs", {
+            options: [
+              { name: "Title", property: "title" },
+              { name: "Type", property: "type" },
+              { name: "Criticality", property: "criticality" }
+            ],
+            total_text: `Total ${active} tickets:`
+          }) 
+        %>
+    
+        <%- include("../../components/body/data-table.ejs") %>
+
+    </div>
+</div>
+
+<script>
+
+    loadData(true, true);
+
+</script>

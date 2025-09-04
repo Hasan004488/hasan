@@ -1,0 +1,131 @@
+<% data.forEach((event) => { %>
+  <% 
+
+    let _id = event._id;
+
+  %>
+  <tr class="py-3 slide-in-up">
+    <td>
+      <button class="btn btn-sm drop-btn" 
+        onclick="
+          toggleDropData(this, '#dropdata-<%= _id %>');
+      ">
+        <i class="fa fa-angle-right"></i>
+      </button>
+    </td>
+    <td>
+      <%
+        let date_part = ", " + event.date?.toLocaleDateString() || "";
+        let time_part = event.date?.toLocaleTimeString() || "";
+        if (!archive) {
+          date_part = "";
+        }
+      %>
+      <span><%= time_part + date_part %></span>
+    </td>
+    <td>
+      <%= event.tenant_id || "unknown" %>
+    </td>
+    <td>
+      <span class="text-nowrap text-<%= event.type === "ip" ? "primary" : event.type === "domain" ? "info" : "secondary" %>">
+        <i class="fa fa-database"></i>
+        <span><%= event.source || "No Information" %></span>
+      </span>
+    </td>
+    <td class="">
+      <div>
+        <span title="Click to view log preview" class="clickable" onclick="loadDynamicPopup('Wazuh Log Preview', '/dashboard/wazuh/logs/data/raw?idfs=id&operators=equal_to&types=string&values=' + '<%= event.log_id %>')">
+          <img src="/images/icons/view-log.png" alt="" height="20">
+        </span>
+        <a target="_blank" class="clickable"
+          href="https://www.virustotal.com/gui/search/<%= event.data ?? '' %>"
+          title="Check in virus total">
+          <img src="/images/icons/virus-total.png" alt="" height="20">
+        </a>
+        <span class="clickable" onclick="navigator.clipboard.writeText('<%= event.data %>').then(() => toast('Text Copied!', 'Data copied to clipboard', 1));" title="Copy Data">
+          <img src="/images/icons/copy.png" alt="" height="20">
+        </span>
+        <%= locals.format.truncateText(event.data, 30) || "No Information" %>
+      </div>
+    </td>
+    <td class="text-center">
+      <span class="badge bg-<%= event.ioc_count > 0 ? "danger" : "secondary" %> rounded-pill">
+        <%= locals.format.number(event.ioc_count) || "None" %>
+      </span>
+    </td>
+    <td class="text-center">
+      <span class="fw-bold text-<%= event.response === "Success" ? "success" : "danger" %>">
+        <%= event.response || "Not Set" %>
+      </span>
+    </td>
+  </tr>
+  <tr id="dropdata-<%= _id %>" class="d-none">
+    <td colspan="<%= 8 %>" class="p-3">
+      <div class="bg-white rounded p-3">
+          <div class="data text-secondary">
+
+            <div class="d-md-flex mb-3">
+              <div class="col-md-3 pe-3">
+                <div class="rounded shadow p-3 border-start border-primary">
+                  <div class="fw-bold">IoC Events Count</div>
+                  <div class="fw-bold fs-2 text-danger"><%= locals.format.number(event.ioc_count) || "0" %></div>
+                </div>
+              </div>
+              <div class="col-md-3 pe-3">
+                <div class="rounded shadow p-3 border-start border-primary">
+                  <div class="fw-bold">Agent ID</div>
+                  <div class="fw-bold fs-2 text-primary"><%= event.agent || "unknown" %></div>
+                </div>
+              </div>
+              <div class="col-md-3 pe-3">
+                <div class="rounded shadow p-3 border-start border-primary">
+                  <div class="fw-bold">Agent Name</div>
+                  <div class="fw-bold fs-2 text-primary"><%= event.agent_name || "unknown" %></div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="rounded shadow p-3 border-start border-primary">
+                  <div class="fw-bold">Agent IP</div>
+                  <div class="fw-bold fs-2 text-primary"><%= event.agent_ip || "unknown" %></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex flex-column gap-2 py-3">
+              <div class="d-flex align-items-center  gap-2">
+                <div class="fw-bold">Target Data: </div>
+                <div class="fw-bold">
+                  <%= event.data || "No Information" %>
+                </div>
+              </div>
+              <div class="d-flex align-items-center  gap-2">
+                <div class="fw-bold">Description: </div>
+                <div class="fw-bold text-primary">
+                  <%= event.description || "No Information" %>
+                </div>
+              </div>
+              <div class="fw-bold ">Full Log: </div>
+              <div>
+                <%= event.full_log || "No Information" %>
+              </div>
+            </div>
+
+            <details class="px-2" open>
+              <summary class="clickable-h fw-bold pb-2">
+                  IoC Events (MISP)
+              </summary>
+              <div class="overflow-auto form-control rounded py-3 mb-3" style="max-height: 40vh;">
+                <% event.ioc_events?.forEach(event_id => { %>
+                  <a href="/dashboard/surface/events/search?id=<%= event_id %>" class="btn" target="_blank">
+                    <i class="fa fa-external-link"></i>
+                    Event: <%= event_id %>
+                  </a>
+                <% }) %>
+              </div>
+            </details>
+            
+          </div>
+      </div>
+    </td>
+  </tr>
+<% }) %>

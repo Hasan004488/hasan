@@ -1,0 +1,26 @@
+
+<div class="col-md-10 mt-5">
+  <div class="col-md bg-light rounded shadow p-4">
+
+    <h1 class="fs-4 fw-bold">Generate a Quick Report</h1>
+    <div class="mb-3">
+      <p class="">Select the reports you want to include in the report. <br/>All reports will be exported into one <strong>pdf</strong> file</p>
+    </div>
+
+    <form id="quick-report-form" class="" action="/dashboard/reports/quick" method="POST" onsubmit="demoLoading()">
+
+      <%- include('load-quick-reports.ejs', {config: {}}) %>
+
+      <div class="my-3">
+        <button type="submit" class="btn rounded-pill btn-primary px-4">
+          <i class="fa fa-file"></i>
+          Generate Report
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<script src="/scripts/quick-reports.js"></script>

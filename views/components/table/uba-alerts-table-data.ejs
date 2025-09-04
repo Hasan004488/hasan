@@ -1,0 +1,92 @@
+<% data.forEach((data) => { %>
+  <tr class="py-3 slide-in-up">
+    <td>
+      <button class="btn btn-sm drop-btn" 
+        onclick="
+          toggleDropData(this, '#dropdata-<%= data._id %>');
+      ">
+        <i class="fa fa-angle-right"></i>
+      </button>
+    </td>
+    <td>
+      <% let timestamp = data.date %>
+      <%= timestamp?.toLocaleString() || "Unknown time" %>
+    </td>
+    <td class="">
+      <div class="">
+        <span class="clickable" onclick="navigator.clipboard.writeText('<%= data.username %>').then(() => toast('Text Copied!', 'Username copied to clipboard', 1));" title="Copy Username">
+          <img src="/images/icons/copy.png" alt="" height="20">
+        </span>
+        <%= data.username || "Unknown" %>
+      </div>
+    </td>
+    <td class="text-center fw-bold">
+      <%= data.attack || "Unknown" %>
+    </td>
+    <td class="text-center">
+      <span class="badge bg-danger rounded-pill"><%= data.risk || "None" %></span>
+    </td>
+    <% if (access("admin", locals.permissions)) { %>
+      <td>
+        <div class="d-flex justify-content-center gap-2">
+          <button type="button" class="btn badge rounded-pill btn-danger" onclick="updateData('Are you sure to delete? (This is Permanent)', '/dashboard/uba/alerts/delete/<%= active %>', '<%= data._id %>')">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </td>
+    <% } %>
+  </tr>
+  <tr id="dropdata-<%= data._id %>" class="d-none">
+    <td colspan="<%= 6 %>" class="p-3">
+      <div class="data mx-auto text-secondary bg-white rounded p-3">
+        <h5 class="d-flex align-items-center fw-bold mb-3 gap-2 mx-auto fixed-dashboard-width">
+          <img src="/dashboard/uba/assets/icons/<%= data.attack %>" alt="Icon" class="profile_image" height="35">
+          <span class="badge bg-danger rounded-pill">High</span>
+          <span class=""><%= data.attack || "Unknown" %>!</span>
+        </h5>
+        <div class="uba-alerts-container fixed-dashboard-width">
+          <% data.actions.forEach(action => { %>
+            <div class="actiity d-flex align-items-center flex-column flex-md-row gap-3 bg-white text-dark p-3 rounded border border-primary">
+              <span class="position-absolute badge rounded-pill bg-primary" style="top: -10px; left: 10px">
+                <i class="fa fa-user"></i>
+                <%= data.username %>
+              </span>
+              <div>
+                <img src="/dashboard/uba/assets/icons/<%= action.name %>" alt="Icon" class="profile_image" height="45">
+              </div>
+              <div class="col">
+                <div class="fw-bold mb-0">
+                  <%= action.name || "Unkonwn" %>
+                </div>
+                <div class="small mb-1">
+                  <div id="description-<%= action._id %>">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                  <script>
+                    fetch('/dashboard/uba/actions/description/<%= action.name %>')
+                      .then(response => response.json())
+                      .then(data => {
+                        document.getElementById('description-<%= action._id %>').innerHTML = `
+                          ${data.description || "Unknown"}
+                        `;
+                      })
+                      .catch(error => console.log(error));
+                  </script>
+                </div>
+                <button class="badge btn bg-secondary text-white rounded-pill" onclick="toggleSecondaryPopup('Activity logs', null, '/dashboard/uba/activity/logs?id=<%= action._id %>&type=<%= active %>')">
+                  <i class="fa fa-circle-info"></i>
+                  Investigate
+                </button>
+              </div>
+            </div>
+            <% if (action !== data.actions[data.actions.length - 1]) { %>
+              <div class="bg-primary" style="height: 5px; width: 50px;"></div>
+            <% } %>
+          <% }) %>
+        </div>
+      </div>
+    </td>
+  </tr>
+<% }) %>

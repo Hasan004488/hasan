@@ -1,0 +1,91 @@
+
+<div class="col-md-8 mx-auto mt-5">
+
+<div class="col-md bg-light rounded shadow p-5">
+
+  <div class="fs-4 fw-bold">Manage Password Policy</div>
+  <div class="small">
+    Configure the password policy for your users. 
+  </div>
+
+  <form class="my-3" action="/dashboard/users/policy/update" method="POST" onsubmit="return ascValidation(this);">
+
+      <div class="fw-bold fs-5 py-2 mb-3 border-bottom border-2">Password Management</div>
+
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Login attempts before blockout",
+        name: "login_attempts",
+        placeholder:"Enter Login Attempts",
+        type: "number",
+        num_limit: [0, 255]
+      }) %>
+
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Days before password expires",
+        name: "password_expires",
+        placeholder:"Enter days before password expires",
+        type: "number",
+        num_limit: [0, 255]
+      }) %>
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Days to Warn User of an expiring password  ",
+        name: "warn_user",
+        placeholder:"Enter days to warn user",
+        type: "number",
+        num_limit: [0, 255]
+      }) %>
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Days between password changes ",
+        name: "password_changing_days",
+        placeholder:"Enter days between password changes",
+        type: "number",
+        num_limit: [0, 255]
+      }) %>
+
+      <div class="fw-bold fs-5 py-2 mb-3 border-bottom border-2">Password Characteristics</div>
+
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Minimum password length",
+        name: "password_len",
+        placeholder:"Enter minimum password length",
+        type: "number",
+        num_limit: [8, 99]
+      }) %>
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Minimum Uppercase Character",
+        name: "uppercase_character",
+        placeholder:"Enter minimum uppercase character",
+        type: "number",
+        num_limit: [8, 99]
+      }) %>
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Minimum Lowercase Character",
+        name: "lowercase_character",
+        placeholder:"Enter minimum lowercase character",
+        type: "number",
+        num_limit: [8, 99]
+      }) %>
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Minimum Numerical Character",
+        name: "numerical_character",
+        placeholder:"Enter minimum numerical character",
+        type: "number",
+        num_limit: [8, 99]
+      }) %>
+      <%- include("../../components/form/input-box.ejs", {
+        label: "Minimum Special Character",
+        name: "special_character",
+        placeholder:"Enter minimum special character",
+        type: "number",
+        num_limit: [8, 99]
+      }) %>
+
+      <div class="my-2">
+          <button class="btn rounded-pill btn-primary" type="submit">Update Password Policy</button>
+      </div>
+
+  </form>
+
+</div>
+
+</div>

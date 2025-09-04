@@ -1,0 +1,26 @@
+<form id="user-selection" class="d-none col-md-6 col-lg-4 position-fixed bg-white rounded-3 shadow p-3 px-4 z-100 overflow-auto scale-in-center"
+    onsubmit="return updateUsers('#user-selection')">
+
+    <h5 class="fw-bold mb-2 d-flex align-items-center justify-content-between">
+        <span>Select Users</span>
+        <button class="btn btn-outline-danger rounded-pill" type="button" onclick="bringPopover('#user-selection');">
+            <i class="fa fa-close"></i>
+        </button>
+    </h5>
+
+    <div class="input-group my-3">
+        <span class="input-group-text bg-light rounded-0 rounded-start"><i class="fa fa-search"></i></span>
+        <input id="search-users-input" type="text" class="form-control rounded-0 rounded-end" placeholder="Search User" onkeyup="searchUsers(this)">
+    </div>
+
+    <div id="user-selection-box" class="overflow-auto mb-3" style="height: 40vh;"></div>
+
+    <div class="text-end">
+        <button class="btn btn-primary rounded-pill px-5">
+            <i class="fa fa-add"></i> Add Users
+        </button>
+    </div>
+
+</form>
+
+<script src="/scripts/user-selection.js"></script>

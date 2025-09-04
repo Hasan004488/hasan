@@ -1,0 +1,153 @@
+<script src="/scripts/chart.js"></script>
+
+<div class="col-12">
+  <div class="p-4 bg-white rounded shadow">
+
+    <div class="d-flex justify-content-between">
+      <div class="btn-group toggle-block">
+        <button class="btn btn-tab px-5" onclick="changeMonitor('weekly')">
+          <i class="fa fa-globe area_blocked"></i>
+          Weekly Monitor
+        </button>
+        <button class="btn btn-tab-off px-5" onclick="changeMonitor('monthly')">
+          <i class="fa fa-globe area_blocked"></i>
+          Monthly Monitor
+        </button>
+      </div>
+      <div class="d-flex gap-3">
+        <% if(access("control", locals.permissions)) { %>
+          <div>
+            <a class="btn rounded-pill btn-outline-secondary" href="/dashboard/surface/configuration">
+              <i class="fa fa-gear"></i>
+            </a>
+          </div>
+          <% } %>
+      </div>
+    </div>
+
+    <div id="risk-monitor-container" class="my-3">
+      <div class="fs-4 fw-bold">Risks Graph</div>
+      <small>Calculated risks by from your Wazuh Server logs.</small>
+      <div class="my-3" style="min-height: 60vh;">
+        <canvas id="risks_monitor"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+
+  // global timing
+  let TIMING = "<%=timing%>";
+
+  // risk monitor
+  let labels = [];
+  let low_risks_data = [];
+  let medium_risks_data = [];
+  let high_risks_data = [];
+
+  let data_set_extra = {
+    tension: 0.3,
+    pointRadius: 4,
+    pointHoverRadius: 15,
+    borderWidth: 3,
+    hoverBorderWidth: 2
+  }
+
+  const risks_ctx = document.getElementById("risks_monitor").getContext("2d");
+  const risks_monitor = new Chart(risks_ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          fill: true,
+          label: " Medium Risk",
+          data: medium_risks_data,
+          borderColor: '#ff7f3f',
+          backgroundColor: '#ff7f3f30',
+          ...data_set_extra
+        },
+        {
+          fill: true,
+          label: " Low Risk",
+          data: low_risks_data,
+          borderColor: '#198754',
+          backgroundColor: '#19875430',
+          ...data_set_extra
+        },
+        {
+          fill: true,
+          label: " High Risk",
+          data: high_risks_data,
+          borderColor: '#df3838',
+          backgroundColor: '#df383830',
+          ...data_set_extra
+        }
+      ],
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'left'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.raw || '';
+              if (label) {
+                label += ' %';
+              }
+              return context.dataset.label + ': ' + label;
+            }
+          }
+        }
+      },
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          max: 100,
+          ticks: {
+            callback: function(value) {
+              return value + ' %';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  function changeMonitor(timing) {
+
+    TIMING = timing || TIMING;
+
+    loadDynamicData({
+      container: "#risk-monitor-container",
+      url: `/dashboard/risks/monitor/data?timing=${TIMING}`,
+    }, (monitor) => {
+      
+      risks_monitor.data.labels = monitor.range;
+      risks_monitor.data.datasets[0].data = monitor.medium_risks;
+      risks_monitor.data.datasets[1].data = monitor.low_risks;
+      risks_monitor.data.datasets[2].data = monitor.high_risks;
+      risks_monitor.update();
+
+    }, 60000); // 1 minute
+
+  }
+
+  // calling section
+
+  $("#assets-tab-<%=active%>").removeClass("btn-tab-off");
+  $("#assets-tab-<%=active%>").addClass("btn-tab");
+
+  changeMonitor("<%=active%>");
+
+</script>

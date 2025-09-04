@@ -1,0 +1,19 @@
+# ignore directories
+/node_modules/
+/logs/
+/reports/
+/backups/
+/tests/
+/assets/
+# ignore executables
+*.exe
+# ignore sesnsitive files
+/license.eitix
+/config.eitix
+/server-key.pem
+/server.pem
+/server.key
+/server.csr
+/server.crt
+/test.js
+.env

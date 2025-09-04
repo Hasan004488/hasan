@@ -1,0 +1,150 @@
+<% data.forEach((breach) => { %>
+<tr id="tr-<%= breach._id %>" ondblclick="this.classList.toggle('highlight')" class="slide-in-up">
+  <td>
+    <% let ingest_timestamp = breach.ingestedAt ? new Date(breach.ingestedAt) : {}; %>
+    <%= ingest_timestamp?.toLocaleDateString() || '- - -' %>
+    <%= ingest_timestamp?.toLocaleTimeString() || '- - -' %>
+  </td>
+  <td>
+    <span title="Click to view log preview" class="clickable" onclick="loadDynamicPopup('Darkweb Log Preview', '/dashboard/darkweb/logs/data/raw?id=<%= breach.breach_id %>')">
+      <img src="/images/icons/view-log.png" alt="" height="20">
+    </span>
+    <%= breach.breach_id %>
+  </td>
+  <% let timestamp = breach.timestamp ? new Date(breach.timestamp) : {}; %>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'basic',
+      content: `
+        ${timestamp?.toLocaleDateString() || '- - -'} <br>
+        ${timestamp?.toLocaleTimeString() || '- - -'}
+      `
+    }
+  }) %>
+  <td class="<%= view === 'basic' ? '' : 'd-none' %> fw-bold" table-data-view="basic">
+    <div class="d-flex align-items-center gap-2">
+      <div>
+        <i class="fa fa-skull-crossbones text-danger fs-3"></i>
+      </div>
+      <div>
+        <%= locals.format.truncateText(breach.name, 30) || '- - -' %> <br>
+        <small>
+          Email:
+          <span class="text-danger">
+            <%= locals.format.truncateText(breach.email, 30) || '- - -' %>
+          </span>
+        </small>
+      </div>
+    </div>
+  </td>
+  <td class="<%= view === 'basic' ? '' : 'd-none' %>" table-data-view="basic">
+    <%
+      let statusClass = 'secondary'; // Default for unresolved
+      if (breach.manualStatus === 'resolved') {
+          statusClass = 'success';
+      } else if (breach.manualStatus === 'false-positive') {
+          statusClass = 'danger';
+      }
+    %>
+    <span class="badge bg-<%= statusClass %>"><%= breach.manualStatus.charAt(0).toUpperCase() + breach.manualStatus.slice(1) %></span>
+    <%# --- Status History Tooltip --- %>
+    <% if (breach.statusUpdateHistory && breach.statusUpdateHistory.length > 0) { %>
+    <% 
+      let historyText = 'Change History:\n';
+      breach.statusUpdateHistory.forEach(h => {
+          historyText += `• ${new Date(h.changedAt).toLocaleString()}: ${h.status} by ${h.changedBy}\n`;
+      });
+    %>
+    <i class="fas fa-info-circle history-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= historyText.trim() %>"></i>
+    <% } %>
+  </td>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'source',
+      content: locals.format.truncateText(breach.leakName, 20) || '- - -'
+    }
+  }) %>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'source',
+      content: locals.format.truncateText(breach.source, 20) || '- - -'
+    }
+  }) %>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'source',
+      content: locals.format.truncateText(breach.databaseName, 20) || '- - -',
+      extraClass: 'fw-bold'
+    }
+  }) %>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'source',
+      content: locals.format.truncateText(breach.foundIn, 20) || '- - -'
+    }
+  }) %>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'security',
+      content: locals.format.truncateText(breach.email, 20) || '- - -'
+    }
+  }) %>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'security',
+      content: locals.format.truncateText(breach.ipAddress, 20) || '- - -'
+    }
+  }) %>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'security',
+      content: locals.format.truncateText(breach.username, 20) || '- - -',
+      extraClass: 'fw-bold'
+    }
+  }) %>
+  <%- include('components/table/view-td', {
+    data: {
+      view, viewName: 'security',
+      content: locals.format.truncateText(breach.hashedPassword, 10, true) || '- - -',
+      extraClass: 'text-danger'
+    }
+  }) %>
+  <!-- manage column -->
+  <td class="text-center">
+    <div class="d-flex gap-2 align-items-center justify-content-center">
+      <a class="btn badge btn-primary rounded-pill" href="/dashboard/tickets/create?breach_id=<%= breach.breach_id %>" target="_blank">
+        <i class="fa fa-add"></i>
+        Ticket
+      </a>
+      <div class="dropdown d-inline-block">
+        <button class="icon2 icon-center btn badge rounded-pill btn-secondary" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Change Status">
+          <i class="fas fa-ellipsis-h"></i>
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <form action="/dashboard/darkWeb/update-breach-status" method="POST">
+              <input type="hidden" name="breachId" value="<%= breach.breachId %>">
+              <input type="hidden" name="status" value="unresolved">
+              <button type="submit" class="dropdown-item">Unresolved</button>
+            </form>
+          </li>
+          <li>
+            <form action="/dashboard/darkWeb/update-breach-status" method="POST">
+              <input type="hidden" name="breachId" value="<%= breach.breachId %>">
+              <input type="hidden" name="status" value="resolved">
+              <button type="submit" class="dropdown-item">Resolved</button>
+            </form>
+          </li>
+          <li>
+            <form action="/dashboard/darkWeb/update-breach-status" method="POST">
+              <input type="hidden" name="breachId" value="<%= breach.breachId %>">
+              <input type="hidden" name="status" value="false-positive">
+              <button type="submit" class="dropdown-item">False-Positive</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </td>
+</tr>
+<% }) %>

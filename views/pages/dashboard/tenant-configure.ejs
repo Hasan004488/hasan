@@ -1,0 +1,154 @@
+<style>
+    .height-limit {
+        max-height: 25vh;
+        overflow: auto;
+    }
+</style>
+
+<div id="eitix-tenants" class="col"></div>
+<div id="add-tenant" class="col-md-8 mt-5 d-none"></div>
+
+<script>
+
+  function tenantQuickUpdate(url, id, type = "POST") {
+
+    /* console.log(url, id, type); */
+    
+    $.ajax({
+      url, type,
+      data: { id }, // id should be mongo Object ID
+      success: (response) => {
+
+        loadTenants("#eitix-tenants");
+        toast("Update Success", response.status, 1);
+
+      },
+      error: (response) => {
+
+        toast("Something went wrong", response?.error, 1);
+
+      }
+    });
+    
+  }
+
+  function showStatus(status) {
+
+    if (status === true) {
+
+      return `
+        <span class="badge bg-success">
+          <i class="fa fa-globe"></i>
+          <span>Connected</span>
+        </span>
+      `;
+
+    } else {
+
+      return `
+        <span class="badge bg-danger">
+          <i class="fa fa-cancel"></i>
+          <span>Unreachable</span>
+        </span>
+      `;
+
+    }
+
+    }
+
+  function toggleTenantAdd(id) {
+
+    let selector = "#add-tenant";
+    let query = "";
+
+    dashboard_body.animate({ scrollTop: 0 }, '300');
+    toggleSection("#eitix-tenants");
+    toggleSection(selector);
+
+    if (id) query = "?id=" + id;
+
+    fetchDynamicData({
+        container: selector,
+        url: "/dashboard/settings/tenant/add" + query
+    }, (data) => {
+
+        $(selector).html(data);
+
+    })
+
+  }
+
+  function editTenant(id) {
+
+    toggleTenantAdd(id);
+
+    return false; // prevent propagation
+
+  }
+
+  function addTenant(selector) {
+
+    let form = document.querySelector(selector);
+
+    if (form["key"]) {
+
+      let new_key = generateTenantKey();
+      form["key"].value = new_key;
+
+      let popup_message = document.querySelector("#popup-modal .popup-message");
+      let popup_body = document.querySelector("#popup-modal .popup-body");
+
+      popup_message.innerHTML = `Tenant Key Generated!`;
+
+      popup_body.innerHTML = `
+        <div class="form-control p-2 bg-light fw-bold text-primary mb-2">${new_key}</div>
+        <small class="">Please copy this tenant key and place it in the webook.</small> <br>
+        <small class="text-danger fw-bold">You won't see it again after closing this popup.</small>
+      `;
+
+      // popup the new tenant key
+      toggle('#popup-modal');
+
+    }
+
+    submitForm(selector, (data) => {
+
+      toggleTenantAdd();
+      loadTenants("#eitix-tenants");
+
+    })
+
+    return false; // prevent propagation
+
+  }
+
+  function loadTenants(selector) {
+
+    fetchDynamicData({
+        container: selector,
+        url: "/dashboard/settings/tenant/list"
+    }, (data) => {
+
+        $(selector).html(data);
+
+    })
+  
+  }
+
+  loadTenants("#eitix-tenants");
+
+  function generateTenantKey() {
+
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let key = '';
+
+    for (let i = 0; i < 32; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        key += characters.charAt(randomIndex);
+    }
+
+    return key;
+
+  }
+
+</script>

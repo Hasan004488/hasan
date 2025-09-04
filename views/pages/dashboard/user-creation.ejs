@@ -1,0 +1,145 @@
+<link href="/styles/select2.css" rel="stylesheet" />
+
+<style>
+  .profile-image-wrapper {
+    width: 250px;
+    height: 250px;
+    overflow: hidden;
+    margin: auto;
+    text-align: center;
+  }
+
+  .profile-image-wrapper img {
+    width: 80%;
+  }
+</style>
+
+<div class="col-md-6 mt-4">
+  <div class="bg-light rounded shadow p-5">
+    <form id="user-creation-form" action="/dashboard/users/create" method="POST" onsubmit="return createUser(event)" class="has-validated" enctype="multipart/form-data">
+      <div class="d-flex gap-3">
+        <div class="position-relative mb-2">
+          <img id="user-profile-image" src="/images/user-profile.png" alt="profile image" class="profile_image" style="height: 5rem; width: 5rem;">
+          <div class="position-absolute bottom-0 end-0">
+            <input id="profile_image_input" name="profile_image" type="file" class="d-none" accept=".png, .jpg, .jpeg, .gif" onchange="previewImage(this, '#user-profile-image')">
+            <button class="btn btn-sm btn-success rounded-circle" type="button" onclick="document.getElementById('profile_image_input').click()">
+              <i class="fa fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="">
+          <h4 class="fw-bold">New EITIx User</h4>
+          <div class="text-muted small">Create New User with default password, you can change the password if you want.</div>
+        </div>
+      </div>
+      <hr>
+      <div class="pb-3 pe-2 overflow-auto">
+        <div class="d-flex align-items-center  gap-3">
+          <%- include("form/input-box.ejs", {
+            label: "Full Name",
+            name: "full_name",
+            placeholder:"Enter the full name",
+            char_limit: [1, 255],
+            required: true
+          }) %>
+          <%- include("form/input-box.ejs", {
+            label: "Email Address",
+            name: "email",
+            type: "email",
+            placeholder:"Enter the email address",
+            char_limit: [1, 255],
+            required: true
+          }) %>
+        </div>
+        <div class="d-flex align-items-center  gap-3">
+          <div class="form-group py-1 w-100">
+            <span class="fw-bold text-primary mb-1">Role</span>
+            <select id="role-selection" name="role" class="form-select w-100 rounded-pill fw-bold text-secondary" required>
+              <% data?.roles?.forEach(role => { %>
+              <option value="<%= role.name %>"><%= role.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <%- include("form/input-box.ejs", {
+              label: "Phone Number",
+              name: "phone_number",
+              placeholder:"Enter the phone number",
+              char_limit: [1, 255],
+              required: true
+            }) %>
+        </div>
+        <div class="alert alert-warning small my-2">
+          <i class="fa fa-circle-info"></i>
+          User will be prompted to change this default password
+        </div>
+        <div class="form-group w-100 my-1 mb-3" id="toggle-password">
+          <label class="mb-2 fw-bold text-primary">Default Password</label>
+          <div class="d-flex gap-3">
+            <input id="password" name="password" type="password" class="form-control rounded-pill" placeholder="Enter new Password" minlength="8" maxlength="255" value="<%= default_pass %>" required>
+            <button type="button" class="btn btn-outline-primary rounded-pill">
+              <i class="fa fa-eye-slash" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="text-end my-3">
+        <button type="submit" class="btn btn-primary rounded-pill px-4">
+          <i class="fa fa-add"></i>
+          Create User
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/scripts/select2.js"></script>
+
+<script>
+  const passInput = $('#password');
+  const pass_btn = $('#toggle-password button');
+
+  pass_btn.on('click', function(e) {
+
+    if (passInput.attr("type") == "text") {
+
+      passInput.attr('type', 'password');
+      pass_btn.html("<i class='fa fa-eye-slash'></i>");
+
+    } else if (passInput.attr("type") == "password") {
+
+      passInput.attr('type', 'text');
+      pass_btn.html("<i class='fa fa-eye'></i>");
+
+    }
+
+  });
+
+  $('#role-selection').select2({
+    width: '100%',
+  });
+
+  function createUser(e) {
+
+    e.preventDefault();
+
+    const form = document.querySelector('#user-creation-form');
+    const validity = form.reportValidity();
+
+    if (validity) {
+
+      customConfirm('Are you ready to create this user?').then(confirmed => {
+
+        if (confirmed) {
+
+          form.submit();
+
+        }
+
+      });
+
+    }
+
+  }
+</script>
+
+<script src="/scripts/user-creation.js"></script>

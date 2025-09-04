@@ -1,0 +1,957 @@
+<link rel="stylesheet" type="text/css" href="/styles/quill.snow.css">
+<script type="text/javascript" src="/scripts/quill.min.js"></script>
+
+<%
+
+let comment_allowed = true;
+
+function renderUser(user) {
+    return `
+    <div class="p-2 border rounded-3 d-flex justify-content-between align-items-center">
+        <div>
+            <strong>
+                ${user.name}
+            </strong>
+            <div class="text-muted">
+                <span class="badge bg-primary">${user.role == "Super Admin" ? 'Admin' : user.role || 'User'}</span> |
+                ${user.sid}
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+function convertBytes(bytes) {
+
+    const kb = 1024;
+    const mb = kb ** 2;
+
+    if (bytes < kb) {
+        return `${bytes} B`;
+    }
+
+    if (bytes < mb) {
+        return `${(bytes / kb).toFixed(2)} KB`;
+    }
+
+    return `${(bytes / mb).toFixed(2)} MB`;
+
+}
+
+%>
+
+<link rel="stylesheet" href="/styles/phases.css">
+
+<style>
+  .tab-link {
+    display: block;
+    padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
+    color: rgb(58, 58, 58);
+    text-decoration: none;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border: none;
+    background: white;
+  }
+
+  .tab-link.active {
+    background: rgb(230, 230, 230);
+  }
+</style>
+
+<div class="col-md-10 row gy-4">
+
+  <!-- basic information -->
+  <div class="p-4 bg-white rounded shadow">
+
+    <div class="d-flex align-items-center mb-3 gap-3">
+      <div class="fw-bold">
+        <span class="badge bg-primary me-1">Phase <%= data.phase %></span>
+        Ticket SID: <%= data.sid %>
+      </div>
+      <div class="ms-auto">
+        <i class="fa fa-envelope"></i>
+        Email Alerts
+        <strong class="text-primary">
+          <%= data.send_email === 'on' ? "YES" : "NO" %>
+        </strong>
+      </div>
+      <div>
+        <i class="fa fa-envelope"></i>
+        SMS Alerts
+        <strong class="text-primary">
+          <%= data.send_sms === 'on' ? "YES" : "NO" %>
+        </strong>
+      </div>
+      <div>
+        <% if(access("report", locals.permissions)) { %>
+        <a href="/dashboard/report/ticket?id=<%= data.sid %>" class="btn btn-primary rounded-pill">
+          <i class="fa fa-print"></i>
+          Download Report
+        </a>
+        <% } %>
+      </div>
+    </div>
+    <div class="fw-bold fs-5 mb-2">
+      <div class="fs-3 mb-3">
+        <%= data.title %>
+      </div>
+      <div class="text-center <%= data.status == 'expired' || data.status == 'closed' ? 'area_disabled' : '' %> ">
+        <span class="badge bg-primary" title="Ticket Current Status">
+          Status - <%= locals.format.title(data.status) %>
+        </span>
+        <span class="badge bg-danger" title="Ticket Criticality">
+          Criticality - <%= data.criticality %>
+        </span>
+        <span class="badge bg-secondary" title="Ticket Type">
+          Type - <%= data.type %>
+        </span>
+        <span class="badge bg-success" title="Ticket Creation Date">
+          Opening Date - <%= data.opening?.toDateString() %>
+        </span>
+      </div>
+    </div>
+
+    <div class="py-3 col-md-10 mx-auto">
+      <% if (data?.phase < data?.workflow?.phases) { %>
+      <div class="text-center mb-3">
+        Next Phase will occur <strong class=""><%= data.workflow?.interval[data.phase - 1]?.toDateString() || '1' %></strong>
+      </div>
+      <% } %>
+      <% let total_steps = parseInt(data?.workflow?.phases); %>
+      <div class="phases" data-progress="<%= Math.min(data?.phase, parseInt(total_steps + 1)) || '1' %>">
+        <div class="phases-bar"></div>
+        <% for( let i = 0; i < total_steps; i++ ) { %>
+        <div class="step clickable" title="Phase <%= i + 1 %>" onclick="previewWorkflow({ value: '<%=data?.workflow?.sid%>' }, null, 'phase<%= i + 1 %>')">
+          <%= i + 1 %>
+        </div>
+        <% } %>
+        <div class="step bg-light" title="Expiry">
+          <i class="fa fa-check text-secondary"></i>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div id="workflow-preview" class="my-3">
+        <!-- dynamically loaded via previewWorkflow() -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- additional info -->
+  <div class="p-4 bg-white rounded shadow">
+
+    <div class="accordion-collapse collapse show">
+      <div class="d-flex justify-content-between">
+        <ul class="nav nav-pills nav-tabs gap-2" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="tab-link active" data-bs-toggle="tab" data-bs-target="#root_cause_tab" type="button" role="tab" aria-controls="root_cause_tab" aria-selected="true">Root Cause</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="tab-link" data-bs-toggle="tab" data-bs-target="#remediation_tab" type="button" role="tab" aria-controls="remediation_tab" aria-selected="false">Remediation</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="tab-link" data-bs-toggle="tab" data-bs-target="#prevention_tab" type="button" role="tab" aria-controls="prevention_tab" aria-selected="false">Preventive Control</button>
+          </li>
+        </ul>
+      </div>
+      <div id="addition_info_box" class="tab-content text-secondary">
+        <div id="root_cause_tab" class="tab-pane fade active show" role="tabpanel">
+          <div class="p-3 bg-gray">
+            <div class="d-flex justify-content-between">
+              <div class="mb-3">
+                <h5 class="mb-0 fw-bold text-secondary">Root Cause of the Ticket</h5>
+                <small class="text-muted">last updated on <%= data.last_root_cause || "creation" %></small>
+              </div>
+              <div class="">
+                <% if (data.status == "open" && access("modifyTicket", locals.permissions)) { %>
+                <button type="button" class="btn btn-sm btn-secondary rounded-pill" onclick="toggleSection('#root_cause_box'); toggleSection('#root_cause_form')">
+                  <i class="fa fa-pen"></i>
+                  Edit
+                </button>
+                <% } %>
+                <button class="btn btn-sm btn-outline-secondary drop-btn rounded-pill ms-2" data-bs-toggle="collapse" data-bs-target="#root_cause_box" onclick="this.classList.toggle('upside-down')">
+                  <i class="fa fa-angle-down"></i>
+                </button>
+              </div>
+            </div>
+
+            <div id="root_cause_box" class="accordion-collapse collapse show">
+              <div class="text-dark bg-white p-3 rounded">
+                <%- data.root_cause != "<p><br></p>" ? data.root_cause : "No Root Cause was written" %>
+              </div>
+            </div>
+
+            <form id="root_cause_form" action="/dashboard/tickets/update" method="POST" class="d-none">
+              <div id="root_cause_editor" class="form-control" style="font-size: inherit;min-height: 30vh;">
+                <%- data.root_cause ?? "No root cause added" %>
+              </div>
+              <div class="d-none">
+                <input type="text" name="root_cause">
+                <input type="text" name="sid" value="<%= data.sid %>">
+                <input type="text" name="last_root_cause">
+              </div>
+              <div class="my-2 py-3">
+                <button type="button" class="btn btn-secondary rounded-pill me-2" onclick="toggleSection('#root_cause_box'); toggleSection('#root_cause_form')">
+                  <i class="fa fa-close"></i>
+                  Close Editor
+                </button>
+                <button type="submit" class="btn btn-primary rounded-pill">Update Root Cause</button>
+              </div>
+            </form>
+
+          </div>
+
+        </div>
+        <div id="remediation_tab" class="tab-pane fade" role="tabpanel">
+          <div class="p-3 bg-gray">
+            <div class="d-flex justify-content-between">
+              <div class="mb-3">
+                <h5 class="mb-0 fw-bold text-secondary">Remediation of the Ticket</h5>
+                <small class="text-muted">last updated on <%= data.last_remediation || "creation" %></small>
+              </div>
+              <div class="btn-group gap-3">
+                <% if (data.status == "open" && access("modifyTicket", locals.permissions)) { %>
+
+                <div>
+                  <button type="button" class="btn  btn-secondary rounded-pill" onclick="toggleSection('#reme-form'); toggleSection('#reme-view')">
+                    <i class="fa fa-pen"></i>
+                    Edit
+                  </button>
+                </div>
+
+                <form class="d-none" action="/dashboard/tickets/close" method="POST" onsubmit="return confirmChoice(event, 'Are sure to close this ticket?')">
+                  <input class="d-none" type="text" name="id" value="<%= data.sid %>">
+                  <button type="submit" class="btn  btn-danger rounded-pill" data-toggle="tooltip">
+                    <i class="fa fa-clipboard-check"></i>
+                    Close Ticket
+                  </button>
+                </form>
+
+                <div>
+                  <button class="btn btn-sm btn-outline-secondary drop-btn rounded-pill ms-2" data-bs-toggle="collapse" data-bs-target="#reme-view" onclick="this.classList.toggle('upside-down')">
+                    <i class="fa fa-angle-down"></i>
+                  </button>
+                </div>
+
+                <% }%>
+              </div>
+            </div>
+            <div id="reme-view" class="accordion-collapse collapse show">
+              <div class="text-dark bg-white p-3 rounded">
+                <%- data.remediation != "<p><br></p>" ? data.remediation : "No remediation was added" %>
+              </div>
+            </div>
+            <form id="reme-form" action="/dashboard/tickets/update" method="POST" class="d-none">
+              <div id="reme-editor" class="form-control" style="font-size: inherit;min-height: 10vh;">
+                <%- data.remediation %>
+              </div>
+              <div class="d-none">
+                <input type="text" name="remediation">
+                <input type="text" name="sid" value="<%= data.sid %>">
+                <input type="text" name="last_remediation">
+              </div>
+              <div class="my-2 py-3">
+                <button type="button" class="btn btn-secondary rounded-pill me-2" onclick="toggleSection('#reme-form'); toggleSection('#reme-view')">
+                  <i class="fa fa-close"></i>
+                  Close Editor
+                </button>
+                <button type="submit" class="btn btn-primary rounded-pill">Update Remediation</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+        <div id="prevention_tab" class="tab-pane fade" role="tabpanel">
+          <div class="p-3 bg-gray">
+            <div class="d-flex justify-content-between">
+              <div class="mb-3">
+                <h5 class="mb-0 fw-bold text-secondary">Preventive Controls of the Ticket</h5>
+                <small class="text-muted">last updated on <%= data.last_prevention || "creation" %></small>
+              </div>
+              <div class="">
+                <% if (data.status == "open" && access("modifyTicket", locals.permissions)) { %>
+                <button type="button" class="btn  btn-secondary rounded-pill" onclick="toggleSection('#prevention_box'); toggleSection('#prevention_form')">
+                  <i class="fa fa-pen"></i>
+                  Edit
+                </button>
+                <% } %>
+                <button class="btn btn-sm btn-outline-secondary drop-btn rounded-pill ms-2" data-bs-toggle="collapse" data-bs-target="#prevention_box" onclick="this.classList.toggle('upside-down')">
+                  <i class="fa fa-angle-down"></i>
+                </button>
+              </div>
+            </div>
+
+            <div id="prevention_box" class="accordion-collapse collapse show">
+              <div class="text-dark bg-white p-3 rounded">
+                <%- data.prevention != "<p><br></p>" ? data.prevention : "No preventive control was written" %>
+              </div>
+            </div>
+
+            <form id="prevention_form" action="/dashboard/tickets/update" method="POST" class="d-none">
+              <div id="prevention_editor" class="form-control" style="font-size: inherit; min-height: 10vh;">
+                <%- data.prevention ?? "No root cause added" %>
+              </div>
+              <div class="d-none">
+                <input type="text" name="prevention">
+                <input type="text" name="sid" value="<%= data.sid %>">
+                <input type="text" name="last_prevention">
+              </div>
+              <div class="my-2 py-3">
+                <button type="button" class="btn btn-secondary rounded-pill me-2" onclick="toggleSection('#prevention_box'); toggleSection('#prevention_form')">
+                  <i class="fa fa-close"></i>
+                  Close Editor
+                </button>
+                <button type="submit" class="btn btn-primary rounded-pill">
+                  Update Prevention Control
+                </button>
+              </div>
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <% console.log(data) %>
+
+  <!-- event log information -->
+  <div class="p-4 bg-white rounded shadow accordion-item <%= data.event.log ? '' : 'd-none' %>">
+
+    <div class="d-flex justify-content-between">
+      <div class="fs-5 my-2 fw-bold text-dark">
+        More Information
+      </div>
+      <div>
+        <button class="btn  btn-outline-secondary drop-btn rounded-pill" data-bs-toggle="collapse" data-bs-target="#more_info_box" onclick="this.classList.toggle('upside-down')">
+          <i class="fa fa-angle-down"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="more_info_box" class="accordion-collapse collapse show">
+
+      <div class="p-2">
+
+        <div class="form-group mb-3">
+          <label class="input-group-text">Full Log</label>
+          <div class="p-3 form-control" style="height: 50vh; overflow:auto">
+            <%- renderJSONInfo(data?.event) %>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- attached files -->
+  <div class="w-100 p-4 bg-white rounded shadow">
+    <div class="fs-5 mb-3 fw-bold text-dark d-flex justify-content-between">
+      <div>Attached Files</div>
+      <div>
+        <% if (data.status == "open" && access("modifyTicket", locals.permissions)) { %>
+        <button type="button" class="btn  btn-secondary rounded-pill" onclick="toggleSection('#add_new_files')">
+          <i class="fa fa-add"></i>
+          Add More Files
+        </button>
+        <% } %>
+      </div>
+    </div>
+    <div class="p-3 mb-3 border rounded" style="max-height: 50vh; overflow:auto">
+      <table class="table table-sm table-striped table-hover">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Caption</th>
+            <th>Filename</th>
+            <th>Size</th>
+            <th>Uploaded By</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%  files?.forEach((file,i) => { %>
+          <tr>
+            <td class="py-2"><%= i + 1 + "." %></td>
+            <td class="py-2"><%= files[i].caption %></td>
+            <td class="py-2"><%= locals.format.truncateText(files[i]?.originalname, 30) %></td>
+            <td class="py-2"><%= convertBytes(files[i]?.size) %></td>
+            <td class="py-2">
+              <span><%= files[i]?.uploaded_by || data.created_by %></span><br />
+              <small>at <%= files[i]?.uploaded_at?.toLocaleString() || data.opening?.toLocaleString() %></small>
+            </td>
+            <td class="py-2 text-center">
+              <div class="d-flex align-items-center gap-2">
+                <a href="/dashboard/tickets/download/attachments?id=<%= files[i]?._id %>" class="btn btn-sm btn-primary rounded-pill px-3">
+                  <i class="fa fa-download"></i>
+                  Download
+                </a>
+                <a href="/dashboard/tickets/delete/attachments?id=<%= files[i]?._id %>" class="btn btn-sm btn-danger rounded-pill" onclick="return confirmChoice(event, 'Are you sure to delete this file permanently?')">
+                  <i class="fa fa-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <div id="add_new_files" class="p-3 d-none">
+      <% if (files.length < 5) { %>
+      <form action="/dashboard/tickets/upload/attachments" method="POST" enctype="multipart/form-data">
+        <%- include("../../components/files-upload.ejs", {
+                        already_added: files.length
+                    }) %>
+        <div class="d-none">
+          <input type="text" name="id" value="<%= data._id %>">
+        </div>
+        <div class="text-end d-flex justify-content-end gap-3">
+          <button type="button" class="btn  btn-secondary px-4 rounded-pill" onclick="toggleSection('#add_new_files')">
+            <i class="fa fa-close"></i> Close
+          </button>
+          <button type="submit" class="btn  btn-success px-4 rounded-pill">
+            <i class="fa fa-upload"></i> Upload New Files
+          </button>
+        </div>
+      </form>
+      <% } %>
+      <p class="text-secondary mt-3">
+        You can upload upto 5 files from your computer.
+        Max file size: <strong>10 MB</strong> <br>
+        Allowed files: <strong><%= allowed_files %></strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- comments -->
+  <div class="p-4 bg-white rounded shadow">
+
+    <div id="ticket-comments" class="fs-5 mb-3 fw-bold text-dark">Comments</div>
+
+    <% if (comment_allowed) { %>
+
+    <form action="/" id="comment-form" class="my-3 fade-in-bck">
+      <div class="card card-body w-100">
+        <div class="input-group-label mb-2">
+          Comment as <%= locals.session.username %>
+          <span class="badge bg-primary"><%= locals.session.role == "Super Admin" ? 'Admin' : locals.session.role || 'User' %></span>
+        </div>
+        <textarea class="form-control mb-2" name="body" id="comment-info" rows="1" placeholder="Write your comment" maxlength="500" required></textarea>
+        <small>Maximum: 500 characters</small>
+        <div class="d-none">
+          <!-- hidden required fields -->
+          <input type="text" name="commenter" value="<%= locals.session.email %>">
+          <input type="text" name="ticket" value="<%= data.sid %>">
+          <input type="text" name="type" value="comment">
+          <input type="text" name="reply_to" value="">
+        </div>
+        <div class="my-2 text-end">
+          <button class="submit btn btn-primary rounded-pill">
+            <i class="fa fa-plus"></i>
+            Post Comment
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <% } %>
+
+    <div id="comments-container" class="py-2">
+
+      <!-- comment -->
+      <div class="spinner-grow text-primary text-center" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- extra spaces for go to top -->
+<div class="py-5"></div>
+
+<script>
+  let current_user = "<%=locals.session.email%>";
+  let comment_allowed = "<%=comment_allowed%>";
+
+  const comments_con = document.getElementById("comments-container");
+  const comment_form = document.getElementById("comment-form");
+
+  let ticket_sid = "<%=data.sid%>";
+  let comments;
+
+  const reme_form = document.getElementById("reme-form");
+  const reme_editor = new Quill('#reme-editor', QUILL_OPTIONS);
+
+  const root_form = document.getElementById("root_cause_form");
+  const root_cause_editor = new Quill('#root_cause_editor', QUILL_OPTIONS);
+
+  const prevention_form = document.getElementById("prevention_form");
+  const prevention_editor = new Quill('#prevention_editor', QUILL_OPTIONS);
+
+  prevention_form.addEventListener("submit", e => {
+
+    e.preventDefault();
+
+    prevention_form['prevention'].value = prevention_editor.root.innerHTML;
+    prevention_form['last_prevention'].value = new Date().toDateString();;
+
+    prevention_form.submit();
+
+  })
+
+  reme_form.addEventListener("submit", e => {
+
+    e.preventDefault();
+
+    reme_form['remediation'].value = reme_editor.root.innerHTML;
+    reme_form['last_remediation'].value = new Date().toDateString();;
+
+    reme_form.submit();
+
+  })
+
+  root_form.addEventListener("submit", e => {
+
+    e.preventDefault();
+
+    root_form['root_cause'].value = root_cause_editor.root.innerHTML;
+    root_form['last_root_cause'].value = new Date().toDateString();
+
+    root_form.submit();
+
+  })
+
+
+  loadComments(ticket_sid);
+
+  setInterval(() => {
+
+    updateComments(ticket_sid);
+
+  }, 9000);
+
+
+  if (comment_allowed == 'true') {
+
+    comment_form.addEventListener("submit", e => {
+
+      e.preventDefault();
+
+      let form = new FormData(comment_form);
+
+      let data = {
+        commenter: form.get('commenter'),
+        ticket: form.get('ticket'),
+        type: form.get('type'),
+        body: form.get('body'),
+        reply_to: form.get('reply_to'),
+      }
+
+      $.ajax({
+        url: '/dashboard/tickets/comments/add',
+        type: 'POST',
+        data: data,
+        success: (data) => {
+
+          comment_form.reset();
+          loadComments(ticket_sid);
+          toast("Comment Posted", "Your comment is just posted on this ticket", 1);
+
+        },
+        error: (err) => {
+
+          toast("Error", "EITIx couldn't add your comment to this ticket", 1);
+          console.error(err);
+
+        }
+      });
+
+    });
+
+  }
+
+  function updateComments(ticket_sid) {
+
+    $.ajax({
+      url: '/content/tickets/comments?ticket=' + ticket_sid,
+      type: 'GET',
+      success: (data) => {
+
+        if (comments) {
+
+          data.forEach((comment) => {
+
+            if (comment.type == 'comment') {
+
+              let dom_comment = document.getElementById("comment-" + comment._id);
+
+              if (dom_comment) {
+
+                dom_comment.querySelector(".comment-time").innerHTML = getElapsedTime(comment.time);
+
+              } else {
+
+                comments_con.innerHTML = renderComment(comment._id, comment) + comments_con.innerHTML;
+
+              }
+
+            }
+
+          });
+
+          // reverse it for loading replies
+          data.reverse();
+
+          data.forEach((comment) => {
+
+            if (comment.type == 'reply') {
+
+
+              let id = comment.reply_to;
+              let reply_con = document.getElementById("comment-reply-con-" + id);
+
+              let reply_id = "reply-" + id;
+
+              if (reply_con) {
+
+                let dom_reply = document.getElementById("comment-" + reply_id);
+
+                if (dom_reply) {
+
+                  dom_reply.querySelector(".comment-time").innerHTML = getElapsedTime(comment.time);
+
+                } else {
+
+                  reply_con.innerHTML += renderComment(reply_id, comment);
+
+                }
+
+              }
+
+            }
+
+          });
+
+
+          if (data.length > comments) {
+
+            toast("Hey!", "New comment just added on this ticket", 2);
+
+          }
+
+          comments = data.length || 0;
+
+        }
+
+      },
+      error: (err) => {
+
+        console.error(err);
+
+      }
+    });
+
+  }
+
+  function loadComments(ticket_sid) {
+
+    $.ajax({
+      url: '/content/tickets/comments?ticket=' + ticket_sid,
+      type: 'GET',
+      success: (data) => {
+
+        if (data.length > 0) {
+
+          comments_con.innerHTML = "";
+
+          data.forEach((comment) => {
+
+            if (comment.type == 'comment') {
+
+              comments_con.innerHTML += renderComment(comment._id, comment);
+
+            }
+
+          });
+
+          // reverse it for loading replies
+          data.reverse();
+
+          data.forEach((comment) => {
+
+            if (comment.type == 'reply') {
+
+              let id = comment.reply_to;
+              let reply_con = document.getElementById("comment-reply-con-" + id);
+              let reply_id = "reply-" + id;
+
+              if (reply_con) {
+
+                reply_con.innerHTML += renderComment(reply_id, comment);
+
+              }
+
+            }
+
+          });
+
+          comments = data.length || 0;
+
+        } else {
+
+          comments_con.innerHTML = 'No comments found for this ticket';
+
+        }
+
+      },
+      error: (err) => {
+
+        console.error(err);
+
+      }
+    });
+
+  }
+
+  function renderComment(id, comment_data) {
+
+    let type = comment_data.type ?? 'comment';
+
+    // templates
+    let reply_box_btn = `
+            <small>
+                Replies
+                <i class="fa fa-arrow-down"></i>
+            </small>
+        `;
+    let reply_form_btn = `
+            <button type="button" onclick="toggleSection('#reply-form-${comment_data._id}')" class="btn btn-sm rounded-pill">
+                <i class="fa fa-reply"></i>
+                Reply
+            </button>
+        `;
+    let reply_box = `
+            <div class="ms-5 ps-3">
+                <div id="comment-reply-con-${id}">
+                </div>
+            </div>
+        `;
+    let delete_btn = `
+            <form class="d-inline" action="/" onsubmit="return deleteMessage(event, this)">
+                <input name="id" type="text" class="d-none" value="${comment_data._id}">
+                <button type="submit" class="btn btn-sm text-danger rounded-pill">
+                    <i class="fa fa-trash"></i>
+                    delete
+                </button>
+            </form>
+        `;
+    let reply_form = `
+        <form id="reply-form-${comment_data._id}" action="/" method="POST"
+            class="d-none my-3 shadow" onsubmit="return replyOn(this)">
+                <div class="card card-body w-100">
+                    <div class="input-group-label">
+                        <i class="fa fa-arrow-right"></i>
+                        Reply as ${current_user}
+                    </div>
+                    <div class="input-group gap-2 my-2">
+                        <textarea id="reply-form-text-${comment_data._id}" class="form-control reply-form-text" rows="1" name="body" placeholder="Write your comment" maxlength="500" required></textarea>
+                        <div>
+                            <button class="submit btn btn-primary rounded-pill">
+                                <i class="fa fa-arrow-right"></i>
+                                Post Reply
+                            </button>
+                        </div>
+                    </div>
+                    <small>Maximum: 500 characters</small>
+                    <div class="d-none">
+                        <!-- hidden required fields -->
+                        <input type="text" name="commenter" value="${current_user}">
+                        <input type="text" name="ticket" value="${comment_data.comment_for}">
+                        <input type="text" name="type" value="reply">
+                        <input type="text" name="reply_to" value="${comment_data._id}">
+                    </div>
+                </div>
+            </form>
+        `;
+
+    if (type == 'reply') {
+
+      // if it's a reply then no reply box should be there
+      reply_box = '';
+      reply_form_btn = '';
+      reply_box_btn = '';
+      reply_form = '';
+
+    }
+
+    if (current_user != comment_data.commenter) {
+
+      delete_btn = '';
+
+    }
+
+    if (comment_allowed == 'false') {
+
+      reply_form = '';
+
+    }
+
+    return `
+            <div id="comment-${id}" class="d-flex my-2">
+                <div class="p-3">
+                    <img src="/images/user-profile.png" width="40"/>
+                </div>
+                <div class="card w-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>${comment_data.name}</strong>
+                                <span class="badge bg-primary">${comment_data.role}</span><br/>
+                                <small class="comment-time">${getElapsedTime(comment_data.time)}</small>
+                            </div>
+                            <div>
+                                ${reply_form_btn}
+                                ${delete_btn}
+                            </div>
+                        </div>
+                        <div class="py-2">
+                            ${comment_data.body}
+                        </div>
+                        ${reply_form}
+                        ${reply_box_btn}
+                    </div>
+                </div>
+            </div>
+            ${reply_box}
+        `;
+
+  }
+
+  function getAbsoluteOffsetTop(element) {
+    let offsetTop = 0;
+
+    while (element) {
+      offsetTop += element.offsetTop;
+      element = element.offsetParent;
+    }
+
+    return offsetTop;
+  }
+
+  function replyOn(form_data) {
+
+    let confirm = 1;
+
+    if (confirm) {
+
+      let form = new FormData(form_data);
+
+      let data = {
+        commenter: form.get('commenter'),
+        ticket: form.get('ticket'),
+        type: form.get('type'),
+        body: form.get('body'),
+        reply_to: form.get('reply_to'),
+      }
+
+      $.ajax({
+        url: '/dashboard/tickets/comments/add',
+        type: 'POST',
+        data: data,
+        success: (data) => {
+
+          loadComments(ticket_sid);
+          toast("Reply Added", "Your reply was posted on that comment", 1);
+
+        },
+        error: (err) => {
+
+          toast("Error", "EITIx couldn't make a reply on that comment", 1);
+          console.error(err);
+
+        }
+      });
+
+    }
+
+    return false;
+
+  }
+
+  async function deleteMessage(event, form_data) {
+
+    event.preventDefault();
+
+    let confirm = await customConfirm('Are you sure to delete this comment?');
+
+    if (confirm) {
+
+      let form = new FormData(form_data);
+
+      let data = {
+        id: form.get('id')
+      }
+
+      $.ajax({
+        url: '/dashboard/tickets/comments/delete',
+        type: 'POST',
+        data: data,
+        success: (data) => {
+
+          loadComments(ticket_sid);
+          toast("Comment removed", "That comment was removed from this ticket", 1);
+
+        },
+        error: (err) => {
+
+          toast("Error", "EITIx couldn't delete that comment", 1);
+          console.error(err);
+
+        }
+      });
+
+    }
+
+    return false;
+
+
+  }
+
+  updatePhase();
+
+  function updatePhase(active_phase) {
+
+    const phases_viewer = document.querySelector(".phases");
+
+    const length = phases_viewer.children.length - 1;
+
+    let size = 100 / (length - 1);
+
+    for (let i = 1; i <= phases_viewer.dataset.progress; i++) {
+      phases_viewer.children[0].style.width = `${(i - 1) * size}%`;
+      if (i == phases_viewer.dataset.progress) {
+        phases_viewer.children[i].classList.add("active");
+      } else {
+        phases_viewer.children[i].classList.add("finish");
+      }
+    }
+
+  }
+
+  // no_f = load users from the ticket
+  previewWorkflow({
+    value: "<%=data?.workflow?.sid%>"
+  });
+</script>
