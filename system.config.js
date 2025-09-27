@@ -55,7 +55,7 @@ module.exports = {
     {
       name: 'EITIxAI',
       version: "1.0.0",
-      script: '/usr/local/bin/gunicorn',
+      script: "gunicorn",
       args: 'EITIxAI:app -b 0.0.0.0:5304',
       cwd: './apps/EITIxAI',
       interpreter: 'none',

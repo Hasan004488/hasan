@@ -1686,6 +1686,7 @@ app.use("/uba", uba_router);
 app.use("/templates", permit('control'), template_router);
 app.use("/", permit('report'), report_router);
 app.use("/", require("./darkweb"));
+app.use("/", require("./ioc-scanner"));
 
 // must be at the bottom
 // 404 error for wrong dashboard route

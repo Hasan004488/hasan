@@ -209,10 +209,21 @@ let nest = typeof track !='undefined' ? track : "";
         name: "IoC",
         items: [
           {
-            id: "IoC-Monitor",
+            id: "IoC-Search",
+            url: "/dashboard/ioc-scanner",
+            icon: "fa-solid fa-circle-check me-2",
+            name: "Ioc-Search"
+          },
+           {
+            id: "IoC-Scan",
+            url: "/dashboard/ioc-attributes",
+            icon: "fa-solid fa-circle-check me-2",
+            name: "Ioc-Scan"
+          },{
+            id: "IoC-Sync",
             url: "/dashboard/ioc/tab/daily#IoC",
             icon: "fa-solid fa-desktop me-2",
-            name: "Monitor IoCs",
+            name: "Ioc-Sync",
           },
           {
             id: "IoC-Management",
@@ -220,6 +231,7 @@ let nest = typeof track !='undefined' ? track : "";
             icon: "fa-solid fa-circle-check me-2",
             name: "Management"
           },
+         
         ]
       }
     }) %>

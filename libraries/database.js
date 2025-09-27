@@ -70,6 +70,12 @@ const DB = {
   uba_alerts_a: "uba.anomaly.alerts.archive",
   uba_actions: "uba.user.actions",
   dw_logs: "darkweb.logs",
+  ioc_ips: "ioc.ips",
+  ioc_sha256: "ioc.sha256",
+  ioc_md5: "ioc.md5",
+  ioc_hostnames: "ioc.hostnames",
+  ioc_domains: "ioc.domains",
+  misp_attributes: "ioc.misp_attributes",
 }
 
 let connection;

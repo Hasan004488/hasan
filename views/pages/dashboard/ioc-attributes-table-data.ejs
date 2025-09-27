@@ -1,0 +1,37 @@
+<%# This partial EJS file renders ONLY the table rows (<tr>). %>
+<%# It receives 'attributes' and 'maxIocMatched' from the backend. %>
+
+<% if (attributes && attributes.length > 0) { %>
+  <% attributes.forEach((attr) => { %>
+    <tr>
+      <td><code class="indicator-value"><%= attr.indicator %></code></td>
+      <td><%= attr.type %></td>
+      <td><%= attr.category %></td>
+      <td><%= attr.eventInfo %></td>
+      <td>
+        <div class="progress-container">
+          <div 
+            class="progress-bar-inner <%= attr.age.progressClass %>" 
+            style="width: <%= attr.age.percentage %>%;"
+            title="<%= attr.age.percentage %>%">
+          </div>
+        </div>
+        <small class="text-muted age-text"><%= attr.age.text %></small>
+      </td>
+      <td class="text-center"><span class="badge rounded-pill <%= attr.threatLevel.class %>"><%= attr.threatLevel.text %></span></td>
+      <td>
+        <% const matchedPercentage = maxIocMatched > 0 ? (attr.iocMatched / maxIocMatched) * 100 : 0; %>
+        <div class="progress-container">
+            <div 
+              class="progress-bar-inner bg-primary" 
+              style="width: <%= matchedPercentage.toFixed(2) %>%;"
+              title="<%= attr.iocMatched.toLocaleString() %> matches">
+            </div>
+        </div>
+        <small class="text-muted"><%= attr.iocMatched.toLocaleString() %> matches</small>
+      </td>
+      <td><%= attr.status %></td>
+      <td><%= attr.date %></td>
+    </tr>
+  <% }); %>
+<% } %>

@@ -1,0 +1,386 @@
+<%# Main view for the IOC Scanner, adapted for the new light-theme UI %>
+
+<style>
+  body {
+    background-color: #f8f9fa;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+  }
+
+  /* Custom animation for results appearing */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .result-animation {
+    animation: slideIn 0.5s ease-out;
+  }
+
+  .scan-container {
+    /* This container is now wrapped in columns for consistency */
+    margin: auto;
+  }
+
+  .stats-bar {
+    display: inline-flex;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 50rem;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e5ec;
+  }
+
+  /* FIX: Custom CSS for pill-shaped input groups */
+  .input-group-pill {
+    border-radius: 50rem;
+    overflow: hidden; /* Ensures inner elements are clipped to the parent's shape */
+    /* Add a default border to the wrapper */
+    border: 1px solid #dee2e6;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+
+  /* Remove borders from the inner elements so they look seamless */
+  .input-group-pill > .form-control,
+  .input-group-pill > .input-group-text {
+    border: none;
+  }
+
+  /* When any element inside the pill is focused, apply the glow to the parent */
+  .input-group-pill:focus-within {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+
+  .input-group-pill .form-control:focus {
+    box-shadow: none; /* Keep this to prevent a double-glow on the input itself */
+    /* Ensure input is "on top" of other elements within the group on focus */
+    z-index: 10;
+    position: relative;
+  }
+</style>
+
+<% if (!scanResult) { %> <%# Initial view when no scan has been performed %>
+<div
+  class="d-flex flex-column justify-content-center align-items-center px-3"
+  style="min-height: 70vh"
+>
+  <div class="col-12 py-4">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="card shadow-lg border-0 rounded-4">
+          <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-5">
+              <div class="mb-4">
+                <i
+                  class="fas fa-shield-alt text-primary"
+                  style="font-size: 4rem"
+                ></i>
+              </div>
+              <h1 class="display-5 fw-bold text-dark mb-3">
+                Threat Intelligence Center
+              </h1>
+              <p class="text-muted fs-5">
+                On-demand IOC Scanning and Monitoring
+              </p>
+            </div>
+
+            <div class="px-md-5">
+              <form
+                action="/dashboard/ioc-scanner/scan"
+                method="POST"
+                id="scanForm"
+              >
+                <div class="input-group input-group-lg input-group-pill">
+                  <span class="input-group-text bg-white border-end-0 border-0"
+                    ><i class="fas fa-search text-muted"></i
+                  ></span>
+                  <input
+                    type="text"
+                    name="indicator"
+                    id="indicatorInput"
+                    class="form-control border-start-0 ps-0 border-0"
+                    placeholder="Enter IP, Domain, SHA256, or MD5 hash..."
+                    required
+                    autofocus
+                  />
+                  <button class="btn btn-primary px-4" type="submit">
+                    Scan Now
+                  </button>
+                </div>
+                <div
+                  id="validationError"
+                  class="text-danger mt-2 small d-none"
+                ></div>
+              </form>
+            </div>
+
+            <hr class="my-5" />
+
+            <div class="text-center">
+              <div class="stats-bar">
+                <i class="fas fa-database text-primary me-3"></i>
+                <small class="text-muted">
+                  <% if (dashboardStats) { %>
+                    <strong><i class="fas fa-shield-alt me-1"></i>MISP:</strong> <%= (dashboardStats.misp?.total || 0).toLocaleString() %> |
+                    <strong><i class="fas fa-map-marker-alt me-1"></i>IPs:</strong> <%= (dashboardStats.ip?.total || 0).toLocaleString() %> |
+                    <strong><i class="fas fa-globe me-1"></i>Domains:</strong> <%= (dashboardStats.domain?.total || 0).toLocaleString() %> |
+                    <strong><i class="fas fa-network-wired me-1"></i>Hostnames:</strong> <%= (dashboardStats.hostname?.total || 0).toLocaleString() %> |
+                    <strong><i class="fas fa-file-alt me-1"></i>SHA256:</strong> <%= (dashboardStats.sha256?.total || 0).toLocaleString() %> |
+                    <strong><i class="fas fa-file-archive me-1"></i>MD5:</strong> <%= (dashboardStats.md5?.total || 0).toLocaleString() %> 
+                  <% } else { %> 
+                    Loading threat feeds... 
+                  <% } %>
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% } else { %> <%# View displayed after a scan is completed %>
+<div class="col-12 py-4">
+  <div class="row justify-content-center">
+    <div class="col-12">
+      <div class="scan-container">
+        <div class="card shadow-lg border-0 rounded-4 result-animation">
+          <div class="card-body p-4 p-md-5">
+            <div class="mb-5">
+              <form
+                action="/dashboard/ioc-scanner/scan"
+                method="POST"
+                id="scanFormSidebar"
+                class="w-100"
+              >
+                <div class="input-group input-group-lg input-group-pill">
+                  <input
+                    type="text"
+                    name="indicator"
+                    id="indicatorInputSidebar"
+                    class="form-control border-0"
+                    placeholder="Scan another indicator..."
+                    value="<%= scanResult.indicator %>"
+                    required
+                  />
+                  <button class="btn btn-primary px-4" type="submit">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+                <div
+                  id="validationErrorSidebar"
+                  class="text-danger mt-2 small d-none"
+                ></div>
+              </form>
+            </div>
+
+            <div>
+              <div
+                class="d-flex align-items-center justify-content-between mb-4"
+              >
+                <div>
+                  <h4 class="mb-1">Scan Results</h4>
+                  <p class="text-muted mb-0">
+                    Indicator:
+                    <code class="text-dark"><%= scanResult.indicator %></code>
+                  </p>
+                </div>
+              </div>
+
+              <% if (scanResult.source === 'MISP Database' || scanResult.source === 'MISP (Live Search)') { %>
+                
+                <% if (scanResult.source === 'MISP Database') { %>
+                  <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="fas fa-exclamation-triangle fs-4 me-3"></i>
+                    <div>
+                      <h5 class="alert-heading mb-1">Threat Detected in Local MISP Database</h5>
+                      This indicator has been flagged as malicious in our threat intelligence feeds.
+                    </div>
+                  </div>
+                <% } else { %>
+                  <div class="alert alert-info d-flex align-items-center" role="alert">
+                    <i class="fas fa-satellite-dish fs-4 me-3"></i>
+                    <div>
+                      <h5 class="alert-heading mb-1">Threat Detected via Live MISP Search</h5>
+                      This indicator was found on the MISP server in real-time and has been saved locally.
+                    </div>
+                  </div>
+                <% } %>
+
+                <% scanResult.data.forEach(attr => { %>
+                  <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-white">
+                      <h6 class="mb-0">
+                        <span class="badge bg-danger me-2">Event #<%= attr.event_id %></span>
+                        <%= attr.Event.Orgc.name %>
+                      </h6>
+                    </div>
+                    <div class="card-body">
+                      <p><strong>Category:</strong> <%= attr.category %></p>
+                      <p><strong>Type:</strong> <%= attr.type %></p>
+                      <p><strong>Event Info:</strong> <%= attr.Event.info %></p>
+
+                      <% if (attr.Event.date) { %>
+                        <p><strong>Event Date:</strong> <%= new Date(attr.Event.date).toLocaleDateString() %></p>
+                      <% } %>
+                      <% if (attr.Event.threat_level_id) { %>
+                        <p><strong>Threat Level:</strong> <span class="badge bg-dark"><%= attr.Event.threat_level_id %></span></p>
+                      <% } %>
+                      <% if (attr.Event.analysis !== undefined && attr.Event.analysis !== null) { %>
+                        <%
+                          let analysisState = 'Unknown';
+                          if (attr.Event.analysis == 0) analysisState = 'Initial';
+                          if (attr.Event.analysis == 1) analysisState = 'Ongoing';
+                          if (attr.Event.analysis == 2) analysisState = 'Completed';
+                        %>
+                        <p><strong>Analysis:</strong> <%= analysisState %></p>
+                      <% } %>
+                      <% if (attr.Event.published !== undefined) { %>
+                        <p><strong>Published:</strong> <%= attr.Event.published ? 'Yes' : 'No' %></p>
+                      <% } %>
+                      <% if (attr.Event.Tag && attr.Event.Tag.length > 0) { %>
+                        <div class="mt-3">
+                          <p class="mb-1"><strong>Tags:</strong></p>
+                          <div>
+                            <% attr.Event.Tag.forEach(tag => { %>
+                              <span class="badge bg-secondary me-1"><%= tag.name %></span>
+                            <% }) %>
+                          </div>
+                        </div>
+                      <% } %>
+                      <% if(attr.comment) { %>
+                        <p class="mt-3"><strong>Comment:</strong> <%= attr.comment %></p>
+                      <% } %>
+                    </div>
+                  </div>
+                <% }) %>
+
+              <% } else if (scanResult.source === 'Local Threat Feed') { %>
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                  <i class="fas fa-exclamation-circle fs-4 me-3"></i>
+                  <div>
+                    <h5 class="alert-heading mb-1">Threat Detected in Local Feeds</h5>
+                    This indicator was found in the local threat intelligence database.
+                  </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                  <div class="card-body">
+                    <p><strong>Indicator:</strong> <code><%= scanResult.data.indicator %></code></p>
+                    <p><strong>Type:</strong> <%= scanResult.data.type %></p>
+                    <p><strong>First Seen:</strong> <%= new Date(scanResult.data.firstSeen).toLocaleString() %></p>
+                    <p><strong>Last Updated:</strong> <%= new Date(scanResult.data.lastUpdated).toLocaleString() %></p>
+                  </div>
+                </div>
+              <% } else if (scanResult.source === 'Invalid') { %>
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                  <i class="fas fa-exclamation-circle fs-4 me-3"></i>
+                  <div>
+                    <h5 class="alert-heading mb-1">Invalid Indicator Format</h5>
+                    <p class="mb-0"><%= scanResult.data.message %></p>
+                  </div>
+                </div>
+              <% } else { %>
+                <div class="alert alert-success d-flex align-items-center" role="alert">
+                  <i class="fas fa-check-circle fs-4 me-3"></i>
+                  <div>
+                    <h5 class="alert-heading mb-1">No Threats Detected</h5>
+                    The indicator <code><%= scanResult.indicator %></code> was not found in any local or remote threat intelligence databases.
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<div
+  id="loader"
+  class="position-fixed top-0 start-0 w-100 h-100 d-none"
+  style="background: rgba(255, 255, 255, 0.9); z-index: 9999"
+>
+  <div
+    class="d-flex flex-column justify-content-center align-items-center h-100"
+  >
+    <div
+      class="spinner-border text-primary mb-3"
+      style="width: 3rem; height: 3rem"
+      role="status"
+    >
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted">Analyzing threat intelligence databases...</p>
+  </div>
+</div>
+
+<script>
+  // Client-side validation logic
+  function isValidIndicator(indicator) {
+    const ipRegex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+    const sha256Regex = /^[a-fA-F0-9]{64}$/;
+    const md5Regex = /^[a-fA-F0-9]{32}$/;
+    const hostnameRegex =
+      /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/;
+    return (
+      ipRegex.test(indicator) ||
+      sha256Regex.test(indicator) ||
+      md5Regex.test(indicator) ||
+      hostnameRegex.test(indicator)
+    );
+  }
+
+  function setupFormValidation(formId, inputId, errorId) {
+    const form = document.getElementById(formId);
+    if (form) {
+      const indicatorInput = document.getElementById(inputId);
+      const validationError = document.getElementById(errorId);
+      const loader = document.getElementById("loader");
+
+      form.addEventListener("submit", function (event) {
+        const indicatorValue = indicatorInput.value.trim();
+        if (indicatorValue && !isValidIndicator(indicatorValue)) {
+          event.preventDefault();
+          validationError.innerHTML =
+            '<i class="fas fa-exclamation-circle me-1"></i>Invalid format. Please use a valid IP, Domain, SHA256, or MD5 hash.';
+          validationError.classList.remove("d-none");
+          indicatorInput.classList.add("is-invalid");
+        } else {
+          validationError.classList.add("d-none");
+          indicatorInput.classList.remove("is-invalid");
+          if (indicatorValue) {
+            loader.classList.remove("d-none");
+          }
+        }
+      });
+
+      indicatorInput.addEventListener("input", function () {
+        if (this.classList.contains("is-invalid")) {
+          this.classList.remove("is-invalid");
+          validationError.classList.add("d-none");
+        }
+      });
+    }
+  }
+
+  // Initialize validation for both forms
+  document.addEventListener("DOMContentLoaded", function () {
+    setupFormValidation("scanForm", "indicatorInput", "validationError");
+    setupFormValidation(
+      "scanFormSidebar",
+      "indicatorInputSidebar",
+      "validationErrorSidebar"
+    );
+  });
+</script>

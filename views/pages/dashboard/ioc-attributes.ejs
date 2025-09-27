@@ -1,0 +1,46 @@
+<style>
+  /* All your custom styles for the table content are preserved here */
+  .threat-level-high { background-color: #dc3545; color: white; }
+  .threat-level-medium { background-color: #ffc107; color: #343a40; }
+  .threat-level-low { background-color: #198754; color: white; }
+  .threat-level-undefined { background-color: #6c757d; color: white; }
+  .table-hover tbody tr:hover { background-color: #f1f3f5; }
+  .indicator-value {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #e9ecef;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.2rem;
+    font-size: 0.9em;
+    word-break: break-all;
+  }
+  .age-text { font-size: 0.8em; }
+  .progress-container {
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+    height: 20px;
+    width: 100%;
+    min-width: 100px;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    border-radius: 0.25rem;
+    transition: width 0.3s ease-in-out;
+  }
+  .bg-danger { background-color: #dc3545 !important; }
+  .bg-warning { background-color: #ffc107 !important; }
+  .bg-success { background-color: #198754 !important; }
+  .bg-primary { background-color: #0d6efd !important; }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+            <h5 class="card-title">MISP Attributes</h5>
+            <p class="card-text text-muted">A list of indicators of compromise from the MISP feed, loaded dynamically as you scroll.</p>
+        </div>
+        
+        <%# FIXED: Corrected the include path to point to the correct location of the data-table component based on your file tree. %>
+        <%- include('../../components/body/data-table.ejs', { table: table }) %>
+
+    </div>
+</div>
